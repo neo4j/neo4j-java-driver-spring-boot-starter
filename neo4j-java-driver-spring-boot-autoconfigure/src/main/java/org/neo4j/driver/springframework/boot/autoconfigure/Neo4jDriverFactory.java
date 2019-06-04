@@ -21,6 +21,7 @@ package org.neo4j.driver.springframework.boot.autoconfigure;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.neo4j.driver.AuthToken;
 import org.neo4j.driver.Config;
@@ -40,14 +41,38 @@ interface Neo4jDriverFactory extends FactoryBean<Driver> {
 		return Driver.class;
 	}
 
-	abstract class DriverFactoryBase {
+	abstract class DriverFactoryBase implements AutoCloseable {
 		private final AuthToken authToken;
 
 		private final Config config;
 
+		private volatile Driver theInstance;
+
 		DriverFactoryBase(AuthToken authToken, Config config) {
 			this.authToken = authToken;
 			this.config = config;
+		}
+
+		@Override
+		public void close() {
+			if (theInstance != null) {
+				theInstance.close();
+			}
+		}
+
+		Driver getObjectImpl(Supplier<Driver> driverSupplier) {
+
+			Driver instance = this.theInstance;
+			if (instance == null) {
+				synchronized (this) {
+					instance = this.theInstance;
+					if (instance == null) {
+						this.theInstance = driverSupplier.get();
+						instance = this.theInstance;
+					}
+				}
+			}
+			return instance;
 		}
 	}
 
@@ -62,7 +87,8 @@ interface Neo4jDriverFactory extends FactoryBean<Driver> {
 
 		@Override
 		public Driver getObject() {
-			return GraphDatabase.driver(this.uri, super.authToken, super.config);
+
+			return getObjectImpl(() -> GraphDatabase.driver(this.uri, super.authToken, super.config));
 		}
 	}
 
@@ -78,7 +104,7 @@ interface Neo4jDriverFactory extends FactoryBean<Driver> {
 		@Override
 		public Driver getObject() {
 
-			return GraphDatabase.routingDriver(this.uris, super.authToken, super.config);
+			return getObjectImpl(() -> GraphDatabase.routingDriver(this.uris, super.authToken, super.config));
 		}
 	}
 }
