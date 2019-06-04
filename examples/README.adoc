@@ -33,3 +33,5 @@ public class SimpleApplication {
 ----
 
 include::simple/README.adoc[]
+
+include::reactive-web/README.adoc[]
