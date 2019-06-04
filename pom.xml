@@ -75,11 +75,14 @@
 	<modules>
 		<module>neo4j-java-driver-spring-boot-autoconfigure</module>
 		<module>neo4j-java-driver-spring-boot-starter</module>
+		<module>examples/reactive-web</module>
+		<module>examples/simple</module>
 	</modules>
 
 	<properties>
 		<checkstyle.version>8.16</checkstyle.version>
 		<jacoco-maven-plugin.version>0.8.2</jacoco-maven-plugin.version>
+		<java.version>1.8</java.version>
 		<junit-jupiter.version>5.4.2</junit-jupiter.version>
 		<maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
 		<maven-deploy-plugin.version>3.0.0-M1</maven-deploy-plugin.version>

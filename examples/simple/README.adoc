@@ -1,0 +1,25 @@
+== Simple example
+
+This examples uses the starter and configures username and password.
+The provided driver bean is than used in a `CommandLineRunner` to retrieve movies in an imperative way:
+
+[source,java]
+[[simple-example]]
+.DisplayMoviesComponent.java
+----
+include::src/main/java/org/neo4j/doc/driver/springframework/boot/simple/DisplayMoviesComponent.java[tags=simple-example,indent=0]
+----
+
+The main takeaway here is that the driver can be injected like any other bean.
+It is a long living object that provides short living sessions.
+The driver does not need to be closed, that is done automatically when the application shuts down.
+
+The configuration is stored in `src/main/resources/application.properties`:
+
+[source,properties]
+----
+org.neo4j.driver.uri=bolt://localhost:7687
+org.neo4j.driver.authentication.username=neo4j
+org.neo4j.driver.authentication.password=secret
+----
+

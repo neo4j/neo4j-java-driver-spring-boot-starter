@@ -1,0 +1,35 @@
+= Examples
+:sectanchors:
+
+We provide several examples how to use this starter.
+The reactive demo can only be used with Neo4j version 4.
+
+The examples use the "Movie" data set, that you can install into your instance by going to the http://localhost:7474/browser/?cmd=play&arg=movies[Neo4j Browser].
+Enter the command `:play movies` and follow the instructions.
+
+The examples expect an instance with the username `neo4j` and the password `secret`.
+
+All examples use Maven, however they work completely the same with Gradle.
+
+Also, all examples follow Spring Boot conventions, especially:
+Use the dependency management and starters, don't provide dependencies for things that are available as a starter.
+Use version properties for overwriting any managed version instead of an explicit version.
+
+The examples all have the default main application class, that looks like this:
+
+[source,java]
+.A standard Spring Boot main application class
+----
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class SimpleApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(SimpleApplication.class, args);
+	}
+}
+----
+
+include::simple/README.adoc[]

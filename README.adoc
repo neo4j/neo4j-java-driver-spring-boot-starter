@@ -1,6 +1,5 @@
 = neo4j-java-driver-spring-boot-starter
 :sectanchors:
-:sectlinks:
 
 :neo4j-java-driver-spring-boot-starter_version: 1.0.0.BUILD-SNAPSHOT
 :groupId: org.neo4j.driver
@@ -34,6 +33,9 @@ If only a single URI is provided, than the configuration tries to use that.
 Otherwise, it passes all URIs to the Java driver which in turn uses the first one that is a reachable `bolt+routing` instance.
 
 The automatic configuration will fail fast if the driver cannot connect to a single Neo4j database or to a routing server.
+
+IMPORTANT: The driver instance is a long living object that provides short living sessions as needed.
+           The instance does not need to be closed manually,, that is done automatically when the application shuts down.
 
 === Maven
 
@@ -79,7 +81,7 @@ you are of course free to use any other declarative way to define properties in 
 Please checkout the chapter https://docs.spring.io/spring-boot/docs/2.1.5.RELEASE/reference/htmlsingle/#boot-features-external-config[Externalized Configuration].
 
 NOTE: It is not necessary to add any programmatically configuration of the driver when you use this starter.
-While it may work, we strongly discourage and don't support additional, pragmatical configuration of the Neo4j driver when using this starter.
+      While it may work, we strongly discourage and don't support additional, pragmatical configuration of the Neo4j driver when using this starter.
 
 ==== All configuration properties
 
