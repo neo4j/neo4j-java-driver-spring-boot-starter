@@ -53,7 +53,7 @@ IMPORTANT: The driver instance is a long living object that provides short livin
 
 === Gradle
 
-[source,xml,subs="verbatim,attributes"]
+[source,groovy,subs="verbatim,attributes"]
 .Inclusion of the neo4j-java-driver-spring-boot-starter in a Gradle project
 ----
 dependencies {
