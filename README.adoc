@@ -28,7 +28,7 @@ The starter supports Neo4j server mode only, that is: A connection against a Neo
 == Usage
 
 As with any other Spring Boot starter, the only thing you have to do is to include the starter module via your dependency management.
-If you don't configure anything, than the starter assumes `neo4j://localhost:7687` as Neo4j URI and a server that has disabled authentication.
+If you don't configure anything, than the starter assumes `bolt://localhost:7687` as Neo4j URI and a server that has disabled authentication.
 
 If only a single URI is provided, than the configuration tries to use that.
 Otherwise, it passes all URIs to the Java driver which in turn uses the first one that is a reachable `bolt+routing` instance.
