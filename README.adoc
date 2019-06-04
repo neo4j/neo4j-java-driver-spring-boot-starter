@@ -1,0 +1,174 @@
+= neo4j-java-driver-spring-boot-starter
+:sectanchors:
+:sectlinks:
+
+:neo4j-java-driver-spring-boot-starter_version: 1.0.0.BUILD-SNAPSHOT
+:groupId: org.neo4j.driver
+:artifactId: neo4j-java-driver-spring-boot-starter
+:spring-boot_version: 2.1.5.RELEASE
+:config_prefix: org.neo4j.driver
+
+[abstract]
+--
+A Spring Boot starter with automatic configuration for the https://github.com/neo4j/neo4j-java-driver[Neo4j Java Driver].
+--
+
+== Introduction
+
+This starter provides a convenient way to configure all aspects of the Neo4j-Java-Driver from within a Spring Boot application.
+It provides a single, managed Spring Bean of type `org.neo4j.driver.Driver`, configured to your needs.
+
+The starter does not add any additional functionality on top of the driver, but only exposes the drivers configuration in a Spring friendly way.
+However, it configures the driver to use https://www.slf4j.org[SLF4J] logging by default.
+
+The starter is tested and developed against https://spring.io/projects/spring-boot[Spring Boot {spring-boot_version}].
+
+The starter supports Neo4j server mode only, that is: A connection against a Neo4j server over the Bolt protocol.
+
+== Usage
+
+As with any other Spring Boot starter, the only thing you have to do is to include the starter module via your dependency management.
+If you don't configure anything, than the starter assumes `neo4j://localhost:7687` as Neo4j URI and a server that has disabled authentication.
+
+If only a single URI is provided, than the configuration tries to use that.
+Otherwise, it passes all URIs to the Java driver which in turn uses the first one that is a reachable `bolt+routing` instance.
+
+The automatic configuration will fail fast if the driver cannot connect to a single Neo4j database or to a routing server.
+
+=== Maven
+
+[source,xml,subs="verbatim,attributes"]
+[[dependencies-maven]]
+.Inclusion of the neo4j-java-driver-spring-boot-starter in a Maven project
+----
+<dependency>
+	<groupId>{groupId}</groupId>
+	<artifactId>{artifactId}</artifactId>
+	<version>{neo4j-java-driver-spring-boot-starter_version}</version>
+</dependency>
+----
+
+=== Gradle
+
+[source,xml,subs="verbatim,attributes"]
+.Inclusion of the neo4j-java-driver-spring-boot-starter in a Gradle project
+----
+dependencies {
+    compile '{groupId}:{artifactId}:{neo4j-java-driver-spring-boot-starter_version}'
+}
+----
+
+=== Configuration
+
+==== Minimal configuration
+
+You'll probably need at least the following configuration
+
+[source,properties]
+.Minimum configuration
+----
+org.neo4j.driver.uri=neo4j://my-neo4j-instance:7687
+org.neo4j.driver.authentication.username=theUser
+org.neo4j.driver.authentication.password=thePassword
+----
+
+Refer to <<All configuration properties,the list of configuration properties>> for all options this driver supports.
+
+While the above configuration is presented in the easiest format (an `application.properties` file),
+you are of course free to use any other declarative way to define properties in Spring Boot.
+Please checkout the chapter https://docs.spring.io/spring-boot/docs/2.1.5.RELEASE/reference/htmlsingle/#boot-features-external-config[Externalized Configuration].
+
+NOTE: It is not necessary to add any programmatically configuration of the driver when you use this starter.
+While it may work, we strongly discourage and don't support additional, pragmatical configuration of the Neo4j driver when using this starter.
+
+==== All configuration properties
+
+[cols="1,1,2", options="header"]
+|===
+|Key|Default Value|Description
+
+|`{config_prefix}.authentication.kerberos-ticket`
+|
+|+++A kerberos ticket for connecting to the database. Mutual exclusive with a given username.+++
+
+|`{config_prefix}.authentication.password`
+|
+|+++The password of the user connecting to the database.+++
+
+|`{config_prefix}.authentication.realm`
+|
+|+++The realm to connect to.+++
+
+|`{config_prefix}.authentication.username`
+|
+|+++The login of the user connecting to the database.+++
+
+|`{config_prefix}.config.connection-acquisition-timeout`
+|`1m`
+|+++Acquisition of new connections will be attempted for at most configured timeout.+++
+
+|`{config_prefix}.config.connection-timeout`
+|`5s`
+|+++Specify socket connection timeout.+++
+
+|`{config_prefix}.config.encrypted`
+|`true`
+|+++Flag, if the driver should use encrypted traffic.+++
+
+|`{config_prefix}.config.idle-time-before-connection-test`
+|
+|+++Pooled connections that have been idle in the pool for longer than this timeout will be tested before they are used again.+++
+
+|`{config_prefix}.config.load-balancing-strategy`
+|
+|+++Provide an alternative load balancing strategy for the routing driver to use.+++
+
+|`{config_prefix}.config.log-leaked-sessions`
+|`false`
+|+++Flag, if leaked sessions logging is enabled.+++
+
+|`{config_prefix}.config.logging-class`
+|`org.neo4j.driver.internal.logging.Slf4jLogging`
+|+++Used to configure a different Neo4j-Java-Driver logging implementation.+++
+
+|`{config_prefix}.config.driver-logging-level`
+|`java.util.logging.Level.WARNING`
+|+++Log level for the bolt driver. This has only meaning of a Logging implementation other than Slf4jLogging has been chosen.+++
+
+|`{config_prefix}.config.max-connection-lifetime`
+|`1h`
+|+++Pooled connections older than this threshold will be closed and removed from the pool.+++
+
+|`{config_prefix}.config.max-connection-pool-size`
+|`100`
+|+++The maximum amount of connections in the connection pool towards a single database.+++
+
+|`{config_prefix}.config.max-transaction-retry-time`
+|`30s`
+|+++Specify the maximum time transactions are allowed to retry.+++
+
+|`{config_prefix}.config.server-address-resolver-class`
+|
+|+++Specify a custom server address resolver used by the routing driver to resolve the initial address used to create the driver.+++
+
+|`{config_prefix}.config.trust-settings.cert-file`
+|
+|+++The file of the certificate to use.+++
+
+|`{config_prefix}.config.trust-settings.hostname-verification-enabled`
+|`false`
+|+++Flag, if hostname verification is used.+++
+
+|`{config_prefix}.config.trust-settings.strategy`
+|
+|+++Configures the strategy to use use.+++
+
+|`{config_prefix}.uri`
+|
+|+++The uri this driver should connect to. The driver supports bolt, bolt+routing or neo4j as schemes. Both uri and uris are empty, the driver tries to connect to 'neo4j://localhost:7687'.+++
+
+|`{config_prefix}.uris`
+|
+|+++This is a fallback for usecases when multiple uris have to provided to get into a Neo4j cluster. Usually one logical entry point is recommended (through DNS or a loadbalancer for example).+++
+
+|===
