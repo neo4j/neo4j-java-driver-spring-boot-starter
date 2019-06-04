@@ -1,0 +1,42 @@
+{
+  "properties": [
+    {
+      "name": "org.neo4j.driver.config.connection-acquisition-timeout",
+      "defaultValue": "1m"
+    },
+    {
+      "name": "org.neo4j.driver.config.connection-timeout",
+      "defaultValue": "5s"
+    },
+    {
+      "name": "org.neo4j.driver.config.load-balancing-strategy",
+      "defaultValue": "LEAST_CONNECTED"
+    },
+    {
+      "name": "org.neo4j.driver.config.max-connection-lifetime",
+      "defaultValue": "1h"
+    },
+    {
+      "name": "org.neo4j.driver.config.max-connection-pool-size",
+      "defaultValue": 100
+    },
+    {
+      "name": "org.neo4j.driver.config.max-transaction-retry-time",
+      "defaultValue": "30s"
+    },
+    {
+      "name": "org.neo4j.driver.config.trust-settings.strategy",
+      "defaultValue": "TRUST_ALL_CERTIFICATES"
+    },
+    {
+      "name": "org.neo4j.driver.uris",
+      "deprecation": {
+        "level": "warning",
+        "reason": "Please use a single, logical uri as entrance to a Neo4j cluster if possible.",
+        "replacement": "org.neo4j.driver.uri"
+      }
+    }
+
+  ],
+  "hints": []
+}
