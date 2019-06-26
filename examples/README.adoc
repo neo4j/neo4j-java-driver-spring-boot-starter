@@ -35,3 +35,5 @@ public class SimpleApplication {
 include::simple/README.adoc[]
 
 include::reactive-web/README.adoc[]
+
+include::testing-with-neo4j-harness/README.adoc[]

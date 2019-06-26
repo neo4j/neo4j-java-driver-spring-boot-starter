@@ -77,6 +77,7 @@
 		<module>neo4j-java-driver-spring-boot-starter</module>
 		<module>examples/reactive-web</module>
 		<module>examples/simple</module>
+		<module>examples/testing-with-neo4j-harness</module>
 	</modules>
 
 	<properties>

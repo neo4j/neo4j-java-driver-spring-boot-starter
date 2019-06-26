@@ -1,0 +1,88 @@
+== Testing examples against the Neo4j harness
+
+First of all, you have to include the test harness in your dependencies.
+Pick either community edition or enterprise edition.
+
+Here's the community edition:
+
+[source,xml]
+.pom.xml
+----
+<dependency>
+	<groupId>org.neo4j.test</groupId>
+	<artifactId>neo4j-harness</artifactId>
+	<version>${neo4j.version}</version>
+	<scope>test</scope>
+</dependency>
+----
+
+That brings a ton of dependencies.
+The advantage of it: It starts very fast.
+If you don't want to have the dependecies and can live with a slower start, we recommend https://www.testcontainers.org/modules/databases/neo4j/[Testcontainers].
+
+=== Starting up the Neo4j harness
+
+There many different options.
+Here's a simple JUnit 5 variant:
+
+[source,java]
+.MoviesServiceTest.java
+----
+class MoviesServiceTest {
+
+    private static ServerControls embeddedDatabaseServer;
+
+    @BeforeAll
+    static void initializeNeo4j() {
+        embeddedDatabaseServer = TestServerBuilders
+            .newInProcessBuilder()
+            .newServer();
+    }
+
+    @AfterAll
+    static void closeNeo4j() {
+        embeddedDatabaseServer.close();
+    }
+}
+----
+
+== Option a: Make Spring Boot aware of the URL of the embedded server
+
+In either case, the real issue you have to solve during testing is:
+*How to make Spring Boot aware that it should use different configuration properties?*
+
+We recommend using a custom `org.springframework.context.ApplicationContextInitializer` on a `@SpringBootTest` like this:
+
+[source,java]
+[[simple-example]]
+.MoviesServiceTest.java
+----
+@SpringBootTest
+@ContextConfiguration(initializers = { MoviesServiceTest.Initializer.class })
+class MoviesServiceTest {
+
+    private static ServerControls embeddedDatabaseServer;
+
+    static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+
+            TestPropertyValues.of(
+                "org.neo4j.driver.uri=" + embeddedDatabaseServer.boltURI().toString(),
+                "org.neo4j.driver.authentication.password="
+            ).applyTo(configurableApplicationContext.getEnvironment());
+        }
+    }
+}
+----
+
+== Option b: Add your own driver bean to the context
+
+We have this as `MoviesServiceAltTest`.
+While the configuration seems less complex, it changes more than just the url:
+Having a driver bean of your own in the context, disables the starter.
+That is of course ok, but you might end up with a very different configuration in test than in production.
+For example, you'll notice that in `MoviesServiceAltTest`, the driver does not use Slf4j logging, but it's own default.
+
+Option a only adds properties with higher values onto the default ones.
+So, if you have configured more options of the driver in your `application.properties` or else, they still get applied.
+That is not the case for you own Driver bean.
