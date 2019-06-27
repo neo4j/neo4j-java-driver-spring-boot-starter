@@ -222,6 +222,11 @@ public class Neo4jDriverProperties {
 		}
 
 		/**
+		 * Flag, if metrics are enabled.
+		 */
+		private boolean metricsEnabled = false;
+
+		/**
 		 * Flag, if leaked sessions logging is enabled.
 		 */
 		private boolean logLeakedSessions = false;
@@ -385,6 +390,14 @@ public class Neo4jDriverProperties {
 			this.loggingClass = loggingClass;
 		}
 
+		public boolean isMetricsEnabled() {
+			return metricsEnabled;
+		}
+
+		public void setMetricsEnabled(boolean metricsEnabled) {
+			this.metricsEnabled = metricsEnabled;
+		}
+
 		Config toInternalRepresentation() {
 			Config.ConfigBuilder builder = Config.builder();
 
@@ -427,6 +440,12 @@ public class Neo4jDriverProperties {
 				}
 			}
 			builder.withLogging(logging);
+
+			if (metricsEnabled) {
+				builder.withDriverMetrics();
+			} else {
+				builder.withoutDriverMetrics();
+			}
 
 			return builder.build();
 		}

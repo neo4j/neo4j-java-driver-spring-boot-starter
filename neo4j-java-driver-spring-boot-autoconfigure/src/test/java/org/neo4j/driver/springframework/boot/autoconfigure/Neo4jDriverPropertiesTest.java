@@ -182,6 +182,7 @@ class Neo4jDriverPropertiesTest {
 			assertDuration(configProperties.getConnectionTimeout(), defaultConfig.connectionTimeoutMillis());
 			assertDuration(configProperties.getMaxTransactionRetryTime(), RetrySettings.DEFAULT.maxRetryTimeMs());
 			assertThat(configProperties.getServerAddressResolverClass()).isNull();
+			assertThat(configProperties.isMetricsEnabled()).isFalse();
 		}
 
 		@Test
@@ -268,6 +269,17 @@ class Neo4jDriverPropertiesTest {
 			ConfigProperties configProperties = new ConfigProperties();
 			configProperties.setConnectionTimeout(Duration.ofSeconds(23));
 			assertThat(configProperties.toInternalRepresentation().connectionTimeoutMillis()).isEqualTo(23_000);
+		}
+
+
+		@Test
+		void enableMetricsShouldWork() {
+
+			ConfigProperties configProperties = new ConfigProperties();
+			assertThat(configProperties.toInternalRepresentation().isMetricsEnabled()).isFalse();
+
+			configProperties.setMetricsEnabled(true);
+			assertThat(configProperties.toInternalRepresentation().isMetricsEnabled()).isTrue();
 		}
 
 		@Test

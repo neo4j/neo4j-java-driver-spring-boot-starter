@@ -61,6 +61,26 @@ dependencies {
 }
 ----
 
+=== Metrics
+
+`neo4j-java-driver-spring-boot-starter` comes with support for https://micrometer.io[Micrometer metrics] out of the box.
+It detects Micrometer on the classpath and binds the metrics of all instances of `org.neo4j.driver.Driver`, that have enabled their metrics, to a micrometer registry.
+
+To enable metrics for the driver instance provided by this starter, set `org.neo4j.driver.config.metrics-enabled` to true.
+
+The following metrics are exposes
+
+* `neo4j.driver.connections.inUse` (Gauge)
+* `neo4j.driver.connections.timedOutToAcquire` (Counter)
+* `neo4j.driver.connections.closed` (Counter)
+* `neo4j.driver.connections.failedToCreate` (Counter)
+* `neo4j.driver.connections.created` (Counter)
+* `neo4j.driver.connections.idle` (Gauge)
+* `neo4j.driver.connections.acquired` (Counter)
+
+All metrics will have the tags `name` (the bean of the driver they belong to)
+and `poolId` (the id of the connection pool, that contributed to the corresponding counter or gauge).
+
 === Configuration
 
 ==== Minimal configuration
@@ -173,5 +193,9 @@ NOTE: It is not necessary to add any programmatically configuration of the drive
 |`{config_prefix}.uris`
 |
 |+++This is a fallback for usecases when multiple uris have to provided to get into a Neo4j cluster. Usually one logical entry point is recommended (through DNS or a loadbalancer for example).+++
+
+|`{config_prefix}.metrics-enabled`
+|`false`
+|+++Set this to true, so that the driver collects metrics, which can be exported to Micrometer.+++
 
 |===

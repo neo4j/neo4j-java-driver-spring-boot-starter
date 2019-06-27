@@ -38,6 +38,9 @@ import org.testcontainers.containers.Neo4jContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+/**
+ * @author Michael J. Simons
+ */
 @SpringBootTest
 @Testcontainers
 @ContextConfiguration(initializers = Neo4jDriverAutoConfigurationIT.Neo4jContainerBasedTestPropertyProvider.class)

@@ -47,7 +47,7 @@ public class Neo4jDriverAutoConfiguration {
 
 	private static final URI DEFAULT_SERVER_URI = URI.create("bolt://localhost:7687");
 
-	@Bean
+	@Bean(name = "driver")
 	public FactoryBean<Driver> driverFactory(final Neo4jDriverProperties driverProperties) {
 
 		final AuthToken authToken = driverProperties.getAuthentication().toInternalRepresentation();

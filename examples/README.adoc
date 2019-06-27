@@ -32,6 +32,63 @@ public class SimpleApplication {
 }
 ----
 
+== Collecting metrics
+
+`neo4j-java-driver-spring-boot-starter` comes with support for https://micrometer.io[Micrometer metrics] out of the box.
+It detects Micrometer on the classpath and binds the metrics of all instances of ` org.neo4j.driver.Driver`, that have enabled their metrics, to a micrometer registry.
+
+Add `org.springframework.boot:spring-boot-starter-actuator` to your Spring Boot application, to include Micrometer.
+To enable metrics for the driver instance provided by this starter, set `org.neo4j.driver.config.metrics-enabled` to true then.
+
+You'll find this in the <<Reactive web example>>.
+Spring Boot doesn't expose the metrics endpoint over http by default, if you need this, your complete configuration looks like this:
+
+[source,properties]
+.application.properties
+----
+# Enable metrics for the driver instance provided by this starter
+org.neo4j.driver.config.metrics-enabled=true
+
+# Expose metrics in addition to info and health over http
+management.endpoints.web.exposure.include=info,health,metrics
+----
+
+The metrics can be accessed like any other metrics by their name.
+The following shows a CURL request retrieving the amount of acquired connections:
+
+[source,baseh]
+----
+curl localhost:8080/actuator/metrics/neo4j.driver.connections.acquired|jq
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   287  100   287    0     0  32773      0 --:--:-- --:--:-- --:--:-- 35875
+{
+  "name": "neo4j.driver.connections.acquired",
+  "description": "The amount of connections that have been acquired.",
+  "baseUnit": "connections",
+  "measurements": [
+    {
+      "statistic": "COUNT",
+      "value": 102
+    }
+  ],
+  "availableTags": [
+    {
+      "tag": "poolId",
+      "values": [
+        "localhost:7687"
+      ]
+    },
+    {
+      "tag": "name",
+      "values": [
+        "driver"
+      ]
+    }
+  ]
+}
+----
+
 include::simple/README.adoc[]
 
 include::reactive-web/README.adoc[]
