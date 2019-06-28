@@ -28,7 +28,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.driver.Driver;
-import org.neo4j.driver.springframework.boot.actuate.metrics.Neo4jDriverMetrics;
+import org.neo4j.driver.springframework.boot.actuate.Neo4jDriverMetrics;
 import org.springframework.boot.actuate.autoconfigure.metrics.MetricsAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.FilteredClassLoader;
@@ -41,7 +41,6 @@ import org.springframework.context.annotation.Configuration;
 /**
  * @author Michael J. Simons
  */
-//@MockitoSettings(strictness = Strictness.LENIENT)
 class Neo4jDriverMetricsAutoConfigurationTest {
 
 	private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
@@ -64,12 +63,12 @@ class Neo4jDriverMetricsAutoConfigurationTest {
 		@Test
 		void shouldRequireAllNeededClasses() {
 			contextRunner
-				.withUserConfiguration(WithDriverWithMetrics.class, WithMeterRegistry.class)
+				.withUserConfiguration(WithMeterRegistry.class)
 				.withClassLoader(new FilteredClassLoader(Driver.class))
 				.run(assertNoInteractionsWithRegistry);
 
 			contextRunner
-				.withUserConfiguration(WithDriverWithMetrics.class, WithMeterRegistry.class)
+				.withUserConfiguration(WithDriverWithMetrics.class)
 				.withClassLoader(new FilteredClassLoader(MeterRegistry.class))
 				.run(assertNoInteractionsWithRegistry);
 		}

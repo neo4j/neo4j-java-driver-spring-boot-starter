@@ -19,4 +19,5 @@
 
 org.springframework.boot.autoconfigure.EnableAutoConfiguration = \
   org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverAutoConfiguration,\
+  org.neo4j.driver.springframework.boot.autoconfigure.Neo4jHealthIndicatorAutoConfiguration,\
   org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverMetricsAutoConfiguration

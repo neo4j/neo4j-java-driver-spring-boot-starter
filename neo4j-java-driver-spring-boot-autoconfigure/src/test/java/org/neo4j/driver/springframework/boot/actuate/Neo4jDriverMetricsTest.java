@@ -16,10 +16,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.neo4j.driver.springframework.boot.actuate.metrics;
+package org.neo4j.driver.springframework.boot.actuate;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.neo4j.driver.springframework.boot.actuate.metrics.Neo4jDriverMetrics.*;
+import static org.neo4j.driver.springframework.boot.actuate.Neo4jDriverMetrics.*;
 import static org.neo4j.driver.springframework.boot.test.Neo4jDriverMocks.*;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;

@@ -24,7 +24,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.neo4j.driver.Driver;
-import org.neo4j.driver.springframework.boot.actuate.metrics.Neo4jDriverMetrics;
+import org.neo4j.driver.springframework.boot.actuate.Neo4jDriverMetrics;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.metrics.MetricsAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.metrics.export.simple.SimpleMetricsExportAutoConfiguration;

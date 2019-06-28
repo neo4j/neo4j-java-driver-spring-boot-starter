@@ -61,7 +61,7 @@ dependencies {
 }
 ----
 
-=== Metrics
+=== Driver metrics
 
 `neo4j-java-driver-spring-boot-starter` comes with support for https://micrometer.io[Micrometer metrics] out of the box.
 It detects Micrometer on the classpath and binds the metrics of all instances of `org.neo4j.driver.Driver`, that have enabled their metrics, to a micrometer registry.
@@ -80,6 +80,44 @@ The following metrics are exposes
 
 All metrics will have the tags `name` (the bean of the driver they belong to)
 and `poolId` (the id of the connection pool, that contributed to the corresponding counter or gauge).
+
+=== Health information
+
+When you have Spring Boot Actuator on the class path, `neo4j-java-driver-spring-boot-starter` contributes to https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html#production-ready-health[health information] by default.
+Both reactive and imperative health checks are available, with the reactive health checks having precedence.
+
+When calling the health endpoint `/actuator/health` and the driver can reach a Neo4j instance, an unauthenticated user will see
+
+[source,json]
+.Health information
+----
+{
+  "status": "UP"
+}
+----
+
+and an authenticated user will see
+
+[source,json]
+.Health information
+----
+{
+  "status": "UP",
+  "details": {
+    "neo4j": {
+      "status": "UP",
+      "details": {
+        "server": "Neo4j/4.0.0@localhost(127.0.0.1):7687",
+        "database": "neo4j"
+      }
+    }
+  }
+}
+----
+
+In case no instance is reachable, the status will be `DOWN` and the details carry the error message.
+
+To disable the Neo4j health indicator, use the standard Spring Boot property `management.health.neo4j.enabled` with a value of `false`.
 
 === Configuration
 
