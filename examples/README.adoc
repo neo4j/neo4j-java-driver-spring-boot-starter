@@ -34,6 +34,8 @@ public class SimpleApplication {
 
 == Collecting metrics
 
+NOTE: This refers only to Driver metrics, not to the Neo4j server metrics.
+
 `neo4j-java-driver-spring-boot-starter` comes with support for https://micrometer.io[Micrometer metrics] out of the box.
 It detects Micrometer on the classpath and binds the metrics of all instances of ` org.neo4j.driver.Driver`, that have enabled their metrics, to a micrometer registry.
 
@@ -56,7 +58,7 @@ management.endpoints.web.exposure.include=info,health,metrics
 The metrics can be accessed like any other metrics by their name.
 The following shows a CURL request retrieving the amount of acquired connections:
 
-[source,baseh]
+[source]
 ----
 curl localhost:8080/actuator/metrics/neo4j.driver.connections.acquired|jq
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
@@ -92,5 +94,7 @@ curl localhost:8080/actuator/metrics/neo4j.driver.connections.acquired|jq
 include::simple/README.adoc[]
 
 include::reactive-web/README.adoc[]
+
+include::web/README.adoc[]
 
 include::testing-with-neo4j-harness/README.adoc[]

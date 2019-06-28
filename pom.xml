@@ -78,6 +78,7 @@
 		<module>examples/reactive-web</module>
 		<module>examples/simple</module>
 		<module>examples/testing-with-neo4j-harness</module>
+		<module>examples/web</module>
 	</modules>
 
 	<properties>
