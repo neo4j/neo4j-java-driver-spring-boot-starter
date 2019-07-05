@@ -22,7 +22,6 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,6 +31,7 @@ import org.neo4j.driver.Session;
 import org.neo4j.driver.StatementResult;
 import org.neo4j.driver.exceptions.ServiceUnavailableException;
 import org.neo4j.driver.exceptions.SessionExpiredException;
+import org.neo4j.driver.internal.SessionConfig;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Status;
 
@@ -54,7 +54,7 @@ class Neo4jHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 		when(statementResult.consume()).thenReturn(resultSummary);
 		when(session.run(anyString())).thenReturn(statementResult);
 
-		when(driver.session(any(Consumer.class))).thenReturn(session);
+		when(driver.session(any(SessionConfig.class))).thenReturn(session);
 
 		Neo4jHealthIndicator healthIndicator = new Neo4jHealthIndicator(driver);
 		Health health = healthIndicator.health();
@@ -78,7 +78,7 @@ class Neo4jHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 			}
 			return statementResult;
 		});
-		when(driver.session(any(Consumer.class))).thenReturn(session);
+		when(driver.session(any(SessionConfig.class))).thenReturn(session);
 
 		Neo4jHealthIndicator healthIndicator = new Neo4jHealthIndicator(driver);
 		Health health = healthIndicator.health();
@@ -93,7 +93,7 @@ class Neo4jHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 	@Test
 	void neo4jSessionIsDown() {
 
-		when(driver.session(any(Consumer.class))).thenThrow(ServiceUnavailableException.class);
+		when(driver.session(any(SessionConfig.class))).thenThrow(ServiceUnavailableException.class);
 
 		Neo4jHealthIndicator healthIndicator = new Neo4jHealthIndicator(driver);
 		Health health = healthIndicator.health();

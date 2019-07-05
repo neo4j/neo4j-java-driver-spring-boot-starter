@@ -34,7 +34,7 @@ import org.neo4j.driver.exceptions.ClientException;
 import org.springframework.util.Assert;
 
 /**
- * This is a {@link MeterBinder} that binds all available Neo4j driver metrivs
+ * This is a {@link MeterBinder} that binds all available Neo4j driver metrics
  * to Micrometer.
  *
  * @author Michael J. Simons
@@ -61,10 +61,10 @@ public final class Neo4jDriverMetrics implements MeterBinder {
 	public void bindTo(MeterRegistry meterRegistry) {
 
 		Metrics metrics = driver.metrics();
-		metrics.connectionPoolMetrics().forEach(this.getBoolMetricsBinder(meterRegistry));
+		metrics.connectionPoolMetrics().forEach(this.getPoolMetricsBinder(meterRegistry));
 	}
 
-	BiConsumer<String, ConnectionPoolMetrics> getBoolMetricsBinder(MeterRegistry meterRegistry) {
+	BiConsumer<String, ConnectionPoolMetrics> getPoolMetricsBinder(MeterRegistry meterRegistry) {
 		return (poolId, poolMetrics) -> {
 			Iterable<Tag> poolTags = Tags.concat(tags, "poolId", poolId);
 

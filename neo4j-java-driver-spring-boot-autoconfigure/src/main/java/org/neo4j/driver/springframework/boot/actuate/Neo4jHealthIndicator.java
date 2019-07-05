@@ -24,6 +24,7 @@ import org.neo4j.driver.AccessMode;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.exceptions.SessionExpiredException;
+import org.neo4j.driver.internal.SessionConfig;
 import org.neo4j.driver.summary.DatabaseInfo;
 import org.neo4j.driver.summary.ResultSummary;
 import org.neo4j.driver.summary.ServerInfo;
@@ -54,6 +55,11 @@ public final class Neo4jHealthIndicator extends AbstractHealthIndicator {
 	 * Message logged before retrying a health check.
 	 */
 	static final String MESSAGE_SESSION_EXPIRED = "Neo4j session has expired, retrying one single time to retrieve server health.";
+	/**
+	 * The default session config to use while connecting.
+	 */
+	static final SessionConfig DEFAULT_SESSION_CONFIG = SessionConfig.builder().withDefaultAccessMode(AccessMode.WRITE)
+		.build();
 	/**
 	 * The driver for this health indicator instance.
 	 */
@@ -101,7 +107,7 @@ public final class Neo4jHealthIndicator extends AbstractHealthIndicator {
 	ResultSummary runHealthCheckQuery() {
 		// We use WRITE here to make sure UP is returned for a server that supports
 		// all possible workloads
-		try (Session session = driver.session(p -> p.withDefaultAccessMode(AccessMode.WRITE))) {
+		try (Session session = driver.session(DEFAULT_SESSION_CONFIG)) {
 			ResultSummary resultSummary = session.run(CYPHER).consume();
 			return resultSummary;
 		}

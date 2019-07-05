@@ -24,7 +24,6 @@ import reactor.core.publisher.Mono;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.neo4j.driver.AccessMode;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.exceptions.SessionExpiredException;
 import org.neo4j.driver.reactive.RxSession;
@@ -65,7 +64,7 @@ public final class Neo4jReactiveHealthIndicator extends AbstractReactiveHealthIn
 		// We use WRITE here to make sure UP is returned for a server that supports
 		// all possible workloads
 		return Mono.using(
-			() -> driver.rxSession(p -> p.withDefaultAccessMode(AccessMode.WRITE)),
+			() -> driver.rxSession(DEFAULT_SESSION_CONFIG),
 			session -> Mono.from(session.run(Neo4jHealthIndicator.CYPHER).summary()),
 			RxSession::close
 		);
