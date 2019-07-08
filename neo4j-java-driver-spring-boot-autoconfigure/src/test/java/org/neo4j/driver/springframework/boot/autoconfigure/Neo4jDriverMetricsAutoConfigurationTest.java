@@ -100,6 +100,10 @@ class Neo4jDriverMetricsAutoConfigurationTest {
 			contextRunner
 				.withUserConfiguration(WithDriverWithMetrics.class, WithMeterRegistry.class)
 				.run(ctx -> {
+
+					// Wait a bit to let the completable future of the test that mocks connectiviy complete.
+					Thread.sleep(500L);
+
 					MeterRegistry meterRegistry = ctx.getBean(MeterRegistry.class);
 					assertThat(meterRegistry.getMeters())
 						.extracting(m -> m.getId().getName())
