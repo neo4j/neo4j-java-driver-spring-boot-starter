@@ -134,7 +134,7 @@ public class Neo4jDriverProperties {
 		}
 	}
 
-	static class Authentication {
+	public static class Authentication {
 
 		/**
 		 * The login of the user connecting to the database.
@@ -210,7 +210,7 @@ public class Neo4jDriverProperties {
 		}
 	}
 
-	static class ConfigProperties {
+	public static class ConfigProperties {
 
 		public enum LoadBalancingStrategy {
 			ROUND_ROBIN,
@@ -451,7 +451,7 @@ public class Neo4jDriverProperties {
 		}
 	}
 
-	static class TrustSettings {
+	public static class TrustSettings {
 
 		public enum Strategy {
 
