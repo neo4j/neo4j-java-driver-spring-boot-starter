@@ -22,6 +22,7 @@ import static org.mockito.Mockito.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import org.neo4j.driver.ConnectionPoolMetrics;
 import org.neo4j.driver.Driver;
@@ -46,6 +47,8 @@ public final class Neo4jDriverMocks {
 
 		Driver driver = mock(Driver.class);
 		when(driver.metrics()).thenReturn(metrics);
+
+		when(driver.verifyConnectivityAsync()).thenReturn(CompletableFuture.completedFuture(null));
 
 		return driver;
 	}

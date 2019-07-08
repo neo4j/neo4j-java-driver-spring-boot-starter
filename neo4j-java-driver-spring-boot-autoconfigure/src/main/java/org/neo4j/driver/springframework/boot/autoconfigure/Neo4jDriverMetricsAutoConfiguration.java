@@ -23,6 +23,8 @@ import io.micrometer.core.instrument.MeterRegistry;
 import java.util.Collections;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.springframework.boot.actuate.Neo4jDriverMetrics;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +55,8 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnBean({ Driver.class, MeterRegistry.class })
 public class Neo4jDriverMetricsAutoConfiguration {
 
+	private static final Log logger = LogFactory.getLog(Neo4jDriverMetricsAutoConfiguration.class);
+
 	@Autowired
 	public void bindDataSourcesToRegistry(Map<String, Driver> drivers, MeterRegistry registry) {
 
@@ -60,8 +64,13 @@ public class Neo4jDriverMetricsAutoConfiguration {
 			if (!Neo4jDriverMetrics.metricsAreEnabled(driver)) {
 				return;
 			}
-
-			new Neo4jDriverMetrics(name, driver, Collections.emptyList()).bindTo(registry);
+			driver
+				.verifyConnectivityAsync()
+				.thenRunAsync(() -> new Neo4jDriverMetrics(name, driver, Collections.emptyList()).bindTo(registry))
+				.exceptionally(e -> {
+					logger.warn("Could not verify connection for " + driver + " and thus not bind to metrics.", e);
+					return null;
+				});
 		});
 	}
 }
