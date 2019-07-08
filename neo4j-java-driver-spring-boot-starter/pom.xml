@@ -31,6 +31,10 @@
 	<name>Neo4j Java Driver Spring Boot Starter</name>
 	<description>A Spring Boot Starter for the Neo4j Java Driver.</description>
 
+	<properties>
+		<java-module-name>neo4j.java.driver.spring.boot.starter</java-module-name>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.neo4j.driver</groupId>
@@ -43,4 +47,22 @@
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifestEntries>
+							<Implementation-Title>${project.name}</Implementation-Title>
+							<Implementation-Version>${project.version}</Implementation-Version>
+							<Automatic-Module-Name>${java-module-name}</Automatic-Module-Name>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>
