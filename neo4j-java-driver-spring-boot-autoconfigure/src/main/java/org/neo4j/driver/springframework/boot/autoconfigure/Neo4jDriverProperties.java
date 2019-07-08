@@ -59,7 +59,7 @@ public class Neo4jDriverProperties {
 
 	/**
 	 * The uri this driver should connect to. The driver supports bolt, bolt+routing or neo4j as schemes. Both uri and uris
-	 * are empty, the driver tries to connect to 'neo4j://localhost:7687'.
+	 * are empty, the driver tries to connect to 'bolt://localhost:7687'.
 	 */
 	private URI uri;
 
