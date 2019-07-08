@@ -23,7 +23,7 @@
 	<parent>
 		<artifactId>neo4j-java-driver-spring-boot-starter-parent</artifactId>
 		<groupId>org.neo4j.driver</groupId>
-		<version>1.0.0.BUILD-SNAPSHOT</version>
+		<version>${revision}${sha1}${changelist}</version>
 	</parent>
 
 	<artifactId>neo4j-java-driver-spring-boot-starter</artifactId>
