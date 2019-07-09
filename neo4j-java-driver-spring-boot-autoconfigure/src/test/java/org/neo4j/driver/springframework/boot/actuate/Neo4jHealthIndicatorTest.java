@@ -48,6 +48,48 @@ class Neo4jHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 	private StatementResult statementResult;
 
 	@Test
+	void shouldWorkWithoutDatabaseName() {
+		when(serverInfo.version()).thenReturn("4711");
+		when(serverInfo.address()).thenReturn("Zu Hause");
+		when(resultSummary.server()).thenReturn(serverInfo);
+		when(resultSummary.database()).thenReturn(databaseInfo);
+
+		when(databaseInfo.name()).thenReturn(null);
+
+		when(statementResult.consume()).thenReturn(resultSummary);
+		when(session.run(anyString())).thenReturn(statementResult);
+
+		when(driver.session(any(SessionConfig.class))).thenReturn(session);
+
+		Neo4jHealthIndicator healthIndicator = new Neo4jHealthIndicator(driver);
+		Health health = healthIndicator.health();
+		assertThat(health.getStatus()).isEqualTo(Status.UP);
+		assertThat(health.getDetails()).containsEntry("server", "4711@Zu Hause");
+		assertThat(health.getDetails()).doesNotContainKey("database");
+	}
+
+	@Test
+	void shouldWorkWithEmptyDatabaseName() {
+		when(serverInfo.version()).thenReturn("4711");
+		when(serverInfo.address()).thenReturn("Zu Hause");
+		when(resultSummary.server()).thenReturn(serverInfo);
+		when(resultSummary.database()).thenReturn(databaseInfo);
+
+		when(databaseInfo.name()).thenReturn("");
+
+		when(statementResult.consume()).thenReturn(resultSummary);
+		when(session.run(anyString())).thenReturn(statementResult);
+
+		when(driver.session(any(SessionConfig.class))).thenReturn(session);
+
+		Neo4jHealthIndicator healthIndicator = new Neo4jHealthIndicator(driver);
+		Health health = healthIndicator.health();
+		assertThat(health.getStatus()).isEqualTo(Status.UP);
+		assertThat(health.getDetails()).containsEntry("server", "4711@Zu Hause");
+		assertThat(health.getDetails()).doesNotContainKey("database");
+	}
+
+	@Test
 	void neo4jIsUp() {
 
 		prepareSharedMocks();
@@ -60,6 +102,7 @@ class Neo4jHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 		Health health = healthIndicator.health();
 		assertThat(health.getStatus()).isEqualTo(Status.UP);
 		assertThat(health.getDetails()).containsEntry("server", "4711@Zu Hause");
+		assertThat(health.getDetails()).containsEntry("database", "n/a");
 
 		verify(session).close();
 		verifyNoMoreInteractions(driver, session, statementResult, resultSummary, serverInfo, databaseInfo);

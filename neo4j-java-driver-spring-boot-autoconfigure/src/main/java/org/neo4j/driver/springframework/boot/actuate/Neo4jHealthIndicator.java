@@ -31,6 +31,7 @@ import org.neo4j.driver.summary.ServerInfo;
 import org.springframework.boot.actuate.health.AbstractHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link HealthIndicator} that tests the status of a Neo4j by executing a Cypher statement and extracting
@@ -98,9 +99,12 @@ public final class Neo4jHealthIndicator extends AbstractHealthIndicator {
 		ServerInfo serverInfo = resultSummary.server();
 		DatabaseInfo databaseInfo = resultSummary.database();
 
-		builder.up()
-			.withDetail("server", serverInfo.version() + "@" + serverInfo.address())
-			.withDetail("database", databaseInfo.name());
+		builder.up().withDetail("server", serverInfo.version() + "@" + serverInfo.address());
+
+		if (StringUtils.hasText(databaseInfo.name())) {
+			builder.withDetail("database", databaseInfo.name());
+		}
+
 		return builder;
 	}
 
