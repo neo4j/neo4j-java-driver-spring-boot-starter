@@ -29,15 +29,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class DisplayMoviesController {
+public class MoviesController {
 
 	private final Driver driver;
 
-	public DisplayMoviesController(Driver driver) {
+	public MoviesController(Driver driver) {
 		this.driver = driver;
 	}
 
-	@GetMapping(path = "/movies", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+	@GetMapping(path = "/movies", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<String> getMovieTitles() {
 
 		try (Session session = driver.session(SessionConfig.builder().withDefaultAccessMode(AccessMode.WRITE).build())) {
