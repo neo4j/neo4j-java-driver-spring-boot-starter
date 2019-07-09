@@ -2,14 +2,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<artifactId>neo4j-java-driver-spring-boot-starter-parent</artifactId>
-		<groupId>org.neo4j.driver</groupId>
-		<version>${revision}${sha1}${changelist}</version>
-		<relativePath>../../</relativePath>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<groupId>org.springframework.boot</groupId>
+		<version>2.1.6.RELEASE</version>
+		<relativePath></relativePath>
 	</parent>
 
 	<groupId>org.neo4j.doc.driver</groupId>
 	<artifactId>testing-with-neo4j-harness</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
 
 	<name>Testing against Neo4j harness</name>
 	<description>Testing examples against the Neo4j harness</description>
@@ -17,24 +18,11 @@
 	<properties>
 		<java.version>1.8</java.version>
 		<junit-jupiter.version>5.4.2</junit-jupiter.version>
+		<neo4j-java-driver-spring-boot-starter.version>1.0.0-alpha03</neo4j-java-driver-spring-boot-starter.version>
 		<neo4j.version>3.5.6</neo4j.version>
 	</properties>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<!-- Import dependency management from Spring Boot -->
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-dependencies</artifactId>
-				<version>2.1.6.RELEASE</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
-
 	<dependencies>
-
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter</artifactId>
@@ -43,9 +31,8 @@
 		<dependency>
 			<groupId>org.neo4j.driver</groupId>
 			<artifactId>neo4j-java-driver-spring-boot-starter</artifactId>
-			<version>${project.version}</version>
+			<version>${neo4j-java-driver-spring-boot-starter.version}</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.neo4j.test</groupId>
 			<artifactId>neo4j-harness</artifactId>
@@ -56,7 +43,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -102,26 +88,6 @@
 				<artifactId>maven-deploy-plugin</artifactId>
 				<configuration>
 					<skip>true</skip>
-				</configuration>
-			</plugin>
-			<!--
-			 | This is mainly due to all the dependencies the test harness brings.
-			 | That bunch of dependencies is one of the main reasons we actually
-			 | are very reluctant to recommend using the test harness in large
-			 | enterprise projects that often have a ton of dependencies already.
-			 -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-enforcer-plugin</artifactId>
-				<configuration>
-					<skip>true</skip>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<configuration>
-					<detectOfflineLinks>false</detectOfflineLinks>
 				</configuration>
 			</plugin>
 		</plugins>
