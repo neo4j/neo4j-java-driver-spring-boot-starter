@@ -1,4 +1,4 @@
-== Testing examples against the Neo4j harness
+== Testing against the Neo4j harness
 
 First of all, you have to include the test harness in your dependencies.
 Pick either community edition or enterprise edition.
@@ -18,7 +18,7 @@ Here's the community edition:
 
 That brings a ton of dependencies.
 The advantage of it: It starts very fast.
-If you don't want to have the dependecies and can live with a slower start, we recommend https://www.testcontainers.org/modules/databases/neo4j/[Testcontainers].
+If you don't want to have the dependencies and can live with a slower start, we recommend https://www.testcontainers.org/modules/databases/neo4j/[Testcontainers].
 
 === Starting up the Neo4j harness
 

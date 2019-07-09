@@ -4,6 +4,8 @@
 We provide several examples how to use this starter.
 The reactive demo can only be used with Neo4j version 4.
 
+Each example comes with a dedicated readme, that guides you through it.
+
 The examples use the "Movie" data set, that you can install into your instance by going to the http://localhost:7474/browser/?cmd=play&arg=movies[Neo4j Browser].
 Enter the command `:play movies` and follow the instructions.
 
@@ -31,6 +33,17 @@ public class SimpleApplication {
 	}
 }
 ----
+
+NOTE: If you are a https://code.visualstudio.com[Visual Studio Code] user, you'll be happy to see that most of the examples include support for https://code.visualstudio.com/docs/remote/remote-overview[VS Code Remote Development].
+      Please follow the instructions at the link above for setting up your Visual Studio Code environment.
+      Once setup, you can open the example of your choice inside a VS Code container.
+      The running example can be accessed from the outside as shown above without any further actions.
+
+include::web/README.adoc[]
+
+include::reactive-web/README.adoc[]
+
+include::testing-with-neo4j-harness/README.adoc[]
 
 == Collecting metrics
 
@@ -90,11 +103,3 @@ curl localhost:8080/actuator/metrics/neo4j.driver.connections.acquired|jq
   ]
 }
 ----
-
-include::simple/README.adoc[]
-
-include::reactive-web/README.adoc[]
-
-include::web/README.adoc[]
-
-include::testing-with-neo4j-harness/README.adoc[]
