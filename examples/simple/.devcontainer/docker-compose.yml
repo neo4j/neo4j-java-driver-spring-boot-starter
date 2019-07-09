@@ -1,0 +1,23 @@
+version: '3.7'
+
+services:
+    database:
+        image: neo4j:3.5.6
+        environment:
+            - NEO4J_AUTH=neo4j/secret
+        ports:
+            - "7474:7474"
+            - "7687:7687"
+    example:
+        build:
+            context: ..
+            dockerfile: .devcontainer/Dockerfile
+        volumes:
+            - ..:/workspace
+        links:
+          - database
+        environment:
+            - ORG_NEO4J_DRIVER_URI=bolt://database:7687
+        ports:
+            - "8080:8080"
+        command: sleep infinity

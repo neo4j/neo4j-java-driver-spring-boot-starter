@@ -1,0 +1,17 @@
+### All movies
+
+GET http://localhost:8080/movies
+Accept: */*
+Cache-Control: no-cache
+
+### Health information
+
+GET http://localhost:8080/actuator/health
+Accept: */*
+Cache-Control: no-cache
+
+### Metrics (i.e. acquired connections)
+
+GET http://localhost:8080/actuator/metrics/neo4j.driver.connections.acquired
+Accept: */*
+Cache-Control: no-cache
