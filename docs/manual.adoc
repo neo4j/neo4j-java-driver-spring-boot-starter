@@ -105,7 +105,7 @@ The easiest way to setup a Spring Boot project is https://start.spring.io[start.
  (which is integrated in the major IDEs as well, in case you don't want to use the website).
 
 Select the "Spring Web Starter" to get all the dependencies needed for creating a Spring based web application.
-The Spring Initializr will take care of creating a valid project structure for your,
+The Spring Initializr will take care of creating a valid project structure for you,
 with all the files and settings in place for the selected build tool.
 
 WARNING: Don't choose Spring Data Neo4j here, as it will get you the previous generation of Spring Data Neo4j including OGM and additional abstraction over the driver.
