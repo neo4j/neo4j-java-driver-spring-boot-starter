@@ -1,5 +1,8 @@
 = Examples
 :sectanchors:
+ifndef::manualIncludeDir[]
+:manualIncludeDir: ../
+endif::[]
 
 We provide several examples how to use this starter.
 The reactive demo can only be used with Neo4j version 4.
@@ -39,11 +42,11 @@ NOTE: If you are a https://code.visualstudio.com[Visual Studio Code] user, you'l
       Once setup, you can open the example of your choice inside a VS Code container.
       The running example can be accessed from the outside as shown above without any further actions.
 
-include::web/README.adoc[]
+include::{manualIncludeDir}examples/web/README.adoc[]
 
-include::reactive-web/README.adoc[]
+include::{manualIncludeDir}examples/reactive-web/README.adoc[]
 
-include::testing-with-neo4j-harness/README.adoc[]
+include::{manualIncludeDir}examples/testing-with-neo4j-harness/README.adoc[]
 
 == Collecting metrics
 

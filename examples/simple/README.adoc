@@ -1,5 +1,7 @@
 == Simple example
-
+ifndef::manualIncludeDir[]
+:manualIncludeDir: ./
+endif::[]
 This examples uses the starter and configures username and password.
 The provided driver bean is than used in a `CommandLineRunner` to retrieve movies in an imperative way:
 
@@ -7,7 +9,7 @@ The provided driver bean is than used in a `CommandLineRunner` to retrieve movie
 [[simple-example]]
 .DisplayMoviesComponent.java
 ----
-include::src/main/java/org/neo4j/doc/driver/springframework/boot/simple/DisplayMoviesComponent.java[tags=simple-example,indent=0]
+include::{manualIncludeDir}src/main/java/org/neo4j/doc/driver/springframework/boot/simple/DisplayMoviesComponent.java[tags=simple-example,indent=0]
 ----
 
 The main takeaway here is that the driver can be injected like any other bean.

@@ -1,5 +1,8 @@
 = Using Neo4j's Spring Boot integration for the Java Driver
 :toc:
+ifndef::manualIncludeDir[]
+:manualIncludeDir: ../
+endif::[]
 :neo4j-java-driver-spring-boot-starter_version: 1.0.0-alpha03
 :groupId: org.neo4j.driver
 :artifactId: neo4j-java-driver-spring-boot-starter
@@ -325,8 +328,8 @@ The following metrics are exposes
 All metrics will have the tags `name` (the bean of the driver they belong to)
 and `poolId` (the id of the connection pool, that contributed to the corresponding counter or gauge).
 
-include::configuraton-options.adoc[]
+include::{manualIncludeDir}docs/configuration-options.adoc[]
 
 :leveloffset: +1
-include::../examples/README.adoc[]
+include::{manualIncludeDir}examples/README.adoc[]
 :leveloffset: -1
