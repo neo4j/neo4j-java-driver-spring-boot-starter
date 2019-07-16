@@ -27,16 +27,7 @@
     {
       "name": "org.neo4j.driver.config.trust-settings.strategy",
       "defaultValue": "TRUST_ALL_CERTIFICATES"
-    },
-    {
-      "name": "org.neo4j.driver.uris",
-      "deprecation": {
-        "level": "warning",
-        "reason": "Please use a single, logical uri as entrance to a Neo4j cluster if possible.",
-        "replacement": "org.neo4j.driver.uri"
-      }
     }
-
   ],
   "hints": []
 }

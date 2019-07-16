@@ -45,6 +45,7 @@ import org.neo4j.driver.net.ServerAddressResolver;
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.DeprecatedConfigurationProperty;
 import org.springframework.boot.context.properties.source.InvalidConfigurationPropertyValueException;
 
 /**
@@ -97,6 +98,7 @@ public class Neo4jDriverProperties {
 	 * @deprecated Please use a single, logical uri as entrance to a Neo4j cluster if possible.
 	 */
 	@Deprecated
+	@DeprecatedConfigurationProperty(reason = "Please use a single, logical uri as entrance to a Neo4j cluster if possible.", replacement = "uri")
 	public List<URI> getUris() {
 		return uris;
 	}
