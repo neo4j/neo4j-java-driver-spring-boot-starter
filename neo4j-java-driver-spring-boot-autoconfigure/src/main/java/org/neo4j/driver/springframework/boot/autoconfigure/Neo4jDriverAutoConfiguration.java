@@ -51,7 +51,7 @@ public class Neo4jDriverAutoConfiguration {
 	public FactoryBean<Driver> driverFactory(final Neo4jDriverProperties driverProperties) {
 
 		final AuthToken authToken = driverProperties.getAuthentication().toInternalRepresentation();
-		final Config config = driverProperties.getConfig().toInternalRepresentation();
+		final Config config = driverProperties.toInternalRepresentation();
 
 		final List<URI> uris = driverProperties.computeFinalListOfUris();
 

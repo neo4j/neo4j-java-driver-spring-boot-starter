@@ -1,7 +1,7 @@
 {
   "properties": [
     {
-      "name": "org.neo4j.driver.config.connection-acquisition-timeout",
+      "name": "org.neo4j.driver.pool.connection-acquisition-timeout",
       "defaultValue": "1m"
     },
     {
@@ -13,11 +13,11 @@
       "defaultValue": "LEAST_CONNECTED"
     },
     {
-      "name": "org.neo4j.driver.config.max-connection-lifetime",
+      "name": "org.neo4j.driver.pool.max-connection-lifetime",
       "defaultValue": "1h"
     },
     {
-      "name": "org.neo4j.driver.config.max-connection-pool-size",
+      "name": "org.neo4j.driver.pool.max-connection-pool-size",
       "defaultValue": 100
     },
     {

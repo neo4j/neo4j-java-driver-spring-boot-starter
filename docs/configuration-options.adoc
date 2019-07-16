@@ -21,7 +21,7 @@
 |
 |+++The login of the user connecting to the database.+++
 
-|`{config_prefix}.config.connection-acquisition-timeout`
+|`{config_prefix}.pool.connection-acquisition-timeout`
 |`1m`
 |+++Acquisition of new connections will be attempted for at most configured timeout.+++
 
@@ -33,7 +33,7 @@
 |`true`
 |+++Flag, if the driver should use encrypted traffic.+++
 
-|`{config_prefix}.config.idle-time-before-connection-test`
+|`{config_prefix}.pool.idle-time-before-connection-test`
 |
 |+++Pooled connections that have been idle in the pool for longer than this timeout will be tested before they are used again.+++
 
@@ -41,7 +41,7 @@
 |
 |+++Provide an alternative load balancing strategy for the routing driver to use.+++
 
-|`{config_prefix}.config.log-leaked-sessions`
+|`{config_prefix}.pool.log-leaked-sessions`
 |`false`
 |+++Flag, if leaked sessions logging is enabled.+++
 
@@ -53,11 +53,11 @@
 |`java.util.logging.Level.WARNING`
 |+++Log level for the bolt driver. This has only meaning of a Logging implementation other than Slf4jLogging has been chosen.+++
 
-|`{config_prefix}.config.max-connection-lifetime`
+|`{config_prefix}.pool.max-connection-lifetime`
 |`1h`
 |+++Pooled connections older than this threshold will be closed and removed from the pool.+++
 
-|`{config_prefix}.config.max-connection-pool-size`
+|`{config_prefix}.pool.max-connection-pool-size`
 |`100`
 |+++The maximum amount of connections in the connection pool towards a single database.+++
 
@@ -89,7 +89,7 @@
 |
 |+++This is a fallback for usecases when multiple uris have to provided to get into a Neo4j cluster. Usually one logical entry point is recommended (through DNS or a loadbalancer for example).+++
 
-|`{config_prefix}.metrics-enabled`
+|`{config_prefix}.pool.metrics-enabled`
 |`false`
 |+++Set this to true, so that the driver collects metrics, which can be exported to Micrometer.+++
 

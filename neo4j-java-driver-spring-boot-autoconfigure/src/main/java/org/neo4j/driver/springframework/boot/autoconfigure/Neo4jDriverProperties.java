@@ -75,6 +75,11 @@ public class Neo4jDriverProperties {
 	private Authentication authentication = new Authentication();
 
 	/**
+	 * The configuration of the connection pool.
+	 */
+	private PoolProperties pool = new PoolProperties();
+
+	/**
 	 * Detailed configuration of the driver.
 	 */
 	private ConfigProperties config = new ConfigProperties();
@@ -110,6 +115,14 @@ public class Neo4jDriverProperties {
 		this.authentication = authentication;
 	}
 
+	public PoolProperties getPool() {
+		return pool;
+	}
+
+	public void setPool(PoolProperties pool) {
+		this.pool = pool;
+	}
+
 	public ConfigProperties getConfig() {
 		return config;
 	}
@@ -132,6 +145,15 @@ public class Neo4jDriverProperties {
 		} else {
 			return Collections.emptyList();
 		}
+	}
+
+	Config toInternalRepresentation() {
+
+		Config.ConfigBuilder builder = Config.builder();
+		this.pool.configure(builder);
+		this.config.configure(builder);
+
+		return builder.build();
 	}
 
 	public static class Authentication {
@@ -210,17 +232,7 @@ public class Neo4jDriverProperties {
 		}
 	}
 
-	public static class ConfigProperties {
-
-		public enum LoadBalancingStrategy {
-			ROUND_ROBIN,
-			LEAST_CONNECTED;
-
-			Config.LoadBalancingStrategy toInternalRepresentation() {
-				return Config.LoadBalancingStrategy.valueOf(this.name());
-			}
-		}
-
+	public static class PoolProperties {
 		/**
 		 * Flag, if metrics are enabled.
 		 */
@@ -251,6 +263,86 @@ public class Neo4jDriverProperties {
 		 */
 		private Duration connectionAcquisitionTimeout = Duration
 			.ofMillis(PoolSettings.DEFAULT_CONNECTION_ACQUISITION_TIMEOUT);
+
+		public boolean isLogLeakedSessions() {
+			return logLeakedSessions;
+		}
+
+		public void setLogLeakedSessions(boolean logLeakedSessions) {
+			this.logLeakedSessions = logLeakedSessions;
+		}
+
+		public int getMaxConnectionPoolSize() {
+			return maxConnectionPoolSize;
+		}
+
+		public void setMaxConnectionPoolSize(int maxConnectionPoolSize) {
+			this.maxConnectionPoolSize = maxConnectionPoolSize;
+		}
+
+		public Duration getIdleTimeBeforeConnectionTest() {
+			return idleTimeBeforeConnectionTest;
+		}
+
+		public void setIdleTimeBeforeConnectionTest(Duration idleTimeBeforeConnectionTest) {
+			this.idleTimeBeforeConnectionTest = idleTimeBeforeConnectionTest;
+		}
+
+		public Duration getMaxConnectionLifetime() {
+			return maxConnectionLifetime;
+		}
+
+		public void setMaxConnectionLifetime(Duration maxConnectionLifetime) {
+			this.maxConnectionLifetime = maxConnectionLifetime;
+		}
+
+		public Duration getConnectionAcquisitionTimeout() {
+			return connectionAcquisitionTimeout;
+		}
+
+		public void setConnectionAcquisitionTimeout(Duration connectionAcquisitionTimeout) {
+			this.connectionAcquisitionTimeout = connectionAcquisitionTimeout;
+		}
+
+		public boolean isMetricsEnabled() {
+			return metricsEnabled;
+		}
+
+		public void setMetricsEnabled(boolean metricsEnabled) {
+			this.metricsEnabled = metricsEnabled;
+		}
+
+		private void configure(Config.ConfigBuilder builder) {
+
+			if (logLeakedSessions) {
+				builder.withLeakedSessionsLogging();
+			}
+			builder.withMaxConnectionPoolSize(maxConnectionPoolSize);
+			if (idleTimeBeforeConnectionTest != null) {
+				builder
+					.withConnectionLivenessCheckTimeout(idleTimeBeforeConnectionTest.toMillis(), TimeUnit.MILLISECONDS);
+			}
+			builder.withMaxConnectionLifetime(maxConnectionLifetime.toMillis(), TimeUnit.MILLISECONDS);
+			builder.withConnectionAcquisitionTimeout(connectionAcquisitionTimeout.toMillis(), TimeUnit.MILLISECONDS);
+
+			if (metricsEnabled) {
+				builder.withDriverMetrics();
+			} else {
+				builder.withoutDriverMetrics();
+			}
+		}
+	}
+
+	public static class ConfigProperties {
+
+		public enum LoadBalancingStrategy {
+			ROUND_ROBIN,
+			LEAST_CONNECTED;
+
+			Config.LoadBalancingStrategy toInternalRepresentation() {
+				return Config.LoadBalancingStrategy.valueOf(this.name());
+			}
+		}
 
 		/**
 		 * Flag, if the driver should use encrypted traffic.
@@ -292,46 +384,6 @@ public class Neo4jDriverProperties {
 		 * Log level for the bolt driver. This has only meaning of a Logging implementation other than Slf4jLogging has been chosen.
 		 */
 		private Level driverLoggingLevel = Level.WARNING;
-
-		public boolean isLogLeakedSessions() {
-			return logLeakedSessions;
-		}
-
-		public void setLogLeakedSessions(boolean logLeakedSessions) {
-			this.logLeakedSessions = logLeakedSessions;
-		}
-
-		public int getMaxConnectionPoolSize() {
-			return maxConnectionPoolSize;
-		}
-
-		public void setMaxConnectionPoolSize(int maxConnectionPoolSize) {
-			this.maxConnectionPoolSize = maxConnectionPoolSize;
-		}
-
-		public Duration getIdleTimeBeforeConnectionTest() {
-			return idleTimeBeforeConnectionTest;
-		}
-
-		public void setIdleTimeBeforeConnectionTest(Duration idleTimeBeforeConnectionTest) {
-			this.idleTimeBeforeConnectionTest = idleTimeBeforeConnectionTest;
-		}
-
-		public Duration getMaxConnectionLifetime() {
-			return maxConnectionLifetime;
-		}
-
-		public void setMaxConnectionLifetime(Duration maxConnectionLifetime) {
-			this.maxConnectionLifetime = maxConnectionLifetime;
-		}
-
-		public Duration getConnectionAcquisitionTimeout() {
-			return connectionAcquisitionTimeout;
-		}
-
-		public void setConnectionAcquisitionTimeout(Duration connectionAcquisitionTimeout) {
-			this.connectionAcquisitionTimeout = connectionAcquisitionTimeout;
-		}
 
 		public boolean isEncrypted() {
 			return encrypted;
@@ -390,27 +442,16 @@ public class Neo4jDriverProperties {
 			this.loggingClass = loggingClass;
 		}
 
-		public boolean isMetricsEnabled() {
-			return metricsEnabled;
+		public Level getDriverLoggingLevel() {
+			return driverLoggingLevel;
 		}
 
-		public void setMetricsEnabled(boolean metricsEnabled) {
-			this.metricsEnabled = metricsEnabled;
+		public void setDriverLoggingLevel(Level driverLoggingLevel) {
+			this.driverLoggingLevel = driverLoggingLevel;
 		}
 
-		Config toInternalRepresentation() {
-			Config.ConfigBuilder builder = Config.builder();
+		private void configure(Config.ConfigBuilder builder) {
 
-			if (logLeakedSessions) {
-				builder.withLeakedSessionsLogging();
-			}
-			builder.withMaxConnectionPoolSize(maxConnectionPoolSize);
-			if (idleTimeBeforeConnectionTest != null) {
-				builder
-					.withConnectionLivenessCheckTimeout(idleTimeBeforeConnectionTest.toMillis(), TimeUnit.MILLISECONDS);
-			}
-			builder.withMaxConnectionLifetime(maxConnectionLifetime.toMillis(), TimeUnit.MILLISECONDS);
-			builder.withConnectionAcquisitionTimeout(connectionAcquisitionTimeout.toMillis(), TimeUnit.MILLISECONDS);
 			if (encrypted) {
 				builder.withEncryption();
 			} else {
@@ -440,14 +481,6 @@ public class Neo4jDriverProperties {
 				}
 			}
 			builder.withLogging(logging);
-
-			if (metricsEnabled) {
-				builder.withDriverMetrics();
-			} else {
-				builder.withoutDriverMetrics();
-			}
-
-			return builder.build();
 		}
 	}
 

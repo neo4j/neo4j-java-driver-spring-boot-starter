@@ -156,6 +156,83 @@ class Neo4jDriverPropertiesTest {
 	}
 
 	@Nested
+	@DisplayName("Pool properties")
+	class PoolPropertiesTest {
+		@Test
+		@DisplayName("…should default to drivers values")
+		void shouldDefaultToDriversValues() {
+
+			Config defaultConfig = Config.defaultConfig();
+
+			Neo4jDriverProperties driverProperties = load();
+
+			PoolProperties poolProperties = driverProperties.getPool();
+			assertThat(poolProperties.isLogLeakedSessions()).isEqualTo(defaultConfig.logLeakedSessions());
+			assertThat(poolProperties.getMaxConnectionPoolSize()).isEqualTo(defaultConfig.maxConnectionPoolSize());
+			assertDuration(poolProperties.getIdleTimeBeforeConnectionTest(),
+				defaultConfig.idleTimeBeforeConnectionTest());
+			assertDuration(poolProperties.getMaxConnectionLifetime(), defaultConfig.maxConnectionLifetimeMillis());
+			assertDuration(poolProperties.getConnectionAcquisitionTimeout(),
+				defaultConfig.connectionAcquisitionTimeoutMillis());
+			assertThat(poolProperties.isMetricsEnabled()).isFalse();
+		}
+
+		@Test
+		void logLeakedSessionsSettingsShouldWork() {
+
+			Neo4jDriverProperties driverProperties;
+
+			driverProperties = new Neo4jDriverProperties();
+			driverProperties.getPool().setLogLeakedSessions(true);
+			assertThat(driverProperties.toInternalRepresentation().logLeakedSessions()).isTrue();
+
+			driverProperties = new Neo4jDriverProperties();
+			driverProperties.getPool().setLogLeakedSessions(false);
+			assertThat(driverProperties.toInternalRepresentation().logLeakedSessions()).isFalse();
+		}
+
+		@Test
+		void maxConnectionPoolSizeSettingsShouldWork() {
+
+			Neo4jDriverProperties driverProperties = new Neo4jDriverProperties();
+			driverProperties.getPool().setMaxConnectionPoolSize(4711);
+			assertThat(driverProperties.toInternalRepresentation().maxConnectionPoolSize()).isEqualTo(4711);
+		}
+
+		@Test
+		void idleTimeBeforeConnectionTestSettingsShouldWork() {
+
+			Neo4jDriverProperties driverProperties;
+
+			driverProperties = new Neo4jDriverProperties();
+			assertThat(driverProperties.toInternalRepresentation().idleTimeBeforeConnectionTest()).isEqualTo(-1);
+
+			driverProperties = new Neo4jDriverProperties();
+			driverProperties.getPool().setIdleTimeBeforeConnectionTest(Duration.ofSeconds(23));
+			assertThat(driverProperties.toInternalRepresentation().idleTimeBeforeConnectionTest()).isEqualTo(23_000);
+		}
+
+		@Test
+		void connectionAcquisitionTimeoutSettingsShouldWork() {
+
+			Neo4jDriverProperties driverProperties = new Neo4jDriverProperties();
+			driverProperties.getPool().setConnectionAcquisitionTimeout(Duration.ofSeconds(23));
+			assertThat(driverProperties.toInternalRepresentation().connectionAcquisitionTimeoutMillis())
+				.isEqualTo(23_000);
+		}
+
+		@Test
+		void enableMetricsShouldWork() {
+
+			Neo4jDriverProperties driverProperties = new Neo4jDriverProperties();
+			assertThat(driverProperties.toInternalRepresentation().isMetricsEnabled()).isFalse();
+
+			driverProperties.getPool().setMetricsEnabled(true);
+			assertThat(driverProperties.toInternalRepresentation().isMetricsEnabled()).isTrue();
+		}
+	}
+
+	@Nested
 	@DisplayName("Config properties")
 	class ConfigPropertiesTest {
 		@Test
@@ -167,13 +244,6 @@ class Neo4jDriverPropertiesTest {
 			Neo4jDriverProperties driverProperties = load();
 
 			ConfigProperties configProperties = driverProperties.getConfig();
-			assertThat(configProperties.isLogLeakedSessions()).isEqualTo(defaultConfig.logLeakedSessions());
-			assertThat(configProperties.getMaxConnectionPoolSize()).isEqualTo(defaultConfig.maxConnectionPoolSize());
-			assertDuration(configProperties.getIdleTimeBeforeConnectionTest(),
-				defaultConfig.idleTimeBeforeConnectionTest());
-			assertDuration(configProperties.getMaxConnectionLifetime(), defaultConfig.maxConnectionLifetimeMillis());
-			assertDuration(configProperties.getConnectionAcquisitionTimeout(),
-				defaultConfig.connectionAcquisitionTimeoutMillis());
 			assertThat(configProperties.isEncrypted()).isEqualTo(defaultConfig.encrypted());
 			assertThat(configProperties.getTrustSettings().getStrategy().name())
 				.isEqualTo(defaultConfig.trustStrategy().strategy().name());
@@ -182,83 +252,38 @@ class Neo4jDriverPropertiesTest {
 			assertDuration(configProperties.getConnectionTimeout(), defaultConfig.connectionTimeoutMillis());
 			assertDuration(configProperties.getMaxTransactionRetryTime(), RetrySettings.DEFAULT.maxRetryTimeMs());
 			assertThat(configProperties.getServerAddressResolverClass()).isNull();
-			assertThat(configProperties.isMetricsEnabled()).isFalse();
-		}
-
-		@Test
-		void logLeakedSessionsSettingsShouldWork() {
-
-			ConfigProperties configProperties;
-
-			configProperties = new ConfigProperties();
-			configProperties.setLogLeakedSessions(true);
-			assertThat(configProperties.toInternalRepresentation().logLeakedSessions()).isTrue();
-
-			configProperties = new ConfigProperties();
-			configProperties.setLogLeakedSessions(false);
-			assertThat(configProperties.toInternalRepresentation().logLeakedSessions()).isFalse();
-		}
-
-		@Test
-		void maxConnectionPoolSizeSettingsShouldWork() {
-
-			ConfigProperties configProperties = new ConfigProperties();
-			configProperties.setMaxConnectionPoolSize(4711);
-			assertThat(configProperties.toInternalRepresentation().maxConnectionPoolSize()).isEqualTo(4711);
-		}
-
-		@Test
-		void idleTimeBeforeConnectionTestSettingsShouldWork() {
-
-			ConfigProperties configProperties;
-
-			configProperties = new ConfigProperties();
-			assertThat(configProperties.toInternalRepresentation().idleTimeBeforeConnectionTest()).isEqualTo(-1);
-
-			configProperties = new ConfigProperties();
-			configProperties.setIdleTimeBeforeConnectionTest(Duration.ofSeconds(23));
-			assertThat(configProperties.toInternalRepresentation().idleTimeBeforeConnectionTest()).isEqualTo(23_000);
-		}
-
-		@Test
-		void connectionAcquisitionTimeoutSettingsShouldWork() {
-
-			ConfigProperties configProperties = new ConfigProperties();
-			configProperties.setConnectionAcquisitionTimeout(Duration.ofSeconds(23));
-			assertThat(configProperties.toInternalRepresentation().connectionAcquisitionTimeoutMillis())
-				.isEqualTo(23_000);
 		}
 
 		@Test
 		void encryptedSettingsShouldWork() {
 
-			ConfigProperties configProperties;
+			Neo4jDriverProperties driverProperties;
 
-			configProperties = new ConfigProperties();
-			configProperties.setEncrypted(true);
-			assertThat(configProperties.toInternalRepresentation().encrypted()).isTrue();
+			driverProperties = new Neo4jDriverProperties();
+			driverProperties.getConfig().setEncrypted(true);
+			assertThat(driverProperties.toInternalRepresentation().encrypted()).isTrue();
 
-			configProperties = new ConfigProperties();
-			configProperties.setEncrypted(false);
-			assertThat(configProperties.toInternalRepresentation().encrypted()).isFalse();
+			driverProperties = new Neo4jDriverProperties();
+			driverProperties.getConfig().setEncrypted(false);
+			assertThat(driverProperties.toInternalRepresentation().encrypted()).isFalse();
 		}
 
 		@Test
 		void trustSettingsShouldWork() {
 
-			ConfigProperties configProperties = new ConfigProperties();
+			Neo4jDriverProperties driverProperties = new Neo4jDriverProperties();
 			TrustSettings trustSettings = new TrustSettings();
 			trustSettings.setStrategy(TRUST_SYSTEM_CA_SIGNED_CERTIFICATES);
-			configProperties.setTrustSettings(trustSettings);
-			assertThat(configProperties.toInternalRepresentation().trustStrategy().strategy()).isEqualTo(
+			driverProperties.getConfig().setTrustSettings(trustSettings);
+			assertThat(driverProperties.toInternalRepresentation().trustStrategy().strategy()).isEqualTo(
 				Config.TrustStrategy.Strategy.TRUST_SYSTEM_CA_SIGNED_CERTIFICATES);
 		}
 
 		@Test
 		void loadBalancingStrategySettingsShouldWork() {
 
-			ConfigProperties configProperties = new ConfigProperties();
-			configProperties.setLoadBalancingStrategy(ROUND_ROBIN);
+			Neo4jDriverProperties configProperties = new Neo4jDriverProperties();
+			configProperties.getConfig().setLoadBalancingStrategy(ROUND_ROBIN);
 			assertThat(configProperties.toInternalRepresentation().loadBalancingStrategy()).isEqualTo(
 				Config.LoadBalancingStrategy.ROUND_ROBIN);
 		}
@@ -266,20 +291,9 @@ class Neo4jDriverPropertiesTest {
 		@Test
 		void connectionTimeoutSettingsShouldWork() {
 
-			ConfigProperties configProperties = new ConfigProperties();
-			configProperties.setConnectionTimeout(Duration.ofSeconds(23));
-			assertThat(configProperties.toInternalRepresentation().connectionTimeoutMillis()).isEqualTo(23_000);
-		}
-
-
-		@Test
-		void enableMetricsShouldWork() {
-
-			ConfigProperties configProperties = new ConfigProperties();
-			assertThat(configProperties.toInternalRepresentation().isMetricsEnabled()).isFalse();
-
-			configProperties.setMetricsEnabled(true);
-			assertThat(configProperties.toInternalRepresentation().isMetricsEnabled()).isTrue();
+			Neo4jDriverProperties driverProperties = new Neo4jDriverProperties();
+			driverProperties.getConfig().setConnectionTimeout(Duration.ofSeconds(23));
+			assertThat(driverProperties.toInternalRepresentation().connectionTimeoutMillis()).isEqualTo(23_000);
 		}
 
 		@Test
@@ -293,9 +307,9 @@ class Neo4jDriverPropertiesTest {
 		@Test
 		void serverAddressResolverClassSettingsShouldWork() {
 
-			ConfigProperties configProperties = new ConfigProperties();
-			configProperties.setServerAddressResolverClass(TestServerAddressResolver.class);
-			assertThat(configProperties.toInternalRepresentation().resolver())
+			Neo4jDriverProperties driverProperties = new Neo4jDriverProperties();
+			driverProperties.getConfig().setServerAddressResolverClass(TestServerAddressResolver.class);
+			assertThat(driverProperties.toInternalRepresentation().resolver())
 				.isNotNull()
 				.isInstanceOf(TestServerAddressResolver.class);
 		}
@@ -303,8 +317,8 @@ class Neo4jDriverPropertiesTest {
 		@Test
 		void shouldDefaultToSlf4j() {
 
-			ConfigProperties configProperties = new ConfigProperties();
-			assertThat(configProperties.toInternalRepresentation().logging())
+			Neo4jDriverProperties driverProperties = new Neo4jDriverProperties();
+			assertThat(driverProperties.toInternalRepresentation().logging())
 				.isNotNull()
 				.isInstanceOf(Slf4jLogging.class);
 
@@ -313,8 +327,8 @@ class Neo4jDriverPropertiesTest {
 		@Test
 		void loggingClassSettingsShouldWork() {
 
-			ConfigProperties configProperties = new ConfigProperties();
-			configProperties.setLoggingClass(JULogging.class);
+			Neo4jDriverProperties configProperties = new Neo4jDriverProperties();
+			configProperties.getConfig().setLoggingClass(JULogging.class);
 			assertThat(configProperties.toInternalRepresentation().logging())
 				.isNotNull()
 				.isInstanceOf(JULogging.class);
@@ -324,8 +338,8 @@ class Neo4jDriverPropertiesTest {
 		@Test
 		void loggingClassSettingsShouldWorkWithCustomClass() {
 
-			ConfigProperties configProperties = new ConfigProperties();
-			configProperties.setLoggingClass(TestLoggingClass.class);
+			Neo4jDriverProperties configProperties = new Neo4jDriverProperties();
+			configProperties.getConfig().setLoggingClass(TestLoggingClass.class);
 			assertThat(configProperties.toInternalRepresentation().logging())
 				.isNotNull()
 				.isInstanceOf(TestLoggingClass.class);
