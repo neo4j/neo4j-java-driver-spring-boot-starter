@@ -243,6 +243,28 @@ public class MoviesController {
 If you generated your application via the commands given above, you can now run the class `Neo4jSpringBootExampleApplication`
 and after a short while, you can access http://localhost:8080/movies.
 
+== Logging
+
+The Neo4j Spring Boot starter uses a small shim to integrate the driver with Springs JCL abstraction.
+Thus, all logging configuration can be done via Spring Boot's `application.properties`.
+Important names used for logging are:
+
+[source,properties]
+----
+logging.level.org.neo4j.driver.GraphDatabase = debug
+logging.level.org.neo4j.driver.Driver = debug
+----
+
+If you ever have the need to debug outgoing and incoming Bolt messages, use those two names:
+
+[source,properties]
+----
+logging.level.org.neo4j.driver.OutboundMessageHandler = debug
+logging.level.org.neo4j.driver.InboundMessageDispatcher = debug
+----
+
+NOTE: The prefix `org.neo4j.driver` is specific to the Drivers integration with Spring Boot.
+
 == Production-ready features
 
 The Neo4j Spring Boot starter hooks into Spring Boot's https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready.html[Production-ready features] (or the so called Spring Boot Actuator).

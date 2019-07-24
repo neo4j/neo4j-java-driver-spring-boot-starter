@@ -19,7 +19,7 @@
 package org.neo4j.driver.springframework.boot.autoconfigure;
 
 import static java.util.stream.Collectors.*;
-import static org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverProperties.ConfigProperties.LoadBalancingStrategy.*;
+import static org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverProperties.DriverSettings.LoadBalancingStrategy.*;
 import static org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverProperties.*;
 import static org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverProperties.TrustSettings.Strategy.*;
 
@@ -31,18 +31,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
-import java.util.logging.Level;
 
 import org.neo4j.driver.AuthToken;
 import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.Config;
-import org.neo4j.driver.Logging;
-import org.neo4j.driver.internal.async.pool.PoolSettings;
-import org.neo4j.driver.internal.logging.ConsoleLogging;
-import org.neo4j.driver.internal.logging.JULogging;
-import org.neo4j.driver.internal.logging.Slf4jLogging;
 import org.neo4j.driver.net.ServerAddressResolver;
-import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.DeprecatedConfigurationProperty;
@@ -66,7 +59,8 @@ public class Neo4jDriverProperties {
 
 	/**
 	 * This is a fallback for use cases when multiple uris have to provided to get into a Neo4j cluster. Usually one logical
-	 * entry point is recommended (through DNS or a loadbalancer for example).
+	 * entry point is recommended (through DNS or a loadbalancer for example). The list of uris must only contain "bolt+routing"
+	 * uris.
 	 */
 	private List<URI> uris = new ArrayList<>();
 
@@ -78,12 +72,12 @@ public class Neo4jDriverProperties {
 	/**
 	 * The configuration of the connection pool.
 	 */
-	private PoolProperties pool = new PoolProperties();
+	private PoolSettings pool = new PoolSettings();
 
 	/**
 	 * Detailed configuration of the driver.
 	 */
-	private ConfigProperties config = new ConfigProperties();
+	private DriverSettings config = new DriverSettings();
 
 	public URI getUri() {
 		return uri;
@@ -117,19 +111,19 @@ public class Neo4jDriverProperties {
 		this.authentication = authentication;
 	}
 
-	public PoolProperties getPool() {
+	public PoolSettings getPool() {
 		return pool;
 	}
 
-	public void setPool(PoolProperties pool) {
+	public void setPool(PoolSettings pool) {
 		this.pool = pool;
 	}
 
-	public ConfigProperties getConfig() {
+	public DriverSettings getConfig() {
 		return config;
 	}
 
-	public void setConfig(ConfigProperties config) {
+	public void setConfig(DriverSettings config) {
 		this.config = config;
 	}
 
@@ -152,10 +146,10 @@ public class Neo4jDriverProperties {
 	Config toInternalRepresentation() {
 
 		Config.ConfigBuilder builder = Config.builder();
-		this.pool.configure(builder);
-		this.config.configure(builder);
+		this.pool.applyTo(builder);
+		this.config.applyTo(builder);
 
-		return builder.build();
+		return builder.withLogging(new Neo4jSpringJclLogging()).build();
 	}
 
 	public static class Authentication {
@@ -234,7 +228,7 @@ public class Neo4jDriverProperties {
 		}
 	}
 
-	public static class PoolProperties {
+	public static class PoolSettings {
 		/**
 		 * Flag, if metrics are enabled.
 		 */
@@ -248,7 +242,7 @@ public class Neo4jDriverProperties {
 		/**
 		 * The maximum amount of connections in the connection pool towards a single database.
 		 */
-		private int maxConnectionPoolSize = PoolSettings.DEFAULT_MAX_CONNECTION_POOL_SIZE;
+		private int maxConnectionPoolSize = org.neo4j.driver.internal.async.pool.PoolSettings.DEFAULT_MAX_CONNECTION_POOL_SIZE;
 
 		/**
 		 * Pooled connections that have been idle in the pool for longer than this timeout will be tested before they are used again.
@@ -258,13 +252,14 @@ public class Neo4jDriverProperties {
 		/**
 		 * Pooled connections older than this threshold will be closed and removed from the pool.
 		 */
-		private Duration maxConnectionLifetime = Duration.ofMillis(PoolSettings.DEFAULT_MAX_CONNECTION_LIFETIME);
+		private Duration maxConnectionLifetime = Duration
+			.ofMillis(org.neo4j.driver.internal.async.pool.PoolSettings.DEFAULT_MAX_CONNECTION_LIFETIME);
 
 		/**
 		 * Acquisition of new connections will be attempted for at most configured timeout.
 		 */
 		private Duration connectionAcquisitionTimeout = Duration
-			.ofMillis(PoolSettings.DEFAULT_CONNECTION_ACQUISITION_TIMEOUT);
+			.ofMillis(org.neo4j.driver.internal.async.pool.PoolSettings.DEFAULT_CONNECTION_ACQUISITION_TIMEOUT);
 
 		public boolean isLogLeakedSessions() {
 			return logLeakedSessions;
@@ -314,7 +309,7 @@ public class Neo4jDriverProperties {
 			this.metricsEnabled = metricsEnabled;
 		}
 
-		private void configure(Config.ConfigBuilder builder) {
+		private void applyTo(Config.ConfigBuilder builder) {
 
 			if (logLeakedSessions) {
 				builder.withLeakedSessionsLogging();
@@ -335,7 +330,7 @@ public class Neo4jDriverProperties {
 		}
 	}
 
-	public static class ConfigProperties {
+	public static class DriverSettings {
 
 		public enum LoadBalancingStrategy {
 			ROUND_ROBIN,
@@ -376,16 +371,6 @@ public class Neo4jDriverProperties {
 		 * Specify a custom server address resolver used by the routing driver to resolve the initial address used to create the driver.
 		 */
 		private Class<? extends ServerAddressResolver> serverAddressResolverClass;
-
-		/**
-		 * Specify a custom logging shim to use. Default delegates to Slf4j.
-		 */
-		private Class<? extends Logging> loggingClass = Slf4jLogging.class;
-
-		/**
-		 * Log level for the bolt driver. This has only meaning of a Logging implementation other than Slf4jLogging has been chosen.
-		 */
-		private Level driverLoggingLevel = Level.WARNING;
 
 		public boolean isEncrypted() {
 			return encrypted;
@@ -436,23 +421,7 @@ public class Neo4jDriverProperties {
 			this.serverAddressResolverClass = serverAddressResolverClass;
 		}
 
-		public Class<? extends Logging> getLoggingClass() {
-			return loggingClass;
-		}
-
-		public void setLoggingClass(Class<? extends Logging> loggingClass) {
-			this.loggingClass = loggingClass;
-		}
-
-		public Level getDriverLoggingLevel() {
-			return driverLoggingLevel;
-		}
-
-		public void setDriverLoggingLevel(Level driverLoggingLevel) {
-			this.driverLoggingLevel = driverLoggingLevel;
-		}
-
-		private void configure(Config.ConfigBuilder builder) {
+		private void applyTo(Config.ConfigBuilder builder) {
 
 			if (encrypted) {
 				builder.withEncryption();
@@ -467,22 +436,6 @@ public class Neo4jDriverProperties {
 			if (serverAddressResolverClass != null) {
 				builder.withResolver(BeanUtils.instantiateClass(serverAddressResolverClass));
 			}
-
-			Logging logging;
-			if (this.loggingClass == JULogging.class) {
-				logging = Logging.javaUtilLogging(driverLoggingLevel);
-			} else if (this.loggingClass == ConsoleLogging.class) {
-				logging = Logging.console(driverLoggingLevel);
-			} else if (this.loggingClass == Slf4jLogging.class) {
-				logging = Logging.slf4j();
-			} else {
-				try {
-					logging = BeanUtils.instantiateClass(this.loggingClass);
-				} catch (BeanInstantiationException e) {
-					logging = Logging.none();
-				}
-			}
-			builder.withLogging(logging);
 		}
 	}
 

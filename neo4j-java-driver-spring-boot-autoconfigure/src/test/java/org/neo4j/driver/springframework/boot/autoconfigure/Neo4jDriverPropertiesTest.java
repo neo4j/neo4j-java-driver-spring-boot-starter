@@ -20,7 +20,7 @@ package org.neo4j.driver.springframework.boot.autoconfigure;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverProperties.*;
-import static org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverProperties.ConfigProperties.LoadBalancingStrategy.*;
+import static org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverProperties.DriverSettings.LoadBalancingStrategy.*;
 import static org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverProperties.TrustSettings.Strategy.*;
 
 import java.io.File;
@@ -34,9 +34,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.Config;
-import org.neo4j.driver.internal.async.pool.PoolSettings;
-import org.neo4j.driver.internal.logging.JULogging;
-import org.neo4j.driver.internal.logging.Slf4jLogging;
 import org.neo4j.driver.internal.retry.RetrySettings;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.context.properties.source.InvalidConfigurationPropertyValueException;
@@ -157,7 +154,7 @@ class Neo4jDriverPropertiesTest {
 
 	@Nested
 	@DisplayName("Pool properties")
-	class PoolPropertiesTest {
+	class PoolSettingsTest {
 		@Test
 		@DisplayName("…should default to drivers values")
 		void shouldDefaultToDriversValues() {
@@ -166,15 +163,15 @@ class Neo4jDriverPropertiesTest {
 
 			Neo4jDriverProperties driverProperties = load();
 
-			PoolProperties poolProperties = driverProperties.getPool();
-			assertThat(poolProperties.isLogLeakedSessions()).isEqualTo(defaultConfig.logLeakedSessions());
-			assertThat(poolProperties.getMaxConnectionPoolSize()).isEqualTo(defaultConfig.maxConnectionPoolSize());
-			assertDuration(poolProperties.getIdleTimeBeforeConnectionTest(),
+			PoolSettings poolSettings = driverProperties.getPool();
+			assertThat(poolSettings.isLogLeakedSessions()).isEqualTo(defaultConfig.logLeakedSessions());
+			assertThat(poolSettings.getMaxConnectionPoolSize()).isEqualTo(defaultConfig.maxConnectionPoolSize());
+			assertDuration(poolSettings.getIdleTimeBeforeConnectionTest(),
 				defaultConfig.idleTimeBeforeConnectionTest());
-			assertDuration(poolProperties.getMaxConnectionLifetime(), defaultConfig.maxConnectionLifetimeMillis());
-			assertDuration(poolProperties.getConnectionAcquisitionTimeout(),
+			assertDuration(poolSettings.getMaxConnectionLifetime(), defaultConfig.maxConnectionLifetimeMillis());
+			assertDuration(poolSettings.getConnectionAcquisitionTimeout(),
 				defaultConfig.connectionAcquisitionTimeoutMillis());
-			assertThat(poolProperties.isMetricsEnabled()).isFalse();
+			assertThat(poolSettings.isMetricsEnabled()).isFalse();
 		}
 
 		@Test
@@ -234,7 +231,7 @@ class Neo4jDriverPropertiesTest {
 
 	@Nested
 	@DisplayName("Config properties")
-	class ConfigPropertiesTest {
+	class DriverSettingsTest {
 		@Test
 		@DisplayName("…should default to drivers values")
 		void shouldDefaultToDriversValues() {
@@ -243,15 +240,15 @@ class Neo4jDriverPropertiesTest {
 
 			Neo4jDriverProperties driverProperties = load();
 
-			ConfigProperties configProperties = driverProperties.getConfig();
-			assertThat(configProperties.isEncrypted()).isEqualTo(defaultConfig.encrypted());
-			assertThat(configProperties.getTrustSettings().getStrategy().name())
+			DriverSettings driverSettings = driverProperties.getConfig();
+			assertThat(driverSettings.isEncrypted()).isEqualTo(defaultConfig.encrypted());
+			assertThat(driverSettings.getTrustSettings().getStrategy().name())
 				.isEqualTo(defaultConfig.trustStrategy().strategy().name());
-			assertThat(configProperties.getLoadBalancingStrategy().name())
+			assertThat(driverSettings.getLoadBalancingStrategy().name())
 				.isEqualTo(defaultConfig.loadBalancingStrategy().name());
-			assertDuration(configProperties.getConnectionTimeout(), defaultConfig.connectionTimeoutMillis());
-			assertDuration(configProperties.getMaxTransactionRetryTime(), RetrySettings.DEFAULT.maxRetryTimeMs());
-			assertThat(configProperties.getServerAddressResolverClass()).isNull();
+			assertDuration(driverSettings.getConnectionTimeout(), defaultConfig.connectionTimeoutMillis());
+			assertDuration(driverSettings.getMaxTransactionRetryTime(), RetrySettings.DEFAULT.maxRetryTimeMs());
+			assertThat(driverSettings.getServerAddressResolverClass()).isNull();
 		}
 
 		@Test
@@ -300,8 +297,8 @@ class Neo4jDriverPropertiesTest {
 		@Disabled("The internal driver has no means of retrieving that value back again")
 		void maxTransactionRetryTimeSettingsShouldWork() {
 
-			ConfigProperties configProperties = new ConfigProperties();
-			configProperties.setMaxTransactionRetryTime(Duration.ofSeconds(23));
+			DriverSettings driverSettings = new DriverSettings();
+			driverSettings.setMaxTransactionRetryTime(Duration.ofSeconds(23));
 		}
 
 		@Test
@@ -315,35 +312,12 @@ class Neo4jDriverPropertiesTest {
 		}
 
 		@Test
-		void shouldDefaultToSlf4j() {
+		void shouldUseSpringJclLogging() {
 
 			Neo4jDriverProperties driverProperties = new Neo4jDriverProperties();
 			assertThat(driverProperties.toInternalRepresentation().logging())
 				.isNotNull()
-				.isInstanceOf(Slf4jLogging.class);
-
-		}
-
-		@Test
-		void loggingClassSettingsShouldWork() {
-
-			Neo4jDriverProperties configProperties = new Neo4jDriverProperties();
-			configProperties.getConfig().setLoggingClass(JULogging.class);
-			assertThat(configProperties.toInternalRepresentation().logging())
-				.isNotNull()
-				.isInstanceOf(JULogging.class);
-
-		}
-
-		@Test
-		void loggingClassSettingsShouldWorkWithCustomClass() {
-
-			Neo4jDriverProperties configProperties = new Neo4jDriverProperties();
-			configProperties.getConfig().setLoggingClass(TestLoggingClass.class);
-			assertThat(configProperties.toInternalRepresentation().logging())
-				.isNotNull()
-				.isInstanceOf(TestLoggingClass.class);
-
+				.isInstanceOf(Neo4jSpringJclLogging.class);
 		}
 	}
 
@@ -429,7 +403,7 @@ class Neo4jDriverPropertiesTest {
 	}
 
 	private static void assertDuration(Duration duration, long expectedValueInMillis) {
-		if (expectedValueInMillis == PoolSettings.NOT_CONFIGURED) {
+		if (expectedValueInMillis == org.neo4j.driver.internal.async.pool.PoolSettings.NOT_CONFIGURED) {
 			assertThat(duration).isNull();
 		} else {
 			assertThat(duration.toMillis()).isEqualTo(expectedValueInMillis);
