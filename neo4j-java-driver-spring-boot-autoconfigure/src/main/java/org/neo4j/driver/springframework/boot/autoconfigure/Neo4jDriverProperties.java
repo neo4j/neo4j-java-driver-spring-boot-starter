@@ -18,30 +18,27 @@
  */
 package org.neo4j.driver.springframework.boot.autoconfigure;
 
-import static org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverProperties.DriverSettings.LoadBalancingStrategy.*;
-import static org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverProperties.*;
-import static org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverProperties.TrustSettings.Strategy.*;
-
 import java.io.File;
 import java.net.URI;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
 
 import org.neo4j.driver.AuthToken;
 import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.Config;
 import org.neo4j.driver.net.ServerAddressResolver;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.source.InvalidConfigurationPropertyValueException;
+import org.springframework.util.StringUtils;
 
 /**
  * Used to configure an instance of the {@link org.neo4j.driver.Driver Neo4j-Java-Driver}.
  *
  * @author Michael J. Simons
  */
-@ConfigurationProperties(prefix = PREFIX)
+@ConfigurationProperties(prefix = Neo4jDriverProperties.PREFIX)
 public class Neo4jDriverProperties {
 
 	static final String PREFIX = "org.neo4j.driver";
@@ -67,7 +64,7 @@ public class Neo4jDriverProperties {
 	private DriverSettings config = new DriverSettings();
 
 	public URI getUri() {
-		return uri;
+		return this.uri;
 	}
 
 	public void setUri(URI uri) {
@@ -75,7 +72,7 @@ public class Neo4jDriverProperties {
 	}
 
 	public Authentication getAuthentication() {
-		return authentication;
+		return this.authentication;
 	}
 
 	public void setAuthentication(
@@ -84,7 +81,7 @@ public class Neo4jDriverProperties {
 	}
 
 	public PoolSettings getPool() {
-		return pool;
+		return this.pool;
 	}
 
 	public void setPool(PoolSettings pool) {
@@ -92,7 +89,7 @@ public class Neo4jDriverProperties {
 	}
 
 	public DriverSettings getConfig() {
-		return config;
+		return this.config;
 	}
 
 	public void setConfig(DriverSettings config) {
@@ -131,7 +128,7 @@ public class Neo4jDriverProperties {
 		private String kerberosTicket;
 
 		public String getUsername() {
-			return username;
+			return this.username;
 		}
 
 		public void setUsername(String username) {
@@ -139,7 +136,7 @@ public class Neo4jDriverProperties {
 		}
 
 		public String getPassword() {
-			return password;
+			return this.password;
 		}
 
 		public void setPassword(String password) {
@@ -147,7 +144,7 @@ public class Neo4jDriverProperties {
 		}
 
 		public String getRealm() {
-			return realm;
+			return this.realm;
 		}
 
 		public void setRealm(String realm) {
@@ -155,7 +152,7 @@ public class Neo4jDriverProperties {
 		}
 
 		public String getKerberosTicket() {
-			return kerberosTicket;
+			return this.kerberosTicket;
 		}
 
 		public void setKerberosTicket(String kerberosTicket) {
@@ -164,11 +161,9 @@ public class Neo4jDriverProperties {
 
 		AuthToken asAuthToken() {
 
-			Predicate<String> isNotEmpty = s -> !(s == null || s.isEmpty());
-
-			boolean hasUsername = isNotEmpty.test(this.username);
-			boolean hasPassword = isNotEmpty.test(this.password);
-			boolean hasKerberosTicket = isNotEmpty.test(this.kerberosTicket);
+			boolean hasUsername = StringUtils.hasText(this.username);
+			boolean hasPassword = StringUtils.hasText(this.password);
+			boolean hasKerberosTicket = StringUtils.hasText(this.kerberosTicket);
 
 			if (hasUsername && hasKerberosTicket) {
 				throw new InvalidConfigurationPropertyValueException(PREFIX + ".authentication",
@@ -177,11 +172,11 @@ public class Neo4jDriverProperties {
 			}
 
 			if (hasUsername && hasPassword) {
-				return AuthTokens.basic(username, password, realm);
+				return AuthTokens.basic(this.username, this.password, this.realm);
 			}
 
 			if (hasKerberosTicket) {
-				return AuthTokens.kerberos(kerberosTicket);
+				return AuthTokens.kerberos(this.kerberosTicket);
 			}
 
 			return AuthTokens.none();
@@ -222,7 +217,7 @@ public class Neo4jDriverProperties {
 			.ofMillis(org.neo4j.driver.internal.async.pool.PoolSettings.DEFAULT_CONNECTION_ACQUISITION_TIMEOUT);
 
 		public boolean isLogLeakedSessions() {
-			return logLeakedSessions;
+			return this.logLeakedSessions;
 		}
 
 		public void setLogLeakedSessions(boolean logLeakedSessions) {
@@ -230,7 +225,7 @@ public class Neo4jDriverProperties {
 		}
 
 		public int getMaxConnectionPoolSize() {
-			return maxConnectionPoolSize;
+			return this.maxConnectionPoolSize;
 		}
 
 		public void setMaxConnectionPoolSize(int maxConnectionPoolSize) {
@@ -238,7 +233,7 @@ public class Neo4jDriverProperties {
 		}
 
 		public Duration getIdleTimeBeforeConnectionTest() {
-			return idleTimeBeforeConnectionTest;
+			return this.idleTimeBeforeConnectionTest;
 		}
 
 		public void setIdleTimeBeforeConnectionTest(Duration idleTimeBeforeConnectionTest) {
@@ -246,7 +241,7 @@ public class Neo4jDriverProperties {
 		}
 
 		public Duration getMaxConnectionLifetime() {
-			return maxConnectionLifetime;
+			return this.maxConnectionLifetime;
 		}
 
 		public void setMaxConnectionLifetime(Duration maxConnectionLifetime) {
@@ -254,7 +249,7 @@ public class Neo4jDriverProperties {
 		}
 
 		public Duration getConnectionAcquisitionTimeout() {
-			return connectionAcquisitionTimeout;
+			return this.connectionAcquisitionTimeout;
 		}
 
 		public void setConnectionAcquisitionTimeout(Duration connectionAcquisitionTimeout) {
@@ -262,7 +257,7 @@ public class Neo4jDriverProperties {
 		}
 
 		public boolean isMetricsEnabled() {
-			return metricsEnabled;
+			return this.metricsEnabled;
 		}
 
 		public void setMetricsEnabled(boolean metricsEnabled) {
@@ -271,22 +266,17 @@ public class Neo4jDriverProperties {
 
 		private void applyTo(Config.ConfigBuilder builder) {
 
-			if (logLeakedSessions) {
+			if (this.logLeakedSessions) {
 				builder.withLeakedSessionsLogging();
 			}
-			builder.withMaxConnectionPoolSize(maxConnectionPoolSize);
-			if (idleTimeBeforeConnectionTest != null) {
-				builder
-					.withConnectionLivenessCheckTimeout(idleTimeBeforeConnectionTest.toMillis(), TimeUnit.MILLISECONDS);
+			builder.withMaxConnectionPoolSize(this.maxConnectionPoolSize);
+			if (this.idleTimeBeforeConnectionTest != null) {
+				builder.withConnectionLivenessCheckTimeout(this.idleTimeBeforeConnectionTest.toMillis(),
+					TimeUnit.MILLISECONDS);
 			}
-			builder.withMaxConnectionLifetime(maxConnectionLifetime.toMillis(), TimeUnit.MILLISECONDS);
-			builder.withConnectionAcquisitionTimeout(connectionAcquisitionTimeout.toMillis(), TimeUnit.MILLISECONDS);
-
-			if (metricsEnabled) {
-				builder.withDriverMetrics();
-			} else {
-				builder.withoutDriverMetrics();
-			}
+			builder.withMaxConnectionLifetime(this.maxConnectionLifetime.toMillis(), TimeUnit.MILLISECONDS);
+			builder
+				.withConnectionAcquisitionTimeout(this.connectionAcquisitionTimeout.toMillis(), TimeUnit.MILLISECONDS);
 		}
 	}
 
@@ -314,7 +304,7 @@ public class Neo4jDriverProperties {
 		/**
 		 * Provide an alternative load balancing strategy for the routing driver to use.
 		 */
-		private LoadBalancingStrategy loadBalancingStrategy = LEAST_CONNECTED;
+		private LoadBalancingStrategy loadBalancingStrategy = LoadBalancingStrategy.LEAST_CONNECTED;
 
 		/**
 		 * Specify socket connection timeout.
@@ -333,7 +323,7 @@ public class Neo4jDriverProperties {
 		private Class<? extends ServerAddressResolver> serverAddressResolverClass;
 
 		public boolean isEncrypted() {
-			return encrypted;
+			return this.encrypted;
 		}
 
 		public void setEncrypted(boolean encrypted) {
@@ -341,7 +331,7 @@ public class Neo4jDriverProperties {
 		}
 
 		public TrustSettings getTrustSettings() {
-			return trustSettings;
+			return this.trustSettings;
 		}
 
 		public void setTrustSettings(TrustSettings trustSettings) {
@@ -349,7 +339,7 @@ public class Neo4jDriverProperties {
 		}
 
 		public LoadBalancingStrategy getLoadBalancingStrategy() {
-			return loadBalancingStrategy;
+			return this.loadBalancingStrategy;
 		}
 
 		public void setLoadBalancingStrategy(LoadBalancingStrategy loadBalancingStrategy) {
@@ -357,7 +347,7 @@ public class Neo4jDriverProperties {
 		}
 
 		public Duration getConnectionTimeout() {
-			return connectionTimeout;
+			return this.connectionTimeout;
 		}
 
 		public void setConnectionTimeout(Duration connectionTimeout) {
@@ -365,7 +355,7 @@ public class Neo4jDriverProperties {
 		}
 
 		public Duration getMaxTransactionRetryTime() {
-			return maxTransactionRetryTime;
+			return this.maxTransactionRetryTime;
 		}
 
 		public void setMaxTransactionRetryTime(Duration maxTransactionRetryTime) {
@@ -373,7 +363,7 @@ public class Neo4jDriverProperties {
 		}
 
 		public Class<? extends ServerAddressResolver> getServerAddressResolverClass() {
-			return serverAddressResolverClass;
+			return this.serverAddressResolverClass;
 		}
 
 		public void setServerAddressResolverClass(
@@ -383,18 +373,18 @@ public class Neo4jDriverProperties {
 
 		private void applyTo(Config.ConfigBuilder builder) {
 
-			if (encrypted) {
+			if (this.encrypted) {
 				builder.withEncryption();
 			} else {
 				builder.withoutEncryption();
 			}
-			builder.withTrustStrategy(trustSettings.toInternalRepresentation());
-			builder.withLoadBalancingStrategy(loadBalancingStrategy.toInternalRepresentation());
-			builder.withConnectionTimeout(connectionTimeout.toMillis(), TimeUnit.MILLISECONDS);
-			builder.withMaxTransactionRetryTime(maxTransactionRetryTime.toMillis(), TimeUnit.MILLISECONDS);
+			builder.withTrustStrategy(this.trustSettings.toInternalRepresentation());
+			builder.withLoadBalancingStrategy(this.loadBalancingStrategy.toInternalRepresentation());
+			builder.withConnectionTimeout(this.connectionTimeout.toMillis(), TimeUnit.MILLISECONDS);
+			builder.withMaxTransactionRetryTime(this.maxTransactionRetryTime.toMillis(), TimeUnit.MILLISECONDS);
 
-			if (serverAddressResolverClass != null) {
-				builder.withResolver(BeanUtils.instantiateClass(serverAddressResolverClass));
+			if (this.serverAddressResolverClass != null) {
+				builder.withResolver(BeanUtils.instantiateClass(this.serverAddressResolverClass));
 			}
 		}
 	}
@@ -413,7 +403,7 @@ public class Neo4jDriverProperties {
 		/**
 		 * Configures the strategy to use use.
 		 */
-		private TrustSettings.Strategy strategy = TRUST_ALL_CERTIFICATES;
+		private TrustSettings.Strategy strategy = Strategy.TRUST_ALL_CERTIFICATES;
 
 		/**
 		 * The file of the certificate to use.
@@ -426,7 +416,7 @@ public class Neo4jDriverProperties {
 		private boolean hostnameVerificationEnabled = false;
 
 		public TrustSettings.Strategy getStrategy() {
-			return strategy;
+			return this.strategy;
 		}
 
 		public void setStrategy(TrustSettings.Strategy strategy) {
@@ -434,7 +424,7 @@ public class Neo4jDriverProperties {
 		}
 
 		public File getCertFile() {
-			return certFile;
+			return this.certFile;
 		}
 
 		public void setCertFile(File certFile) {
@@ -442,7 +432,7 @@ public class Neo4jDriverProperties {
 		}
 
 		public boolean isHostnameVerificationEnabled() {
-			return hostnameVerificationEnabled;
+			return this.hostnameVerificationEnabled;
 		}
 
 		public void setHostnameVerificationEnabled(boolean hostnameVerificationEnabled) {
@@ -453,7 +443,7 @@ public class Neo4jDriverProperties {
 			String propertyName = Neo4jDriverProperties.PREFIX + ".config.trust-settings";
 
 			Config.TrustStrategy internalRepresentation;
-			switch (strategy) {
+			switch (this.strategy) {
 				case TRUST_ALL_CERTIFICATES:
 					internalRepresentation = Config.TrustStrategy.trustAllCertificates();
 					break;
@@ -462,17 +452,17 @@ public class Neo4jDriverProperties {
 					break;
 				case TRUST_CUSTOM_CA_SIGNED_CERTIFICATES:
 					if (this.certFile == null || !this.certFile.isFile()) {
-						throw new InvalidConfigurationPropertyValueException(propertyName, strategy.name(),
+						throw new InvalidConfigurationPropertyValueException(propertyName, this.strategy.name(),
 							"Configured trust strategy requires a certificate file.");
 					}
-					internalRepresentation = Config.TrustStrategy.trustCustomCertificateSignedBy(certFile);
+					internalRepresentation = Config.TrustStrategy.trustCustomCertificateSignedBy(this.certFile);
 					break;
 				default:
-					throw new InvalidConfigurationPropertyValueException(propertyName, strategy.name(),
+					throw new InvalidConfigurationPropertyValueException(propertyName, this.strategy.name(),
 						"Unknown strategy.");
 			}
 
-			if (hostnameVerificationEnabled) {
+			if (this.hostnameVerificationEnabled) {
 				internalRepresentation.withHostnameVerification();
 			} else {
 				internalRepresentation.withoutHostnameVerification();

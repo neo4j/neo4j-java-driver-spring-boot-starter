@@ -18,14 +18,15 @@
  */
 package org.neo4j.driver.springframework.boot.autoconfigure;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverProperties.*;
-
 import org.junit.jupiter.api.Test;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.StatementResult;
 import org.neo4j.driver.Transaction;
+import org.testcontainers.containers.Neo4jContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,9 +35,8 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.testcontainers.containers.Neo4jContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Michael J. Simons
@@ -51,7 +51,8 @@ class Neo4jDriverAutoConfigurationIT {
 
 	private final Driver driver;
 
-	@Autowired Neo4jDriverAutoConfigurationIT(Driver driver) {
+	@Autowired
+	Neo4jDriverAutoConfigurationIT(Driver driver) {
 		this.driver = driver;
 	}
 
@@ -74,9 +75,9 @@ class Neo4jDriverAutoConfigurationIT {
 		@Override
 		public void initialize(ConfigurableApplicationContext applicationContext) {
 			TestPropertyValues.of(
-				PREFIX + ".uri = " + neo4jServer.getBoltUrl(),
-				PREFIX + ".authentication.username = neo4j",
-				PREFIX + ".authentication.password = " + neo4jServer.getAdminPassword()
+				Neo4jDriverProperties.PREFIX + ".uri = " + neo4jServer.getBoltUrl(),
+				Neo4jDriverProperties.PREFIX + ".authentication.username = neo4j",
+				Neo4jDriverProperties.PREFIX + ".authentication.password = " + neo4jServer.getAdminPassword()
 			).applyTo(applicationContext.getEnvironment());
 		}
 	}

@@ -56,46 +56,47 @@ public final class Neo4jSpringJclLogging implements Logging {
 
 		@Override
 		public void error(String message, Throwable cause) {
-			delegate.error(message, cause);
+			this.delegate.error(message, cause);
 		}
 
 		@Override
 		public void info(String format, Object... params) {
-			delegate.info(String.format(format, params));
+			this.delegate.info(String.format(format, params));
 		}
 
 		@Override
 		public void warn(String format, Object... params) {
-			delegate.warn(String.format(format, params));
+			this.delegate.warn(String.format(format, params));
 		}
 
 		@Override
 		public void warn(String message, Throwable cause) {
-			delegate.warn(message, cause);
+			this.delegate.warn(message, cause);
 		}
 
 		@Override
 		public void debug(String format, Object... params) {
 			if (isDebugEnabled()) {
-				delegate.debug(String.format(format, params));
+				this.delegate.debug(String.format(format, params));
 			}
 		}
 
 		@Override
 		public void trace(String format, Object... params) {
 			if (isTraceEnabled()) {
-				delegate.trace(String.format(format, params));
+				this.delegate.trace(String.format(format, params));
 			}
 		}
 
 		@Override
 		public boolean isTraceEnabled() {
-			return delegate.isTraceEnabled();
+			return this.delegate.isTraceEnabled();
 		}
 
 		@Override
 		public boolean isDebugEnabled() {
-			return delegate.isDebugEnabled();
+			return this.delegate.isDebugEnabled();
 		}
 	}
 }
+

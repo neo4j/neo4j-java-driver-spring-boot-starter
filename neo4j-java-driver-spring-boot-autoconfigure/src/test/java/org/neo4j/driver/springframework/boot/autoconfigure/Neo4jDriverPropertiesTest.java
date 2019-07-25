@@ -18,11 +18,6 @@
  */
 package org.neo4j.driver.springframework.boot.autoconfigure;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverProperties.*;
-import static org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverProperties.DriverSettings.LoadBalancingStrategy.*;
-import static org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverProperties.TrustSettings.Strategy.*;
-
 import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
@@ -32,14 +27,23 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.neo4j.driver.internal.retry.RetrySettings;
 import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.Config;
-import org.neo4j.driver.internal.retry.RetrySettings;
+
+import org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverProperties.Authentication;
+import org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverProperties.DriverSettings;
+import org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverProperties.PoolSettings;
+import org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverProperties.TrustSettings;
+import org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverProperties.TrustSettings.Strategy;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.context.properties.source.InvalidConfigurationPropertyValueException;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Configuration;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Michael J. Simons
@@ -47,6 +51,31 @@ import org.springframework.context.annotation.Configuration;
 class Neo4jDriverPropertiesTest {
 
 	private AnnotationConfigApplicationContext context;
+
+	private Neo4jDriverProperties load(String... properties) {
+
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		TestPropertyValues.of(properties).applyTo(ctx);
+		ctx.register(TestConfiguration.class);
+		ctx.refresh();
+		this.context = ctx;
+		return this.context.getBean(Neo4jDriverProperties.class);
+	}
+
+	@AfterEach
+	void closeContext() {
+		if (this.context != null) {
+			this.context.close();
+		}
+	}
+
+	private static void assertDuration(Duration duration, long expectedValueInMillis) {
+		if (expectedValueInMillis == org.neo4j.driver.internal.async.pool.PoolSettings.NOT_CONFIGURED) {
+			assertThat(duration).isNull();
+		} else {
+			assertThat(duration.toMillis()).isEqualTo(expectedValueInMillis);
+		}
+	}
 
 	@Nested
 	@DisplayName("Configuration of authentication")
@@ -113,7 +142,7 @@ class Neo4jDriverPropertiesTest {
 			assertThatExceptionOfType(InvalidConfigurationPropertyValueException.class)
 				.isThrownBy(() -> authentication.asAuthToken())
 				.withMessage(
-					"Property " + PREFIX + ".authentication with value 'username=Farin,kerberos-ticket=AABBCCDDEE' is invalid: Cannot specify both username and kerberos ticket.");
+					"Property " + Neo4jDriverProperties.PREFIX + ".authentication with value 'username=Farin,kerberos-ticket=AABBCCDDEE' is invalid: Cannot specify both username and kerberos ticket.");
 		}
 	}
 
@@ -235,7 +264,7 @@ class Neo4jDriverPropertiesTest {
 
 			Neo4jDriverProperties driverProperties = new Neo4jDriverProperties();
 			TrustSettings trustSettings = new TrustSettings();
-			trustSettings.setStrategy(TRUST_SYSTEM_CA_SIGNED_CERTIFICATES);
+			trustSettings.setStrategy(Strategy.TRUST_SYSTEM_CA_SIGNED_CERTIFICATES);
 			driverProperties.getConfig().setTrustSettings(trustSettings);
 			assertThat(driverProperties.asDriverConfig().trustStrategy().strategy()).isEqualTo(
 				Config.TrustStrategy.Strategy.TRUST_SYSTEM_CA_SIGNED_CERTIFICATES);
@@ -245,7 +274,7 @@ class Neo4jDriverPropertiesTest {
 		void loadBalancingStrategySettingsShouldWork() {
 
 			Neo4jDriverProperties configProperties = new Neo4jDriverProperties();
-			configProperties.getConfig().setLoadBalancingStrategy(ROUND_ROBIN);
+			configProperties.getConfig().setLoadBalancingStrategy(DriverSettings.LoadBalancingStrategy.ROUND_ROBIN);
 			assertThat(configProperties.asDriverConfig().loadBalancingStrategy()).isEqualTo(
 				Config.LoadBalancingStrategy.ROUND_ROBIN);
 		}
@@ -294,7 +323,7 @@ class Neo4jDriverPropertiesTest {
 		void trustAllCertificatesShouldWork() {
 
 			TrustSettings settings = new TrustSettings();
-			settings.setStrategy(TRUST_ALL_CERTIFICATES);
+			settings.setStrategy(Strategy.TRUST_ALL_CERTIFICATES);
 
 			assertThat(settings.toInternalRepresentation().strategy()).isEqualTo(
 				Config.TrustStrategy.Strategy.TRUST_ALL_CERTIFICATES);
@@ -304,7 +333,7 @@ class Neo4jDriverPropertiesTest {
 		void shouldEnableHostnameVerification() {
 
 			TrustSettings settings = new TrustSettings();
-			settings.setStrategy(TRUST_ALL_CERTIFICATES);
+			settings.setStrategy(Strategy.TRUST_ALL_CERTIFICATES);
 			settings.setHostnameVerificationEnabled(true);
 
 			assertThat(settings.toInternalRepresentation().isHostnameVerificationEnabled()).isTrue();
@@ -314,7 +343,7 @@ class Neo4jDriverPropertiesTest {
 		void trustSystemCertificatesShouldWork() {
 
 			TrustSettings settings = new TrustSettings();
-			settings.setStrategy(TRUST_SYSTEM_CA_SIGNED_CERTIFICATES);
+			settings.setStrategy(Strategy.TRUST_SYSTEM_CA_SIGNED_CERTIFICATES);
 
 			assertThat(settings.toInternalRepresentation().strategy()).isEqualTo(
 				Config.TrustStrategy.Strategy.TRUST_SYSTEM_CA_SIGNED_CERTIFICATES);
@@ -327,7 +356,7 @@ class Neo4jDriverPropertiesTest {
 			File certFile = File.createTempFile("sdnrx", ".cert");
 
 			TrustSettings settings = new TrustSettings();
-			settings.setStrategy(TRUST_CUSTOM_CA_SIGNED_CERTIFICATES);
+			settings.setStrategy(Strategy.TRUST_CUSTOM_CA_SIGNED_CERTIFICATES);
 			settings.setCertFile(certFile);
 
 			Config.TrustStrategy trustStrategy = settings.toInternalRepresentation();
@@ -341,37 +370,12 @@ class Neo4jDriverPropertiesTest {
 		void trustCustomCertificatesShouldWork2() throws IOException {
 
 			TrustSettings settings = new TrustSettings();
-			settings.setStrategy(TRUST_CUSTOM_CA_SIGNED_CERTIFICATES);
+			settings.setStrategy(Strategy.TRUST_CUSTOM_CA_SIGNED_CERTIFICATES);
 
 			assertThatExceptionOfType(InvalidConfigurationPropertyValueException.class)
 				.isThrownBy(() -> settings.toInternalRepresentation())
 				.withMessage(
-					"Property " + PREFIX + ".config.trust-settings with value 'TRUST_CUSTOM_CA_SIGNED_CERTIFICATES' is invalid: Configured trust strategy requires a certificate file.");
-		}
-	}
-
-	private Neo4jDriverProperties load(String... properties) {
-
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		TestPropertyValues.of(properties).applyTo(ctx);
-		ctx.register(TestConfiguration.class);
-		ctx.refresh();
-		this.context = ctx;
-		return this.context.getBean(Neo4jDriverProperties.class);
-	}
-
-	@AfterEach
-	void closeContext() {
-		if (this.context != null) {
-			this.context.close();
-		}
-	}
-
-	private static void assertDuration(Duration duration, long expectedValueInMillis) {
-		if (expectedValueInMillis == org.neo4j.driver.internal.async.pool.PoolSettings.NOT_CONFIGURED) {
-			assertThat(duration).isNull();
-		} else {
-			assertThat(duration.toMillis()).isEqualTo(expectedValueInMillis);
+					"Property " + Neo4jDriverProperties.PREFIX + ".config.trust-settings with value 'TRUST_CUSTOM_CA_SIGNED_CERTIFICATES' is invalid: Configured trust strategy requires a certificate file.");
 		}
 	}
 
