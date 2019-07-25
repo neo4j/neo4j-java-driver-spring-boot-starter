@@ -24,8 +24,6 @@ import static org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverPro
 import org.junit.jupiter.api.Test;
 import org.neo4j.driver.Driver;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
-import org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverFactory.DefaultDriverFactory;
-import org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverFactory.RoutingDriverFactory;
 import org.springframework.boot.test.context.FilteredClassLoader;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
@@ -42,7 +40,7 @@ class Neo4jDriverAutoConfigurationTest {
 
 		contextRunner
 			.withClassLoader(new FilteredClassLoader(Driver.class))
-			.run((ctx) -> assertThat(ctx).doesNotHaveBean(DefaultDriverFactory.class));
+			.run((ctx) -> assertThat(ctx).doesNotHaveBean(Driver.class));
 	}
 
 	@Test
@@ -50,7 +48,7 @@ class Neo4jDriverAutoConfigurationTest {
 
 		contextRunner
 			.run(ctx -> assertThat(ctx)
-				.hasSingleBean(DefaultDriverFactory.class)
+				.hasSingleBean(Driver.class)
 			);
 	}
 
@@ -60,29 +58,7 @@ class Neo4jDriverAutoConfigurationTest {
 		contextRunner
 			.withPropertyValues(PREFIX + ".uri=bolt://localhost:4711")
 			.run(ctx -> assertThat(ctx)
-				.hasSingleBean(DefaultDriverFactory.class)
-			);
-	}
-
-	@Test
-	void shouldCreateDefaultDriverFactoryForSingleElementUris() {
-
-		contextRunner
-			.withPropertyValues(PREFIX + ".uris=bolt://localhost:4711")
-			.run(ctx -> assertThat(ctx)
-				.hasSingleBean(DefaultDriverFactory.class)
-			);
-	}
-
-	@Test
-	void shouldCreateRoutingDriverFactoryForMultipleUris() {
-
-		contextRunner
-			.withPropertyValues(
-				PREFIX + ".uris=bolt+routing://instance1:7687, bolt+routing://instance2:7687"
-			)
-			.run(ctx -> assertThat(ctx)
-				.hasSingleBean(RoutingDriverFactory.class)
+				.hasSingleBean(Driver.class)
 			);
 	}
 }

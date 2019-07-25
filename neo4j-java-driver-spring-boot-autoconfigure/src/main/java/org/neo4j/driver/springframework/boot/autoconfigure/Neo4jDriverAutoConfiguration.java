@@ -18,13 +18,10 @@
  */
 package org.neo4j.driver.springframework.boot.autoconfigure;
 
-import java.net.URI;
-import java.util.List;
-
 import org.neo4j.driver.AuthToken;
 import org.neo4j.driver.Config;
 import org.neo4j.driver.Driver;
-import org.springframework.beans.factory.FactoryBean;
+import org.neo4j.driver.GraphDatabase;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -41,30 +38,16 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @ConditionalOnClass(Driver.class)
-@ConditionalOnMissingBean(Driver.class)
 @EnableConfigurationProperties(Neo4jDriverProperties.class)
 public class Neo4jDriverAutoConfiguration {
 
-	private static final URI DEFAULT_SERVER_URI = URI.create("bolt://localhost:7687");
+	@Bean
+	@ConditionalOnMissingBean(Driver.class)
+	public Driver neo4jDriver(final Neo4jDriverProperties driverProperties) {
 
-	@Bean(name = "driver")
-	public FactoryBean<Driver> driverFactory(final Neo4jDriverProperties driverProperties) {
+		final AuthToken authToken = driverProperties.getAuthentication().asAuthToken();
+		final Config config = driverProperties.asDriverConfig();
 
-		final AuthToken authToken = driverProperties.getAuthentication().toInternalRepresentation();
-		final Config config = driverProperties.toInternalRepresentation();
-
-		final List<URI> uris = driverProperties.computeFinalListOfUris();
-
-		Neo4jDriverFactory driverFactory;
-		if (uris.isEmpty() || uris.size() == 1) {
-
-			URI uriOfServer = uris.stream().findFirst().orElse(DEFAULT_SERVER_URI);
-			driverFactory = new Neo4jDriverFactory.DefaultDriverFactory(uriOfServer, authToken, config);
-		} else {
-
-			driverFactory = new Neo4jDriverFactory.RoutingDriverFactory(uris, authToken, config);
-		}
-
-		return driverFactory;
+		return GraphDatabase.driver(driverProperties.getUri(), authToken, config);
 	}
 }

@@ -49,41 +49,6 @@ class Neo4jDriverPropertiesTest {
 	private AnnotationConfigApplicationContext context;
 
 	@Nested
-	@DisplayName("Configuration of uris")
-	class URIsTest {
-		@Test
-		@DisplayName("…should allow empty list")
-		void shouldAllowEmptyListOfURIs() {
-
-			Neo4jDriverProperties driverProperties = load();
-			assertThat(driverProperties.computeFinalListOfUris()).isEmpty();
-		}
-
-		@Test
-		@DisplayName("…should allow more than one URI")
-		void shouldAllowMoreThanOneURI() {
-
-			Neo4jDriverProperties driverProperties = load(PREFIX + ".uris=bolt://localhost:7687,bolt://localhost:7688");
-			assertThat(driverProperties.computeFinalListOfUris()).hasSize(2);
-		}
-
-		@Test
-		@DisplayName("…not allow both single and multiple uris")
-		void shouldNotAllowBothSingleAndMultipleUris() {
-
-			Neo4jDriverProperties driverProperties = load(
-				PREFIX + ".uri=bolt://localhost:7687",
-				PREFIX + ".uris=bolt://localhost:7687,bolt://localhost:7688"
-			);
-
-			assertThatExceptionOfType(InvalidConfigurationPropertyValueException.class)
-				.isThrownBy(() -> driverProperties.computeFinalListOfUris())
-				.withMessage(
-					"Property " + PREFIX + ".uris with value 'bolt://localhost:7687,bolt://localhost:7688' is invalid: Cannot specify both single uri and list of uris.");
-		}
-	}
-
-	@Nested
 	@DisplayName("Configuration of authentication")
 	class AuthenticationTest {
 
@@ -100,7 +65,7 @@ class Neo4jDriverPropertiesTest {
 		void noAuthenticationShouldWork() {
 
 			Authentication authentication = new Authentication();
-			assertThat(authentication.toInternalRepresentation()).isEqualTo(AuthTokens.none());
+			assertThat(authentication.asAuthToken()).isEqualTo(AuthTokens.none());
 		}
 
 		@Test
@@ -111,7 +76,7 @@ class Neo4jDriverPropertiesTest {
 			authentication.setUsername("Farin");
 			authentication.setPassword("Urlaub");
 
-			assertThat(authentication.toInternalRepresentation()).isEqualTo(AuthTokens.basic("Farin", "Urlaub"));
+			assertThat(authentication.asAuthToken()).isEqualTo(AuthTokens.basic("Farin", "Urlaub"));
 		}
 
 		@Test
@@ -123,7 +88,7 @@ class Neo4jDriverPropertiesTest {
 			authentication.setPassword("Urlaub");
 			authentication.setRealm("Die Ärzte");
 
-			assertThat(authentication.toInternalRepresentation())
+			assertThat(authentication.asAuthToken())
 				.isEqualTo(AuthTokens.basic("Farin", "Urlaub", "Die Ärzte"));
 		}
 
@@ -134,7 +99,7 @@ class Neo4jDriverPropertiesTest {
 			Authentication authentication = new Authentication();
 			authentication.setKerberosTicket("AABBCCDDEE");
 
-			assertThat(authentication.toInternalRepresentation()).isEqualTo(AuthTokens.kerberos("AABBCCDDEE"));
+			assertThat(authentication.asAuthToken()).isEqualTo(AuthTokens.kerberos("AABBCCDDEE"));
 		}
 
 		@Test
@@ -146,7 +111,7 @@ class Neo4jDriverPropertiesTest {
 			authentication.setKerberosTicket("AABBCCDDEE");
 
 			assertThatExceptionOfType(InvalidConfigurationPropertyValueException.class)
-				.isThrownBy(() -> authentication.toInternalRepresentation())
+				.isThrownBy(() -> authentication.asAuthToken())
 				.withMessage(
 					"Property " + PREFIX + ".authentication with value 'username=Farin,kerberos-ticket=AABBCCDDEE' is invalid: Cannot specify both username and kerberos ticket.");
 		}
@@ -181,11 +146,11 @@ class Neo4jDriverPropertiesTest {
 
 			driverProperties = new Neo4jDriverProperties();
 			driverProperties.getPool().setLogLeakedSessions(true);
-			assertThat(driverProperties.toInternalRepresentation().logLeakedSessions()).isTrue();
+			assertThat(driverProperties.asDriverConfig().logLeakedSessions()).isTrue();
 
 			driverProperties = new Neo4jDriverProperties();
 			driverProperties.getPool().setLogLeakedSessions(false);
-			assertThat(driverProperties.toInternalRepresentation().logLeakedSessions()).isFalse();
+			assertThat(driverProperties.asDriverConfig().logLeakedSessions()).isFalse();
 		}
 
 		@Test
@@ -193,7 +158,7 @@ class Neo4jDriverPropertiesTest {
 
 			Neo4jDriverProperties driverProperties = new Neo4jDriverProperties();
 			driverProperties.getPool().setMaxConnectionPoolSize(4711);
-			assertThat(driverProperties.toInternalRepresentation().maxConnectionPoolSize()).isEqualTo(4711);
+			assertThat(driverProperties.asDriverConfig().maxConnectionPoolSize()).isEqualTo(4711);
 		}
 
 		@Test
@@ -202,11 +167,11 @@ class Neo4jDriverPropertiesTest {
 			Neo4jDriverProperties driverProperties;
 
 			driverProperties = new Neo4jDriverProperties();
-			assertThat(driverProperties.toInternalRepresentation().idleTimeBeforeConnectionTest()).isEqualTo(-1);
+			assertThat(driverProperties.asDriverConfig().idleTimeBeforeConnectionTest()).isEqualTo(-1);
 
 			driverProperties = new Neo4jDriverProperties();
 			driverProperties.getPool().setIdleTimeBeforeConnectionTest(Duration.ofSeconds(23));
-			assertThat(driverProperties.toInternalRepresentation().idleTimeBeforeConnectionTest()).isEqualTo(23_000);
+			assertThat(driverProperties.asDriverConfig().idleTimeBeforeConnectionTest()).isEqualTo(23_000);
 		}
 
 		@Test
@@ -214,7 +179,7 @@ class Neo4jDriverPropertiesTest {
 
 			Neo4jDriverProperties driverProperties = new Neo4jDriverProperties();
 			driverProperties.getPool().setConnectionAcquisitionTimeout(Duration.ofSeconds(23));
-			assertThat(driverProperties.toInternalRepresentation().connectionAcquisitionTimeoutMillis())
+			assertThat(driverProperties.asDriverConfig().connectionAcquisitionTimeoutMillis())
 				.isEqualTo(23_000);
 		}
 
@@ -222,10 +187,10 @@ class Neo4jDriverPropertiesTest {
 		void enableMetricsShouldWork() {
 
 			Neo4jDriverProperties driverProperties = new Neo4jDriverProperties();
-			assertThat(driverProperties.toInternalRepresentation().isMetricsEnabled()).isFalse();
+			assertThat(driverProperties.asDriverConfig().isMetricsEnabled()).isFalse();
 
 			driverProperties.getPool().setMetricsEnabled(true);
-			assertThat(driverProperties.toInternalRepresentation().isMetricsEnabled()).isTrue();
+			assertThat(driverProperties.asDriverConfig().isMetricsEnabled()).isTrue();
 		}
 	}
 
@@ -258,11 +223,11 @@ class Neo4jDriverPropertiesTest {
 
 			driverProperties = new Neo4jDriverProperties();
 			driverProperties.getConfig().setEncrypted(true);
-			assertThat(driverProperties.toInternalRepresentation().encrypted()).isTrue();
+			assertThat(driverProperties.asDriverConfig().encrypted()).isTrue();
 
 			driverProperties = new Neo4jDriverProperties();
 			driverProperties.getConfig().setEncrypted(false);
-			assertThat(driverProperties.toInternalRepresentation().encrypted()).isFalse();
+			assertThat(driverProperties.asDriverConfig().encrypted()).isFalse();
 		}
 
 		@Test
@@ -272,7 +237,7 @@ class Neo4jDriverPropertiesTest {
 			TrustSettings trustSettings = new TrustSettings();
 			trustSettings.setStrategy(TRUST_SYSTEM_CA_SIGNED_CERTIFICATES);
 			driverProperties.getConfig().setTrustSettings(trustSettings);
-			assertThat(driverProperties.toInternalRepresentation().trustStrategy().strategy()).isEqualTo(
+			assertThat(driverProperties.asDriverConfig().trustStrategy().strategy()).isEqualTo(
 				Config.TrustStrategy.Strategy.TRUST_SYSTEM_CA_SIGNED_CERTIFICATES);
 		}
 
@@ -281,7 +246,7 @@ class Neo4jDriverPropertiesTest {
 
 			Neo4jDriverProperties configProperties = new Neo4jDriverProperties();
 			configProperties.getConfig().setLoadBalancingStrategy(ROUND_ROBIN);
-			assertThat(configProperties.toInternalRepresentation().loadBalancingStrategy()).isEqualTo(
+			assertThat(configProperties.asDriverConfig().loadBalancingStrategy()).isEqualTo(
 				Config.LoadBalancingStrategy.ROUND_ROBIN);
 		}
 
@@ -290,7 +255,7 @@ class Neo4jDriverPropertiesTest {
 
 			Neo4jDriverProperties driverProperties = new Neo4jDriverProperties();
 			driverProperties.getConfig().setConnectionTimeout(Duration.ofSeconds(23));
-			assertThat(driverProperties.toInternalRepresentation().connectionTimeoutMillis()).isEqualTo(23_000);
+			assertThat(driverProperties.asDriverConfig().connectionTimeoutMillis()).isEqualTo(23_000);
 		}
 
 		@Test
@@ -306,7 +271,7 @@ class Neo4jDriverPropertiesTest {
 
 			Neo4jDriverProperties driverProperties = new Neo4jDriverProperties();
 			driverProperties.getConfig().setServerAddressResolverClass(TestServerAddressResolver.class);
-			assertThat(driverProperties.toInternalRepresentation().resolver())
+			assertThat(driverProperties.asDriverConfig().resolver())
 				.isNotNull()
 				.isInstanceOf(TestServerAddressResolver.class);
 		}
@@ -315,7 +280,7 @@ class Neo4jDriverPropertiesTest {
 		void shouldUseSpringJclLogging() {
 
 			Neo4jDriverProperties driverProperties = new Neo4jDriverProperties();
-			assertThat(driverProperties.toInternalRepresentation().logging())
+			assertThat(driverProperties.asDriverConfig().logging())
 				.isNotNull()
 				.isInstanceOf(Neo4jSpringJclLogging.class);
 		}

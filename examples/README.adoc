@@ -106,3 +106,5 @@ curl localhost:8080/actuator/metrics/neo4j.driver.connections.acquired|jq
   ]
 }
 ----
+
+include::{manualIncludeDir}examples/dedicated-routing-driver/README.adoc[]

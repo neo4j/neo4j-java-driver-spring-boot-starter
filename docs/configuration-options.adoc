@@ -75,11 +75,7 @@
 
 |`{config_prefix}.uri`
 |
-|+++The uri this driver should connect to. The driver supports bolt, bolt+routing or neo4j as schemes. Both uri and uris are empty, the driver tries to connect to 'bolt://localhost:7687'.+++
-
-|`{config_prefix}.uris`
-|
-|+++This is a fallback for usecases when multiple uris have to provided to get into a Neo4j cluster. Usually one logical entry point is recommended (through DNS or a loadbalancer for example).+++
+|+++The uri this driver should connect to. The driver supports bolt, bolt+routing or neo4j as schemes. The default URI is 'bolt://localhost:7687'.+++
 
 |`{config_prefix}.pool.metrics-enabled`
 |`false`

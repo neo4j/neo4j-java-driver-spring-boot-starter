@@ -74,7 +74,7 @@ class Neo4jDriverAutoConfigurationIT {
 		@Override
 		public void initialize(ConfigurableApplicationContext applicationContext) {
 			TestPropertyValues.of(
-				PREFIX + ".uris = " + neo4jServer.getBoltUrl(),
+				PREFIX + ".uri = " + neo4jServer.getBoltUrl(),
 				PREFIX + ".authentication.username = neo4j",
 				PREFIX + ".authentication.password = " + neo4jServer.getAdminPassword()
 			).applyTo(applicationContext.getEnvironment());

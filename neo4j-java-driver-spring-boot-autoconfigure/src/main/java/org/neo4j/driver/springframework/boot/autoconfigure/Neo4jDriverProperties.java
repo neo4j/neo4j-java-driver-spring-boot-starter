@@ -18,7 +18,6 @@
  */
 package org.neo4j.driver.springframework.boot.autoconfigure;
 
-import static java.util.stream.Collectors.*;
 import static org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverProperties.DriverSettings.LoadBalancingStrategy.*;
 import static org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverProperties.*;
 import static org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverProperties.TrustSettings.Strategy.*;
@@ -26,9 +25,6 @@ import static org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverPro
 import java.io.File;
 import java.net.URI;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
@@ -38,7 +34,6 @@ import org.neo4j.driver.Config;
 import org.neo4j.driver.net.ServerAddressResolver;
 import org.springframework.beans.BeanUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.DeprecatedConfigurationProperty;
 import org.springframework.boot.context.properties.source.InvalidConfigurationPropertyValueException;
 
 /**
@@ -52,17 +47,9 @@ public class Neo4jDriverProperties {
 	static final String PREFIX = "org.neo4j.driver";
 
 	/**
-	 * The uri this driver should connect to. The driver supports bolt, bolt+routing or neo4j as schemes. Both uri and uris
-	 * are empty, the driver tries to connect to 'bolt://localhost:7687'.
+	 * The uri this driver should connect to. The driver supports bolt, bolt+routing or neo4j as schemes.
 	 */
-	private URI uri;
-
-	/**
-	 * This is a fallback for use cases when multiple uris have to provided to get into a Neo4j cluster. Usually one logical
-	 * entry point is recommended (through DNS or a loadbalancer for example). The list of uris must only contain "bolt+routing"
-	 * uris.
-	 */
-	private List<URI> uris = new ArrayList<>();
+	private URI uri = URI.create("bolt://localhost:7687");
 
 	/**
 	 * The authentication the driver is supposed to use. Maybe null.
@@ -85,21 +72,6 @@ public class Neo4jDriverProperties {
 
 	public void setUri(URI uri) {
 		this.uri = uri;
-	}
-
-	/**
-	 * @return A list of URIs of Neo4j cluster members
-	 * @deprecated Please use a single, logical uri as entrance to a Neo4j cluster if possible.
-	 */
-	@Deprecated
-	@DeprecatedConfigurationProperty(reason = "Please use a single, logical uri as entrance to a Neo4j cluster if possible.", replacement = "uri")
-	public List<URI> getUris() {
-		return uris;
-	}
-
-	@Deprecated
-	public void setUris(List<URI> uris) {
-		this.uris = uris;
 	}
 
 	public Authentication getAuthentication() {
@@ -127,23 +99,11 @@ public class Neo4jDriverProperties {
 		this.config = config;
 	}
 
-	List<URI> computeFinalListOfUris() {
-		if (this.uri != null && !this.uris.isEmpty()) {
-			throw new InvalidConfigurationPropertyValueException(PREFIX + ".uris",
-				this.uris.stream().map(URI::toString).collect(joining(",")),
-				"Cannot specify both single uri and list of uris.");
-		}
-
-		if (this.uri != null) {
-			return Collections.singletonList(this.uri);
-		} else if (this.uris != null) {
-			return Collections.unmodifiableList(this.uris);
-		} else {
-			return Collections.emptyList();
-		}
+	public AuthToken getAuthToken() {
+		return this.authentication.asAuthToken();
 	}
 
-	Config toInternalRepresentation() {
+	public Config asDriverConfig() {
 
 		Config.ConfigBuilder builder = Config.builder();
 		this.pool.applyTo(builder);
@@ -202,7 +162,7 @@ public class Neo4jDriverProperties {
 			this.kerberosTicket = kerberosTicket;
 		}
 
-		AuthToken toInternalRepresentation() {
+		AuthToken asAuthToken() {
 
 			Predicate<String> isNotEmpty = s -> !(s == null || s.isEmpty());
 
