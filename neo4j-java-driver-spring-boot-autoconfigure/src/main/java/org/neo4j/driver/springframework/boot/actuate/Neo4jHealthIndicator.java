@@ -79,14 +79,12 @@ public final class Neo4jHealthIndicator extends AbstractHealthIndicator {
 			// Retry one time when the session has been expired
 			try {
 				resultSummary = runHealthCheckQuery();
-			}
-			catch (SessionExpiredException sessionExpiredException) {
+			} catch (SessionExpiredException sessionExpiredException) {
 				logger.warn(MESSAGE_SESSION_EXPIRED);
 				resultSummary = runHealthCheckQuery();
 			}
 			buildStatusUp(resultSummary, builder);
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			builder.down().withException(ex);
 		}
 	}
