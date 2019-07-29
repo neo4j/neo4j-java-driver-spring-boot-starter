@@ -277,6 +277,12 @@ public class Neo4jDriverProperties {
 			builder.withMaxConnectionLifetime(this.maxConnectionLifetime.toMillis(), TimeUnit.MILLISECONDS);
 			builder
 				.withConnectionAcquisitionTimeout(this.connectionAcquisitionTimeout.toMillis(), TimeUnit.MILLISECONDS);
+
+			if (metricsEnabled) {
+				builder.withDriverMetrics();
+			} else {
+				builder.withoutDriverMetrics();
+			}
 		}
 	}
 
