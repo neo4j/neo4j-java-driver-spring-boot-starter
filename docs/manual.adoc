@@ -42,12 +42,14 @@ for all aspects of the driver.
 * [*] _You want Spring Data Neo4j⚡️RX repositories?_
   The automatic configuration for SDN-RX is dependent on this starter, so it is already there and you would use exactly
   the same as described in this manual to configure your connection
-* [ ] _You have the previous generation of Spring Data Neo4j or Neo4j-OGM?_
-  You cannot use this starter, as Spring Data Neo4j + OGM is based on the previous generation of the Java driver.
+* [*] _You have the previous generation of Spring Data Neo4j or Neo4j-OGM?_
+  While you cannot use the 4.0.x line of this starter, as Spring Data Neo4j + OGM is based on the previous generation of the Java driver,
+  you can use the 1.7.x line of this starter. This configures a bean of the previous generation of the Neo4j driver and
+  also configures Neo4j-OGM to use that bean instead of an internal one.
 
 === Does it work with the 1.7 series of the driver?
 
-No.
+The 1.7.x line of the starter is for the 1.7.x line of the driver, the 4.0.x line for the 4.0..x of the driver.
 
 === Does it work with the embedded database?
 

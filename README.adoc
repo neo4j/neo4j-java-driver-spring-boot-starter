@@ -16,9 +16,9 @@ This starter provides a convenient way to configure all aspects of the Neo4j-Jav
 It provides a single, managed Spring Bean of type `org.neo4j.driver.Driver`, configured to your needs.
 
 The starter does not add any additional functionality on top of the driver, but only exposes the drivers configuration in a Spring friendly way.
-However, it configures the driver to use https://www.slf4j.org[SLF4J] logging by default.
+However, it configures the driver to use Springs JCL logging variation by default.
 
-The starter only supports the 4.0 line of the Neo4j Java Driver.
+The 4.0.x. line of the starter only supports the 4.0.x line of the Neo4j Java Driver.
 It is tested and developed against https://spring.io/projects/spring-boot[Spring Boot {spring-boot_version}].
 
 The starter supports Neo4j server mode only, that is: A connection against a Neo4j server over the Bolt protocol.
