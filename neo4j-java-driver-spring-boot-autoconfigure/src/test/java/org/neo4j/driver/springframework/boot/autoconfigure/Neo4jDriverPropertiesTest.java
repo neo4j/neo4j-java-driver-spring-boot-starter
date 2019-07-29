@@ -28,8 +28,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.driver.internal.retry.RetrySettings;
-import org.neo4j.driver.AuthTokens;
-import org.neo4j.driver.Config;
+import org.neo4j.driver.v1.AuthTokens;
+import org.neo4j.driver.v1.Config;
 
 import org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverProperties.Authentication;
 import org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverProperties.DriverSettings;
@@ -165,7 +165,6 @@ class Neo4jDriverPropertiesTest {
 			assertDuration(poolSettings.getMaxConnectionLifetime(), defaultConfig.maxConnectionLifetimeMillis());
 			assertDuration(poolSettings.getConnectionAcquisitionTimeout(),
 				defaultConfig.connectionAcquisitionTimeoutMillis());
-			assertThat(poolSettings.isMetricsEnabled()).isFalse();
 		}
 
 		@Test
@@ -210,16 +209,6 @@ class Neo4jDriverPropertiesTest {
 			driverProperties.getPool().setConnectionAcquisitionTimeout(Duration.ofSeconds(23));
 			assertThat(driverProperties.asDriverConfig().connectionAcquisitionTimeoutMillis())
 				.isEqualTo(23_000);
-		}
-
-		@Test
-		void enableMetricsShouldWork() {
-
-			Neo4jDriverProperties driverProperties = new Neo4jDriverProperties();
-			assertThat(driverProperties.asDriverConfig().isMetricsEnabled()).isFalse();
-
-			driverProperties.getPool().setMetricsEnabled(true);
-			assertThat(driverProperties.asDriverConfig().isMetricsEnabled()).isTrue();
 		}
 	}
 

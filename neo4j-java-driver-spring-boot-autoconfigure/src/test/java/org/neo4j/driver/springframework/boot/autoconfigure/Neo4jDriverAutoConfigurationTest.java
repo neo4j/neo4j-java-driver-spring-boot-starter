@@ -19,7 +19,7 @@
 package org.neo4j.driver.springframework.boot.autoconfigure;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.driver.Driver;
+import org.neo4j.driver.v1.Driver;
 
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.FilteredClassLoader;
@@ -39,21 +39,22 @@ class Neo4jDriverAutoConfigurationTest {
 	void shouldRequireAllNeededClasses() {
 
 		this.contextRunner
+			.withPropertyValues("org.neo4j.driver.uri=bolt://localhost:4711")
 			.withClassLoader(new FilteredClassLoader(Driver.class))
 			.run((ctx) -> assertThat(ctx).doesNotHaveBean(Driver.class));
 	}
 
 	@Test
-	void shouldCreateDefaultDriverFactoryWithDefaultUri() {
+	void shouldRequireUri() {
 
 		this.contextRunner
 			.run((ctx) -> assertThat(ctx)
-				.hasSingleBean(Driver.class)
+				.doesNotHaveBean(Driver.class)
 			);
 	}
 
 	@Test
-	void shouldCreateDefaultDriverFactoryForSingleUri() {
+	void shouldCreateDriver() {
 
 		this.contextRunner
 			.withPropertyValues("org.neo4j.driver.uri=bolt://localhost:4711")

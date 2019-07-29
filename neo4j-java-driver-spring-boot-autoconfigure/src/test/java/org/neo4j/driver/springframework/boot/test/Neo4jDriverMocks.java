@@ -20,14 +20,7 @@ package org.neo4j.driver.springframework.boot.test;
 
 import static org.mockito.Mockito.*;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-
-import org.neo4j.driver.ConnectionPoolMetrics;
-import org.neo4j.driver.Driver;
-import org.neo4j.driver.Metrics;
-import org.neo4j.driver.exceptions.ClientException;
+import org.neo4j.driver.v1.Driver;
 
 /**
  * Some predefined mocks, only to be used internally for tests.
@@ -36,27 +29,9 @@ import org.neo4j.driver.exceptions.ClientException;
  */
 public final class Neo4jDriverMocks {
 
-	public static Driver mockDriverWithMetrics() {
-		ConnectionPoolMetrics p1 = mock(ConnectionPoolMetrics.class);
-
-		Map<String, ConnectionPoolMetrics> connectionPoolMetrics = new HashMap<>();
-		connectionPoolMetrics.put("p1", p1);
-
-		Metrics metrics = mock(Metrics.class);
-		when(metrics.connectionPoolMetrics()).thenReturn(connectionPoolMetrics);
-
-		Driver driver = mock(Driver.class);
-		when(driver.metrics()).thenReturn(metrics);
-
-		when(driver.verifyConnectivityAsync()).thenReturn(CompletableFuture.completedFuture(null));
-
-		return driver;
-	}
-
 	public static Driver mockDriverWithoutMetrics() {
 
 		Driver driver = mock(Driver.class);
-		when(driver.metrics()).thenThrow(ClientException.class);
 		return driver;
 	}
 

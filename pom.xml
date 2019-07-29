@@ -75,7 +75,6 @@
 	<modules>
 		<module>neo4j-java-driver-spring-boot-autoconfigure</module>
 		<module>neo4j-java-driver-spring-boot-starter</module>
-		<module>examples/reactive-web</module>
 		<module>examples/simple</module>
 		<module>examples/testing-with-neo4j-harness</module>
 		<module>examples/web</module>
@@ -98,9 +97,9 @@
 		<maven-jar-plugin.version>3.1.2</maven-jar-plugin.version>
 		<maven-source-plugin.version>3.0.1</maven-source-plugin.version>
 		<maven-surefire-plugin.version>3.0.0-M3</maven-surefire-plugin.version>
-		<neo4j-java-driver.version>2.0.0-alpha03</neo4j-java-driver.version>
+		<neo4j-java-driver.version>1.7.5</neo4j-java-driver.version>
 		<neo4j.version>3.5.2</neo4j.version>
-		<revision>1.0.0</revision>
+		<revision>1.7.5</revision>
 		<sha1></sha1>
 		<sortpom-maven-plugin.version>2.8.0</sortpom-maven-plugin.version>
 		<testcontainers.version>1.10.7</testcontainers.version>

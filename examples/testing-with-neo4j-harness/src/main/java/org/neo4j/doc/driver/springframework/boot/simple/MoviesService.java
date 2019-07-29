@@ -21,8 +21,8 @@ package org.neo4j.doc.driver.springframework.boot.simple;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.neo4j.driver.Driver;
-import org.neo4j.driver.Session;
+import org.neo4j.driver.v1.Driver;
+import org.neo4j.driver.v1.Session;
 import org.springframework.stereotype.Service;
 
 @Service

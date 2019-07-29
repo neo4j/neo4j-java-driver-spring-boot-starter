@@ -21,8 +21,8 @@ package org.neo4j.driver.springframework.boot.autoconfigure;
 import java.util.Collections;
 import java.util.Set;
 
-import org.neo4j.driver.net.ServerAddress;
-import org.neo4j.driver.net.ServerAddressResolver;
+import org.neo4j.driver.v1.net.ServerAddress;
+import org.neo4j.driver.v1.net.ServerAddressResolver;
 
 /**
  * Resolver used only for configuration tests.

@@ -20,8 +20,8 @@ package org.neo4j.driver.springframework.boot.autoconfigure;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.neo4j.driver.Logger;
-import org.neo4j.driver.Logging;
+import org.neo4j.driver.v1.Logger;
+import org.neo4j.driver.v1.Logging;
 
 /**
  * Shim to use Spring JCL implementation, delegating all the hard work of deciding the underlying system to Spring and Spring Boot.

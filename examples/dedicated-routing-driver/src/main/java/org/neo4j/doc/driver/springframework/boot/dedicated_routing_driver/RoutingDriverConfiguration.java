@@ -5,10 +5,10 @@ package org.neo4j.doc.driver.springframework.boot.dedicated_routing_driver;
 import java.net.URI;
 import java.util.List;
 
-import org.neo4j.driver.AuthToken;
-import org.neo4j.driver.Config;
-import org.neo4j.driver.Driver;
-import org.neo4j.driver.GraphDatabase;
+import org.neo4j.driver.v1.AuthToken;
+import org.neo4j.driver.v1.Config;
+import org.neo4j.driver.v1.Driver;
+import org.neo4j.driver.v1.GraphDatabase;
 import org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverProperties;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

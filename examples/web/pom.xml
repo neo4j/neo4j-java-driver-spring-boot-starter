@@ -95,7 +95,7 @@
 				</property>
 			</activation>
 			<properties>
-				<revision>1.0.0</revision>
+				<revision>1.7.5</revision>
 			</properties>
 		</profile>
 		<profile>
@@ -117,7 +117,7 @@
 				</property>
 			</activation>
 			<properties>
-				<changelist>-alpha03</changelist>
+				<changelist>-SNAPSHOT</changelist>
 			</properties>
 		</profile>
 	</profiles>

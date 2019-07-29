@@ -27,11 +27,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.neo4j.driver.Session;
-import org.neo4j.driver.StatementResult;
-import org.neo4j.driver.exceptions.ServiceUnavailableException;
-import org.neo4j.driver.exceptions.SessionExpiredException;
-import org.neo4j.driver.internal.SessionConfig;
+import org.neo4j.driver.v1.AccessMode;
+import org.neo4j.driver.v1.Session;
+import org.neo4j.driver.v1.StatementResult;
+import org.neo4j.driver.v1.exceptions.ServiceUnavailableException;
+import org.neo4j.driver.v1.exceptions.SessionExpiredException;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Status;
 
@@ -52,20 +52,16 @@ class Neo4jHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 		when(this.serverInfo.version()).thenReturn("4711");
 		when(this.serverInfo.address()).thenReturn("Zu Hause");
 		when(this.resultSummary.server()).thenReturn(this.serverInfo);
-		when(this.resultSummary.database()).thenReturn(this.databaseInfo);
-
-		when(this.databaseInfo.name()).thenReturn(null);
 
 		when(this.statementResult.consume()).thenReturn(this.resultSummary);
 		when(this.session.run(anyString())).thenReturn(this.statementResult);
 
-		when(this.driver.session(any(SessionConfig.class))).thenReturn(this.session);
+		when(this.driver.session(AccessMode.WRITE)).thenReturn(this.session);
 
 		Neo4jHealthIndicator healthIndicator = new Neo4jHealthIndicator(this.driver);
 		Health health = healthIndicator.health();
 		assertThat(health.getStatus()).isEqualTo(Status.UP);
 		assertThat(health.getDetails()).containsEntry("server", "4711@Zu Hause");
-		assertThat(health.getDetails()).doesNotContainKey("database");
 	}
 
 	@Test
@@ -73,20 +69,16 @@ class Neo4jHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 		when(this.serverInfo.version()).thenReturn("4711");
 		when(this.serverInfo.address()).thenReturn("Zu Hause");
 		when(this.resultSummary.server()).thenReturn(this.serverInfo);
-		when(this.resultSummary.database()).thenReturn(this.databaseInfo);
-
-		when(this.databaseInfo.name()).thenReturn("");
 
 		when(this.statementResult.consume()).thenReturn(this.resultSummary);
 		when(this.session.run(anyString())).thenReturn(this.statementResult);
 
-		when(driver.session(any(SessionConfig.class))).thenReturn(this.session);
+		when(this.driver.session(AccessMode.WRITE)).thenReturn(this.session);
 
 		Neo4jHealthIndicator healthIndicator = new Neo4jHealthIndicator(this.driver);
 		Health health = healthIndicator.health();
 		assertThat(health.getStatus()).isEqualTo(Status.UP);
 		assertThat(health.getDetails()).containsEntry("server", "4711@Zu Hause");
-		assertThat(health.getDetails()).doesNotContainKey("database");
 	}
 
 	@Test
@@ -96,16 +88,15 @@ class Neo4jHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 		when(this.statementResult.consume()).thenReturn(this.resultSummary);
 		when(this.session.run(anyString())).thenReturn(this.statementResult);
 
-		when(this.driver.session(any(SessionConfig.class))).thenReturn(this.session);
+		when(this.driver.session(AccessMode.WRITE)).thenReturn(this.session);
 
 		Neo4jHealthIndicator healthIndicator = new Neo4jHealthIndicator(this.driver);
 		Health health = healthIndicator.health();
 		assertThat(health.getStatus()).isEqualTo(Status.UP);
 		assertThat(health.getDetails()).containsEntry("server", "4711@Zu Hause");
-		assertThat(health.getDetails()).containsEntry("database", "n/a");
 
 		verify(session).close();
-		verifyNoMoreInteractions(this.driver, this.session, this.statementResult, this.resultSummary, this.serverInfo, this.databaseInfo);
+		verifyNoMoreInteractions(this.driver, this.session, this.statementResult, this.resultSummary, this.serverInfo);
 	}
 
 	@Test
@@ -121,7 +112,7 @@ class Neo4jHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 			}
 			return Neo4jHealthIndicatorTest.this.statementResult;
 		});
-		when(driver.session(any(SessionConfig.class))).thenReturn(this.session);
+		when(this.driver.session(AccessMode.WRITE)).thenReturn(this.session);
 
 		Neo4jHealthIndicator healthIndicator = new Neo4jHealthIndicator(this.driver);
 		Health health = healthIndicator.health();
@@ -130,13 +121,13 @@ class Neo4jHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 		assertThat(health.getDetails()).containsEntry("server", "4711@Zu Hause");
 
 		verify(this.session, times(2)).close();
-		verifyNoMoreInteractions(this.driver, this.session, this.statementResult, this.resultSummary, this.serverInfo, this.databaseInfo);
+		verifyNoMoreInteractions(this.driver, this.session, this.statementResult, this.resultSummary, this.serverInfo);
 	}
 
 	@Test
 	void neo4jSessionIsDown() {
 
-		when(driver.session(any(SessionConfig.class))).thenThrow(ServiceUnavailableException.class);
+		when(driver.session(AccessMode.WRITE)).thenThrow(ServiceUnavailableException.class);
 
 		Neo4jHealthIndicator healthIndicator = new Neo4jHealthIndicator(driver);
 		Health health = healthIndicator.health();
@@ -144,6 +135,6 @@ class Neo4jHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 		assertThat(health.getStatus()).isEqualTo(Status.DOWN);
 		assertThat(health.getDetails()).containsKeys("error");
 
-		verifyNoMoreInteractions(this.driver, this.session, this.statementResult, this.resultSummary, this.serverInfo, this.databaseInfo);
+		verifyNoMoreInteractions(this.driver, this.session, this.statementResult, this.resultSummary, this.serverInfo);
 	}
 }

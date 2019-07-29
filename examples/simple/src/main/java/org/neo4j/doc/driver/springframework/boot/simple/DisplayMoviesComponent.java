@@ -20,8 +20,8 @@ package org.neo4j.doc.driver.springframework.boot.simple;
 
 // tag::simple-example[]
 
-import org.neo4j.driver.Driver;
-import org.neo4j.driver.Session;
+import org.neo4j.driver.v1.Driver;
+import org.neo4j.driver.v1.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;

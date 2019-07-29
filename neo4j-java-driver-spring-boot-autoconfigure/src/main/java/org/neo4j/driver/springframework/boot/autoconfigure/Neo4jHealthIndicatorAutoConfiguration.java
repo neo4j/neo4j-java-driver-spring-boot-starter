@@ -18,20 +18,16 @@
  */
 package org.neo4j.driver.springframework.boot.autoconfigure;
 
-import reactor.core.publisher.Flux;
-
 import java.util.Map;
 
-import org.neo4j.driver.Driver;
+import org.neo4j.driver.v1.Driver;
 import org.neo4j.driver.springframework.boot.actuate.Neo4jHealthIndicator;
-import org.neo4j.driver.springframework.boot.actuate.Neo4jReactiveHealthIndicator;
+
 import org.springframework.boot.actuate.autoconfigure.health.CompositeHealthIndicatorConfiguration;
-import org.springframework.boot.actuate.autoconfigure.health.CompositeReactiveHealthIndicatorConfiguration;
 import org.springframework.boot.actuate.autoconfigure.health.ConditionalOnEnabledHealthIndicator;
 import org.springframework.boot.actuate.autoconfigure.health.HealthIndicatorAutoConfiguration;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
-import org.springframework.boot.actuate.health.ReactiveHealthIndicator;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -43,10 +39,7 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for health indicators on all available
- * {@link org.neo4j.driver.Driver drivers}.
- * <p>
- * The auto-configuration here is responsible for both imperative and reactive health checks. The reactive health check
- * has precedence over the imperative one.
+ * {@link org.neo4j.driver.v1.Driver drivers}.
  *
  * @author Michael J. Simons
  * @soundtrack Iron Maiden - Somewhere In Time
@@ -65,20 +58,8 @@ public class Neo4jHealthIndicatorAutoConfiguration {
 		extends CompositeHealthIndicatorConfiguration<Neo4jHealthIndicator, Driver> {
 
 		@Bean
-		// If Neo4jReactiveHealthIndicatorConfiguration kicked in, don't add the imperative version as well
 		@ConditionalOnMissingBean(name = "neo4jHealthIndicator")
 		public HealthIndicator neo4jHealthIndicator(Map<String, Driver> drivers) {
-			return createHealthIndicator(drivers);
-		}
-	}
-
-	@Configuration
-	@ConditionalOnClass({ ReactiveHealthIndicator.class, Flux.class })
-	static class Neo4jReactiveHealthIndicatorConfiguration
-		extends CompositeReactiveHealthIndicatorConfiguration<Neo4jReactiveHealthIndicator, Driver> {
-
-		@Bean
-		public ReactiveHealthIndicator neo4jHealthIndicator(Map<String, Driver> drivers) {
 			return createHealthIndicator(drivers);
 		}
 	}

@@ -21,10 +21,9 @@ package org.neo4j.driver.springframework.boot.actuate;
 import static org.mockito.Mockito.*;
 
 import org.mockito.Mock;
-import org.neo4j.driver.Driver;
-import org.neo4j.driver.summary.DatabaseInfo;
-import org.neo4j.driver.summary.ResultSummary;
-import org.neo4j.driver.summary.ServerInfo;
+import org.neo4j.driver.v1.Driver;
+import org.neo4j.driver.v1.summary.ResultSummary;
+import org.neo4j.driver.v1.summary.ServerInfo;
 
 /**
  * Contains some shared mocks for the health indicator tests.
@@ -42,15 +41,10 @@ abstract class Neo4jHealthIndicatorTestBase {
 	@Mock
 	protected ServerInfo serverInfo;
 
-	@Mock
-	protected DatabaseInfo databaseInfo;
-
 	protected void prepareSharedMocks() {
 
 		when(serverInfo.version()).thenReturn("4711");
 		when(serverInfo.address()).thenReturn("Zu Hause");
-		when(databaseInfo.name()).thenReturn("n/a");
 		when(resultSummary.server()).thenReturn(serverInfo);
-		when(resultSummary.database()).thenReturn(databaseInfo);
 	}
 }

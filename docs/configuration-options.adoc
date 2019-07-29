@@ -77,8 +77,4 @@
 |
 |+++The uri this driver should connect to. The driver supports bolt, bolt+routing or neo4j as schemes. The default URI is 'bolt://localhost:7687'.+++
 
-|`{config_prefix}.pool.metrics-enabled`
-|`false`
-|+++Set this to true, so that the driver collects metrics, which can be exported to Micrometer.+++
-
 |===

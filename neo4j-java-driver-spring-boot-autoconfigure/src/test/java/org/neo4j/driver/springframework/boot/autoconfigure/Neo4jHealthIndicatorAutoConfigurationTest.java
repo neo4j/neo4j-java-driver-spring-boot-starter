@@ -21,18 +21,14 @@ package org.neo4j.driver.springframework.boot.autoconfigure;
 import static org.assertj.core.api.Assertions.*;
 import static org.neo4j.driver.springframework.boot.test.Neo4jDriverMocks.*;
 
-import reactor.core.publisher.Flux;
-
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.neo4j.driver.Driver;
+import org.neo4j.driver.v1.Driver;
 import org.neo4j.driver.springframework.boot.actuate.Neo4jHealthIndicator;
-import org.neo4j.driver.springframework.boot.actuate.Neo4jReactiveHealthIndicator;
 import org.springframework.boot.actuate.autoconfigure.health.HealthIndicatorAutoConfiguration;
 import org.springframework.boot.actuate.health.ApplicationHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
-import org.springframework.boot.actuate.health.ReactiveHealthIndicator;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.FilteredClassLoader;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -57,7 +53,6 @@ class Neo4jHealthIndicatorAutoConfigurationTest {
 				.withPropertyValues("management.health.neo4j.enabled=false")
 				.run(ctx -> assertThat(ctx)
 					.doesNotHaveBean(Neo4jHealthIndicator.class)
-					.doesNotHaveBean(Neo4jReactiveHealthIndicator.class)
 					.hasSingleBean(ApplicationHealthIndicator.class)
 				);
 		}
@@ -69,7 +64,6 @@ class Neo4jHealthIndicatorAutoConfigurationTest {
 				.withClassLoader(new FilteredClassLoader(Health.class))
 				.run(ctx -> assertThat(ctx)
 					.doesNotHaveBean(Neo4jHealthIndicator.class)
-					.doesNotHaveBean(Neo4jReactiveHealthIndicator.class)
 				);
 		}
 
@@ -80,7 +74,6 @@ class Neo4jHealthIndicatorAutoConfigurationTest {
 				.withClassLoader(new FilteredClassLoader(Driver.class))
 				.run(ctx -> assertThat(ctx)
 					.doesNotHaveBean(Neo4jHealthIndicator.class)
-					.doesNotHaveBean(Neo4jReactiveHealthIndicator.class)
 				);
 		}
 
@@ -89,7 +82,6 @@ class Neo4jHealthIndicatorAutoConfigurationTest {
 			contextRunner
 				.run(ctx -> assertThat(ctx)
 					.doesNotHaveBean(Neo4jHealthIndicator.class)
-					.doesNotHaveBean(Neo4jReactiveHealthIndicator.class)
 				);
 		}
 
@@ -98,38 +90,11 @@ class Neo4jHealthIndicatorAutoConfigurationTest {
 			contextRunner
 				.withUserConfiguration(WithDriverWithMetrics.class)
 				.withClassLoader(
-					new FilteredClassLoader(HealthIndicator.class, ReactiveHealthIndicator.class, Flux.class))
+					new FilteredClassLoader(HealthIndicator.class))
 				.run(ctx -> assertThat(ctx)
 					.doesNotHaveBean(Neo4jHealthIndicator.class)
-					.doesNotHaveBean(Neo4jReactiveHealthIndicator.class)
-				);
-
-			contextRunner
-				.withUserConfiguration(WithDriverWithMetrics.class)
-				.withClassLoader(new FilteredClassLoader(ReactiveHealthIndicator.class))
-				.run(ctx -> assertThat(ctx)
-					.hasSingleBean(Neo4jHealthIndicator.class)
-					.doesNotHaveBean(Neo4jReactiveHealthIndicator.class)
-				);
-
-			contextRunner
-				.withUserConfiguration(WithDriverWithMetrics.class)
-				.withClassLoader(new FilteredClassLoader(Flux.class))
-				.run(ctx -> assertThat(ctx)
-					.hasSingleBean(Neo4jHealthIndicator.class)
-					.doesNotHaveBean(Neo4jReactiveHealthIndicator.class)
 				);
 		}
-	}
-
-	@Test
-	void reactiveHealthCheckShouldHavePrecedence() {
-		contextRunner
-			.withUserConfiguration(WithDriverWithMetrics.class)
-			.run(ctx -> assertThat(ctx)
-				.doesNotHaveBean(Neo4jHealthIndicator.class)
-				.hasSingleBean(Neo4jReactiveHealthIndicator.class)
-			);
 	}
 
 	@Configuration
@@ -137,7 +102,7 @@ class Neo4jHealthIndicatorAutoConfigurationTest {
 
 		@Bean
 		Driver driver() {
-			return mockDriverWithMetrics();
+			return mockDriverWithoutMetrics();
 		}
 	}
 }

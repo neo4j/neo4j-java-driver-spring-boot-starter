@@ -20,18 +20,16 @@ package org.neo4j.driver.springframework.boot.actuate;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.neo4j.driver.AccessMode;
-import org.neo4j.driver.Driver;
-import org.neo4j.driver.Session;
-import org.neo4j.driver.exceptions.SessionExpiredException;
-import org.neo4j.driver.internal.SessionConfig;
-import org.neo4j.driver.summary.DatabaseInfo;
-import org.neo4j.driver.summary.ResultSummary;
-import org.neo4j.driver.summary.ServerInfo;
+import org.neo4j.driver.v1.AccessMode;
+import org.neo4j.driver.v1.Driver;
+import org.neo4j.driver.v1.Session;
+import org.neo4j.driver.v1.exceptions.SessionExpiredException;
+import org.neo4j.driver.v1.summary.ResultSummary;
+import org.neo4j.driver.v1.summary.ServerInfo;
+
 import org.springframework.boot.actuate.health.AbstractHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
-import org.springframework.util.StringUtils;
 
 /**
  * {@link HealthIndicator} that tests the status of a Neo4j by executing a Cypher statement and extracting
@@ -56,11 +54,6 @@ public final class Neo4jHealthIndicator extends AbstractHealthIndicator {
 	 * Message logged before retrying a health check.
 	 */
 	static final String MESSAGE_SESSION_EXPIRED = "Neo4j session has expired, retrying one single time to retrieve server health.";
-	/**
-	 * The default session config to use while connecting.
-	 */
-	static final SessionConfig DEFAULT_SESSION_CONFIG = SessionConfig.builder().withDefaultAccessMode(AccessMode.WRITE)
-		.build();
 	/**
 	 * The driver for this health indicator instance.
 	 */
@@ -98,13 +91,8 @@ public final class Neo4jHealthIndicator extends AbstractHealthIndicator {
 	 */
 	static Health.Builder buildStatusUp(ResultSummary resultSummary, Health.Builder builder) {
 		ServerInfo serverInfo = resultSummary.server();
-		DatabaseInfo databaseInfo = resultSummary.database();
 
 		builder.up().withDetail("server", serverInfo.version() + "@" + serverInfo.address());
-
-		if (StringUtils.hasText(databaseInfo.name())) {
-			builder.withDetail("database", databaseInfo.name());
-		}
 
 		return builder;
 	}
@@ -112,7 +100,7 @@ public final class Neo4jHealthIndicator extends AbstractHealthIndicator {
 	ResultSummary runHealthCheckQuery() {
 		// We use WRITE here to make sure UP is returned for a server that supports
 		// all possible workloads
-		try (Session session = this.driver.session(DEFAULT_SESSION_CONFIG)) {
+		try (Session session = this.driver.session(AccessMode.WRITE)) {
 			ResultSummary resultSummary = session.run(CYPHER).consume();
 			return resultSummary;
 		}

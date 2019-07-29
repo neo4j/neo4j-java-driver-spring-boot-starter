@@ -23,10 +23,10 @@ import java.net.URI;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
-import org.neo4j.driver.AuthToken;
-import org.neo4j.driver.AuthTokens;
-import org.neo4j.driver.Config;
-import org.neo4j.driver.net.ServerAddressResolver;
+import org.neo4j.driver.v1.AuthToken;
+import org.neo4j.driver.v1.AuthTokens;
+import org.neo4j.driver.v1.Config;
+import org.neo4j.driver.v1.net.ServerAddressResolver;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -34,7 +34,7 @@ import org.springframework.boot.context.properties.source.InvalidConfigurationPr
 import org.springframework.util.StringUtils;
 
 /**
- * Used to configure an instance of the {@link org.neo4j.driver.Driver Neo4j-Java-Driver}.
+ * Used to configure an instance of the {@link org.neo4j.driver.v1.Driver Neo4j-Java-Driver}.
  *
  * @author Michael J. Simons
  */
@@ -183,11 +183,6 @@ public class Neo4jDriverProperties {
 
 	public static class PoolSettings {
 		/**
-		 * Flag, if metrics are enabled.
-		 */
-		private boolean metricsEnabled = false;
-
-		/**
 		 * Flag, if leaked sessions logging is enabled.
 		 */
 		private boolean logLeakedSessions = false;
@@ -254,14 +249,6 @@ public class Neo4jDriverProperties {
 			this.connectionAcquisitionTimeout = connectionAcquisitionTimeout;
 		}
 
-		public boolean isMetricsEnabled() {
-			return this.metricsEnabled;
-		}
-
-		public void setMetricsEnabled(boolean metricsEnabled) {
-			this.metricsEnabled = metricsEnabled;
-		}
-
 		private void applyTo(Config.ConfigBuilder builder) {
 
 			if (this.logLeakedSessions) {
@@ -275,12 +262,6 @@ public class Neo4jDriverProperties {
 			builder.withMaxConnectionLifetime(this.maxConnectionLifetime.toMillis(), TimeUnit.MILLISECONDS);
 			builder
 				.withConnectionAcquisitionTimeout(this.connectionAcquisitionTimeout.toMillis(), TimeUnit.MILLISECONDS);
-
-			if (metricsEnabled) {
-				builder.withDriverMetrics();
-			} else {
-				builder.withoutDriverMetrics();
-			}
 		}
 	}
 

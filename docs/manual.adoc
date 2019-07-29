@@ -42,12 +42,13 @@ for all aspects of the driver.
 * [*] _You want Spring Data Neo4j⚡️RX repositories?_
   The automatic configuration for SDN-RX is dependent on this starter, so it is already there and you would use exactly
   the same as described in this manual to configure your connection
-* [ ] _You have the previous generation of Spring Data Neo4j or Neo4j-OGM?_
-  You cannot use this starter, as Spring Data Neo4j + OGM is based on the previous generation of the Java driver.
+* [*] _You have the previous generation of Spring Data Neo4j or Neo4j-OGM?_
+  You can use the 1.7.x line of this starter. This configures a bean of the previous generation of the Neo4j driver and
+  also configures Neo4j-OGM to use that bean instead of an internal one.
 
 === Does it work with the 1.7 series of the driver?
 
-No.
+The 1.7.x line of the starter is for the 1.7.x line of the driver, the 4.0.x line for the 4.0..x of the driver.
 
 === Does it work with the embedded database?
 
@@ -208,10 +209,8 @@ package com.example.demo;
 
 import java.util.List;
 
-import org.neo4j.driver.AccessMode;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.Session;
-import org.neo4j.driver.internal.SessionConfig;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -329,26 +328,6 @@ and an authenticated user will see
 In case no instance is reachable, the status will be `DOWN` and the details carry the error message.
 
 To disable the Neo4j health indicator, use the standard Spring Boot property `management.health.neo4j.enabled` with a value of `false`.
-
-=== Driver metrics
-
-`neo4j-java-driver-spring-boot-starter` comes with support for https://micrometer.io[Micrometer metrics] out of the box.
-It detects Micrometer on the classpath and binds the metrics of all instances of `org.neo4j.driver.Driver`, that have enabled their metrics, to a micrometer registry.
-
-To enable metrics for the driver instance provided by this starter, set `org.neo4j.driver.config.metrics-enabled` to true.
-
-The following metrics are exposes
-
-* `neo4j.driver.connections.inUse` (Gauge)
-* `neo4j.driver.connections.timedOutToAcquire` (Counter)
-* `neo4j.driver.connections.closed` (Counter)
-* `neo4j.driver.connections.failedToCreate` (Counter)
-* `neo4j.driver.connections.created` (Counter)
-* `neo4j.driver.connections.idle` (Gauge)
-* `neo4j.driver.connections.acquired` (Counter)
-
-All metrics will have the tags `name` (the bean of the driver they belong to)
-and `poolId` (the id of the connection pool, that contributed to the corresponding counter or gauge).
 
 include::{manualIncludeDir}docs/configuration-options.adoc[]
 
