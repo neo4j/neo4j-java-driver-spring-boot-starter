@@ -64,7 +64,7 @@ public final class Neo4jReactiveHealthIndicator extends AbstractReactiveHealthIn
 		// We use WRITE here to make sure UP is returned for a server that supports
 		// all possible workloads
 		return Mono.using(
-			() -> driver.rxSession(DEFAULT_SESSION_CONFIG),
+			() -> this.driver.rxSession(DEFAULT_SESSION_CONFIG),
 			session -> Mono.from(session.run(Neo4jHealthIndicator.CYPHER).summary()),
 			RxSession::close
 		);

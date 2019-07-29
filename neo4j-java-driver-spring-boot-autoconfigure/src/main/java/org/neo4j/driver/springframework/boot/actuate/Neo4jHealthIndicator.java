@@ -79,21 +79,24 @@ public final class Neo4jHealthIndicator extends AbstractHealthIndicator {
 			// Retry one time when the session has been expired
 			try {
 				resultSummary = runHealthCheckQuery();
-			} catch (SessionExpiredException sessionExpiredException) {
-				logger.warn("Neo4j session has expired, retrying one single time to retrieve server health.");
+			}
+			catch (SessionExpiredException sessionExpiredException) {
+				logger.warn(MESSAGE_SESSION_EXPIRED);
 				resultSummary = runHealthCheckQuery();
 			}
 			buildStatusUp(resultSummary, builder);
-		} catch (Exception e) {
-			builder.down().withException(e);
+		}
+		catch (Exception ex) {
+			builder.down().withException(ex);
 		}
 	}
 
 	/**
 	 * Applies the given {@link ResultSummary} to the {@link Health.Builder builder} without actually calling {@code build}.
 	 *
-	 * @param resultSummary
-	 * @param builder
+	 * @param resultSummary the result summary returned by the server
+	 * @param builder the health builder to be modified
+	 * @return the modified health builder
 	 */
 	static Health.Builder buildStatusUp(ResultSummary resultSummary, Health.Builder builder) {
 		ServerInfo serverInfo = resultSummary.server();
@@ -111,7 +114,7 @@ public final class Neo4jHealthIndicator extends AbstractHealthIndicator {
 	ResultSummary runHealthCheckQuery() {
 		// We use WRITE here to make sure UP is returned for a server that supports
 		// all possible workloads
-		try (Session session = driver.session(DEFAULT_SESSION_CONFIG)) {
+		try (Session session = this.driver.session(DEFAULT_SESSION_CONFIG)) {
 			ResultSummary resultSummary = session.run(CYPHER).consume();
 			return resultSummary;
 		}

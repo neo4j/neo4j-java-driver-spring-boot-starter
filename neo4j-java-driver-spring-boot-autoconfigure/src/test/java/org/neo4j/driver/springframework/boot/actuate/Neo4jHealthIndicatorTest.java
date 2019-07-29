@@ -49,19 +49,19 @@ class Neo4jHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 
 	@Test
 	void shouldWorkWithoutDatabaseName() {
-		when(serverInfo.version()).thenReturn("4711");
-		when(serverInfo.address()).thenReturn("Zu Hause");
-		when(resultSummary.server()).thenReturn(serverInfo);
-		when(resultSummary.database()).thenReturn(databaseInfo);
+		when(this.serverInfo.version()).thenReturn("4711");
+		when(this.serverInfo.address()).thenReturn("Zu Hause");
+		when(this.resultSummary.server()).thenReturn(this.serverInfo);
+		when(this.resultSummary.database()).thenReturn(this.databaseInfo);
 
-		when(databaseInfo.name()).thenReturn(null);
+		when(this.databaseInfo.name()).thenReturn(null);
 
-		when(statementResult.consume()).thenReturn(resultSummary);
-		when(session.run(anyString())).thenReturn(statementResult);
+		when(this.statementResult.consume()).thenReturn(this.resultSummary);
+		when(this.session.run(anyString())).thenReturn(this.statementResult);
 
-		when(driver.session(any(SessionConfig.class))).thenReturn(session);
+		when(this.driver.session(any(SessionConfig.class))).thenReturn(this.session);
 
-		Neo4jHealthIndicator healthIndicator = new Neo4jHealthIndicator(driver);
+		Neo4jHealthIndicator healthIndicator = new Neo4jHealthIndicator(this.driver);
 		Health health = healthIndicator.health();
 		assertThat(health.getStatus()).isEqualTo(Status.UP);
 		assertThat(health.getDetails()).containsEntry("server", "4711@Zu Hause");
@@ -70,19 +70,19 @@ class Neo4jHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 
 	@Test
 	void shouldWorkWithEmptyDatabaseName() {
-		when(serverInfo.version()).thenReturn("4711");
-		when(serverInfo.address()).thenReturn("Zu Hause");
-		when(resultSummary.server()).thenReturn(serverInfo);
-		when(resultSummary.database()).thenReturn(databaseInfo);
+		when(this.serverInfo.version()).thenReturn("4711");
+		when(this.serverInfo.address()).thenReturn("Zu Hause");
+		when(this.resultSummary.server()).thenReturn(this.serverInfo);
+		when(this.resultSummary.database()).thenReturn(this.databaseInfo);
 
-		when(databaseInfo.name()).thenReturn("");
+		when(this.databaseInfo.name()).thenReturn("");
 
-		when(statementResult.consume()).thenReturn(resultSummary);
-		when(session.run(anyString())).thenReturn(statementResult);
+		when(this.statementResult.consume()).thenReturn(this.resultSummary);
+		when(this.session.run(anyString())).thenReturn(this.statementResult);
 
-		when(driver.session(any(SessionConfig.class))).thenReturn(session);
+		when(driver.session(any(SessionConfig.class))).thenReturn(this.session);
 
-		Neo4jHealthIndicator healthIndicator = new Neo4jHealthIndicator(driver);
+		Neo4jHealthIndicator healthIndicator = new Neo4jHealthIndicator(this.driver);
 		Health health = healthIndicator.health();
 		assertThat(health.getStatus()).isEqualTo(Status.UP);
 		assertThat(health.getDetails()).containsEntry("server", "4711@Zu Hause");
@@ -93,19 +93,19 @@ class Neo4jHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 	void neo4jIsUp() {
 
 		prepareSharedMocks();
-		when(statementResult.consume()).thenReturn(resultSummary);
-		when(session.run(anyString())).thenReturn(statementResult);
+		when(this.statementResult.consume()).thenReturn(this.resultSummary);
+		when(this.session.run(anyString())).thenReturn(this.statementResult);
 
-		when(driver.session(any(SessionConfig.class))).thenReturn(session);
+		when(this.driver.session(any(SessionConfig.class))).thenReturn(this.session);
 
-		Neo4jHealthIndicator healthIndicator = new Neo4jHealthIndicator(driver);
+		Neo4jHealthIndicator healthIndicator = new Neo4jHealthIndicator(this.driver);
 		Health health = healthIndicator.health();
 		assertThat(health.getStatus()).isEqualTo(Status.UP);
 		assertThat(health.getDetails()).containsEntry("server", "4711@Zu Hause");
 		assertThat(health.getDetails()).containsEntry("database", "n/a");
 
 		verify(session).close();
-		verifyNoMoreInteractions(driver, session, statementResult, resultSummary, serverInfo, databaseInfo);
+		verifyNoMoreInteractions(this.driver, this.session, this.statementResult, this.resultSummary, this.serverInfo, this.databaseInfo);
 	}
 
 	@Test
@@ -114,23 +114,23 @@ class Neo4jHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 		AtomicInteger cnt = new AtomicInteger(0);
 
 		prepareSharedMocks();
-		when(statementResult.consume()).thenReturn(resultSummary);
-		when(session.run(anyString())).thenAnswer(invocation -> {
+		when(this.statementResult.consume()).thenReturn(this.resultSummary);
+		when(this.session.run(anyString())).thenAnswer(invocation -> {
 			if (cnt.compareAndSet(0, 1)) {
 				throw new SessionExpiredException("Session expired");
 			}
-			return statementResult;
+			return Neo4jHealthIndicatorTest.this.statementResult;
 		});
-		when(driver.session(any(SessionConfig.class))).thenReturn(session);
+		when(driver.session(any(SessionConfig.class))).thenReturn(this.session);
 
-		Neo4jHealthIndicator healthIndicator = new Neo4jHealthIndicator(driver);
+		Neo4jHealthIndicator healthIndicator = new Neo4jHealthIndicator(this.driver);
 		Health health = healthIndicator.health();
 
 		assertThat(health.getStatus()).isEqualTo(Status.UP);
 		assertThat(health.getDetails()).containsEntry("server", "4711@Zu Hause");
 
-		verify(session, times(2)).close();
-		verifyNoMoreInteractions(driver, session, statementResult, resultSummary, serverInfo, databaseInfo);
+		verify(this.session, times(2)).close();
+		verifyNoMoreInteractions(this.driver, this.session, this.statementResult, this.resultSummary, this.serverInfo, this.databaseInfo);
 	}
 
 	@Test
@@ -144,6 +144,6 @@ class Neo4jHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 		assertThat(health.getStatus()).isEqualTo(Status.DOWN);
 		assertThat(health.getDetails()).containsKeys("error");
 
-		verifyNoMoreInteractions(driver, session, statementResult, resultSummary, serverInfo, databaseInfo);
+		verifyNoMoreInteractions(this.driver, this.session, this.statementResult, this.resultSummary, this.serverInfo, this.databaseInfo);
 	}
 }
