@@ -38,10 +38,8 @@ import org.springframework.util.StringUtils;
  *
  * @author Michael J. Simons
  */
-@ConfigurationProperties(prefix = Neo4jDriverProperties.PREFIX)
+@ConfigurationProperties(prefix = "org.neo4j.driver")
 public class Neo4jDriverProperties {
-
-	static final String PREFIX = "org.neo4j.driver";
 
 	/**
 	 * The uri this driver should connect to. The driver supports bolt, bolt+routing or neo4j as schemes.
@@ -166,7 +164,7 @@ public class Neo4jDriverProperties {
 			boolean hasKerberosTicket = StringUtils.hasText(this.kerberosTicket);
 
 			if (hasUsername && hasKerberosTicket) {
-				throw new InvalidConfigurationPropertyValueException(PREFIX + ".authentication",
+				throw new InvalidConfigurationPropertyValueException("org.neo4j.driver.authentication",
 					"username=" + username + ",kerberos-ticket=" + kerberosTicket,
 					"Cannot specify both username and kerberos ticket.");
 			}
@@ -446,7 +444,7 @@ public class Neo4jDriverProperties {
 		}
 
 		Config.TrustStrategy toInternalRepresentation() {
-			String propertyName = Neo4jDriverProperties.PREFIX + ".config.trust-settings";
+			String propertyName = "org.neo4j.driver.config.trust-settings";
 
 			Config.TrustStrategy internalRepresentation;
 			switch (this.strategy) {

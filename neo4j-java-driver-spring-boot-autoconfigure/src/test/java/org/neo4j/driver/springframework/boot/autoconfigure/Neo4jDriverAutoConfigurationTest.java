@@ -56,7 +56,7 @@ class Neo4jDriverAutoConfigurationTest {
 	void shouldCreateDefaultDriverFactoryForSingleUri() {
 
 		this.contextRunner
-			.withPropertyValues(Neo4jDriverProperties.PREFIX + ".uri=bolt://localhost:4711")
+			.withPropertyValues("org.neo4j.driver.uri=bolt://localhost:4711")
 			.run((ctx) -> assertThat(ctx)
 				.hasSingleBean(Driver.class)
 			);

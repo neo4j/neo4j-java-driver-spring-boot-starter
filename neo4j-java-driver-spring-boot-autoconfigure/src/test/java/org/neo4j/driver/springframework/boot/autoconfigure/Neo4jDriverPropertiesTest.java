@@ -142,7 +142,7 @@ class Neo4jDriverPropertiesTest {
 			assertThatExceptionOfType(InvalidConfigurationPropertyValueException.class)
 				.isThrownBy(() -> authentication.asAuthToken())
 				.withMessage(
-					"Property " + Neo4jDriverProperties.PREFIX + ".authentication with value 'username=Farin,kerberos-ticket=AABBCCDDEE' is invalid: Cannot specify both username and kerberos ticket.");
+					"Property org.neo4j.driver.authentication with value 'username=Farin,kerberos-ticket=AABBCCDDEE' is invalid: Cannot specify both username and kerberos ticket.");
 		}
 	}
 
@@ -375,7 +375,7 @@ class Neo4jDriverPropertiesTest {
 			assertThatExceptionOfType(InvalidConfigurationPropertyValueException.class)
 				.isThrownBy(() -> settings.toInternalRepresentation())
 				.withMessage(
-					"Property " + Neo4jDriverProperties.PREFIX + ".config.trust-settings with value 'TRUST_CUSTOM_CA_SIGNED_CERTIFICATES' is invalid: Configured trust strategy requires a certificate file.");
+					"Property org.neo4j.driver.config.trust-settings with value 'TRUST_CUSTOM_CA_SIGNED_CERTIFICATES' is invalid: Configured trust strategy requires a certificate file.");
 		}
 	}
 
