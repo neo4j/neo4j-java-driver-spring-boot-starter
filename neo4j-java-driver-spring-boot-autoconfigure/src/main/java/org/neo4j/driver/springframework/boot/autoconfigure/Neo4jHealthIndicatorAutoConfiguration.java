@@ -27,6 +27,7 @@ import org.neo4j.ogm.session.SessionFactory;
 import org.springframework.boot.actuate.autoconfigure.health.CompositeHealthIndicatorConfiguration;
 import org.springframework.boot.actuate.autoconfigure.health.ConditionalOnEnabledHealthIndicator;
 import org.springframework.boot.actuate.autoconfigure.health.HealthIndicatorAutoConfiguration;
+import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -47,7 +48,7 @@ import org.springframework.core.annotation.Order;
  * @soundtrack Iron Maiden - Somewhere In Time
  */
 @Configuration
-@ConditionalOnClass({ HealthIndicator.class })
+@ConditionalOnClass({ Health.class })
 @ConditionalOnEnabledHealthIndicator("neo4j")
 @AutoConfigureBefore({HealthIndicatorAutoConfiguration.class,
 	org.springframework.boot.actuate.autoconfigure.neo4j.Neo4jHealthIndicatorAutoConfiguration.class})

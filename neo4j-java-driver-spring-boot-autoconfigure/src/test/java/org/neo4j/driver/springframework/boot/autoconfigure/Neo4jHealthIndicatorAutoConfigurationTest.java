@@ -61,10 +61,10 @@ class Neo4jHealthIndicatorAutoConfigurationTest {
 		}
 
 		@Test
-		void shouldRequireHealthIndicatorClasses() {
+		void shouldRequireHealthClasses() {
 			contextRunner
 				.withUserConfiguration(WithDriver.class)
-				.withClassLoader(new FilteredClassLoader(HealthIndicator.class))
+				.withClassLoader(new FilteredClassLoader(Health.class))
 				.run(ctx -> assertThat(ctx)
 					.doesNotHaveBean(Neo4jHealthIndicator.class)
 				);
