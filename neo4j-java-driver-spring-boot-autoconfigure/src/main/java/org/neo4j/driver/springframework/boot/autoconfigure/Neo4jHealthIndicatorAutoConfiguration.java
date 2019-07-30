@@ -40,6 +40,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for health indicators on all available
@@ -60,7 +61,7 @@ import org.springframework.context.annotation.Configuration;
 public class Neo4jHealthIndicatorAutoConfiguration {
 
 	@Configuration
-	@ConditionalOnClass(HealthIndicator.class)
+	@Order(-20)
 	static class Neo4jHealthIndicatorConfiguration
 		extends CompositeHealthIndicatorConfiguration<Neo4jHealthIndicator, Driver> {
 
@@ -73,11 +74,13 @@ public class Neo4jHealthIndicatorAutoConfiguration {
 	}
 
 	@Configuration
-	@ConditionalOnClass({ ReactiveHealthIndicator.class, Flux.class })
+	@ConditionalOnClass({ Flux.class })
+	@Order(-30)
 	static class Neo4jReactiveHealthIndicatorConfiguration
 		extends CompositeReactiveHealthIndicatorConfiguration<Neo4jReactiveHealthIndicator, Driver> {
 
 		@Bean
+		@ConditionalOnMissingBean(name = "neo4jHealthIndicator")
 		public ReactiveHealthIndicator neo4jHealthIndicator(Map<String, Driver> drivers) {
 			return createHealthIndicator(drivers);
 		}
