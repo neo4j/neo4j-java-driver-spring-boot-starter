@@ -19,13 +19,16 @@
 package org.neo4j.driver.springframework.boot.autoconfigure;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 import static org.neo4j.driver.springframework.boot.test.Neo4jDriverMocks.*;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.driver.v1.Driver;
 import org.neo4j.driver.springframework.boot.actuate.Neo4jHealthIndicator;
+import org.neo4j.ogm.session.SessionFactory;
 import org.springframework.boot.actuate.autoconfigure.health.HealthIndicatorAutoConfiguration;
+import org.springframework.boot.actuate.health.AbstractHealthIndicator;
 import org.springframework.boot.actuate.health.ApplicationHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
@@ -49,7 +52,7 @@ class Neo4jHealthIndicatorAutoConfigurationTest {
 		@Test
 		void shouldRespectManagementDecisions() {
 			contextRunner
-				.withUserConfiguration(WithDriverWithMetrics.class)
+				.withUserConfiguration(WithDriver.class)
 				.withPropertyValues("management.health.neo4j.enabled=false")
 				.run(ctx -> assertThat(ctx)
 					.doesNotHaveBean(Neo4jHealthIndicator.class)
@@ -58,10 +61,10 @@ class Neo4jHealthIndicatorAutoConfigurationTest {
 		}
 
 		@Test
-		void shouldRequireHealthClass() {
+		void shouldRequireHealthIndicatorClasses() {
 			contextRunner
-				.withUserConfiguration(WithDriverWithMetrics.class)
-				.withClassLoader(new FilteredClassLoader(Health.class))
+				.withUserConfiguration(WithDriver.class)
+				.withClassLoader(new FilteredClassLoader(HealthIndicator.class))
 				.run(ctx -> assertThat(ctx)
 					.doesNotHaveBean(Neo4jHealthIndicator.class)
 				);
@@ -70,7 +73,7 @@ class Neo4jHealthIndicatorAutoConfigurationTest {
 		@Test
 		void shouldRequireDriverClass() {
 			contextRunner
-				.withUserConfiguration(WithDriverWithMetrics.class)
+				.withUserConfiguration(WithDriver.class)
 				.withClassLoader(new FilteredClassLoader(Driver.class))
 				.run(ctx -> assertThat(ctx)
 					.doesNotHaveBean(Neo4jHealthIndicator.class)
@@ -86,23 +89,72 @@ class Neo4jHealthIndicatorAutoConfigurationTest {
 		}
 
 		@Test
-		void shouldRequireHealthIndicatorClasses() {
+		void defaultIndicatorCanBeReplaced() {
 			contextRunner
-				.withUserConfiguration(WithDriverWithMetrics.class)
-				.withClassLoader(
-					new FilteredClassLoader(HealthIndicator.class))
+				.withUserConfiguration(WithDriver.class, WithSessionFactory.class, WithCustomIndicator.class)
+				.run((context) -> {
+					assertThat(context).hasBean("neo4jHealthIndicator");
+					assertThat(context).doesNotHaveBean(ApplicationHealthIndicator.class);
+					Health health = context.getBean("neo4jHealthIndicator", HealthIndicator.class).health();
+					assertThat(health.getDetails()).containsOnly(entry("test", true));
+				});
+		}
+	}
+
+	@Nested
+	class Matches {
+
+		@Test
+		void ogmHealthIndicatorShouldHavePrecedence() {
+			contextRunner
+				.withUserConfiguration(WithDriver.class, WithSessionFactory.class)
 				.run(ctx -> assertThat(ctx)
 					.doesNotHaveBean(Neo4jHealthIndicator.class)
+					.hasSingleBean(org.springframework.boot.actuate.neo4j.Neo4jHealthIndicator.class)
+				);
+		}
+
+		@Test
+		void shouldCreateHealthIndicator() {
+			contextRunner
+				.withUserConfiguration(WithDriver.class)
+				.run(ctx -> assertThat(ctx)
+					.hasSingleBean(Neo4jHealthIndicator.class)
+					.doesNotHaveBean(org.springframework.boot.actuate.neo4j.Neo4jHealthIndicator.class)
 				);
 		}
 	}
 
 	@Configuration
-	static class WithDriverWithMetrics {
+	static class WithDriver {
 
 		@Bean
 		Driver driver() {
 			return mockDriverWithoutMetrics();
 		}
+	}
+
+	@Configuration
+	static class WithSessionFactory {
+
+		@Bean
+		SessionFactory sessionFactory() {
+			return mock(SessionFactory.class);
+		}
+	}
+
+	@Configuration
+	static class WithCustomIndicator {
+
+		@Bean
+		HealthIndicator neo4jHealthIndicator() {
+			return new AbstractHealthIndicator() {
+
+				protected void doHealthCheck(Health.Builder builder) throws Exception {
+					builder.up().withDetail("test", true);
+				}
+			};
+		}
+
 	}
 }

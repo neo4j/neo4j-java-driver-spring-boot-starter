@@ -18,25 +18,30 @@
  */
 package org.neo4j.driver.springframework.boot.autoconfigure;
 
+import static org.assertj.core.api.Assertions.*;
+
+import java.util.Collections;
+
 import org.junit.jupiter.api.Test;
+import org.neo4j.driver.springframework.boot.autoconfigure.domain.EmptyPackage;
 import org.neo4j.driver.v1.Driver;
 import org.neo4j.driver.v1.Session;
 import org.neo4j.driver.v1.StatementResult;
 import org.neo4j.driver.v1.Transaction;
-import org.testcontainers.containers.Neo4jContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-
+import org.neo4j.ogm.model.Result;
+import org.neo4j.ogm.session.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.testcontainers.containers.Neo4jContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * @author Michael J. Simons
@@ -51,9 +56,12 @@ class Neo4jDriverAutoConfigurationIT {
 
 	private final Driver driver;
 
+	private final SessionFactory sessionFactory;
+
 	@Autowired
-	Neo4jDriverAutoConfigurationIT(Driver driver) {
+	Neo4jDriverAutoConfigurationIT(Driver driver, SessionFactory sessionFactory) {
 		this.driver = driver;
+		this.sessionFactory = sessionFactory;
 	}
 
 	@Test
@@ -67,6 +75,13 @@ class Neo4jDriverAutoConfigurationIT {
 			assertThat(statementResult.hasNext()).isFalse();
 			tx.success();
 		}
+	}
+
+	@Test
+	void ensureOgmSessionIsUsable() {
+
+		Result result = sessionFactory.openSession().query("MATCH (n:Thing) RETURN n LIMIT 1", Collections.emptyMap());
+		assertThat(result.iterator().hasNext()).isFalse();
 	}
 
 	static class Neo4jContainerBasedTestPropertyProvider
@@ -84,6 +99,7 @@ class Neo4jDriverAutoConfigurationIT {
 
 	@Configuration
 	@ImportAutoConfiguration(Neo4jDriverAutoConfiguration.class)
+	@EntityScan(basePackageClasses = EmptyPackage.class)
 	static class TestConfiguration {
 	}
 }

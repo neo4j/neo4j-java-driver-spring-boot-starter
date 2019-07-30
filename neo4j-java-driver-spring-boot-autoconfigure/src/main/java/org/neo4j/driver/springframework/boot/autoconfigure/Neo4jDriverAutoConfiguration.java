@@ -18,18 +18,13 @@
  */
 package org.neo4j.driver.springframework.boot.autoconfigure;
 
-import org.neo4j.driver.v1.AuthToken;
-import org.neo4j.driver.v1.Config;
 import org.neo4j.driver.v1.Driver;
-import org.neo4j.driver.v1.GraphDatabase;
-
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.data.neo4j.Neo4jDataAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Import;
 
 /**
  * Automatic configuration of Neo4js Java Driver.
@@ -40,19 +35,9 @@ import org.springframework.context.annotation.Lazy;
  * @author Michael J. Simons
  */
 @Configuration
+@AutoConfigureBefore(Neo4jDataAutoConfiguration.class)
 @ConditionalOnClass(Driver.class)
 @EnableConfigurationProperties(Neo4jDriverProperties.class)
+@Import({ DriverConfiguration.class, AdditionalDataConfiguration.class })
 public class Neo4jDriverAutoConfiguration {
-
-	@Bean
-	@ConditionalOnMissingBean(Driver.class)
-	@ConditionalOnProperty(prefix = "org.neo4j.driver", name = "uri")
-	@Lazy // The current 1.7 driver does automatically verify connections
-	public Driver neo4jDriver(final Neo4jDriverProperties driverProperties) {
-
-		final AuthToken authToken = driverProperties.getAuthentication().asAuthToken();
-		final Config config = driverProperties.asDriverConfig();
-
-		return GraphDatabase.driver(driverProperties.getUri(), authToken, config);
-	}
 }
