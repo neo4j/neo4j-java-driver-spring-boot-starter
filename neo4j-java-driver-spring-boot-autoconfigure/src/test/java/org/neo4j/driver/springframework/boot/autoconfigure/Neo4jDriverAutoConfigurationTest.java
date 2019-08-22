@@ -24,7 +24,6 @@ import org.neo4j.driver.v1.Driver;
 
 import org.neo4j.ogm.drivers.bolt.driver.BoltDriver;
 import org.neo4j.ogm.session.SessionFactory;
-import org.neo4j.ogm.transaction.TransactionManager;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.data.neo4j.Neo4jDataAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
