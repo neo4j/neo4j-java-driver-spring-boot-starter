@@ -39,6 +39,7 @@ import org.springframework.test.context.ContextConfiguration;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Optional;
+import java.util.function.Predicate;
 
 /**
  * @author Michael J. Simons
@@ -54,10 +55,13 @@ class Neo4jDriverAutoConfigurationIT {
 	@Container
 	private static Neo4jContainer neo4jServer;
 	static {
-		final String imageVersion = Optional.ofNullable(System.getenv(SYS_PROPERTY_NEO4J_VERSION)).orElse("3.5.8");
+		Predicate<String> isNotBlank = s -> !s.trim().isEmpty();
+		final String imageVersion = Optional.ofNullable(System.getenv(SYS_PROPERTY_NEO4J_VERSION))
+			.filter(isNotBlank)
+			.orElse("3.5.8");
 		neo4jServer = new Neo4jContainer<>("neo4j:" + imageVersion)
 			.withoutAuthentication()
-			.withEnv("NEO4J_ACCEPT_LICENSE_AGREEMENT", Optional.ofNullable(System.getenv(SYS_PROPERTY_NEO4J_ACCEPT_COMMERCIAL_EDITION)).orElse("no"));
+			.withEnv("NEO4J_ACCEPT_LICENSE_AGREEMENT", Optional.ofNullable(System.getenv(SYS_PROPERTY_NEO4J_ACCEPT_COMMERCIAL_EDITION)).filter(isNotBlank).orElse("no"));
 	}
 
 
