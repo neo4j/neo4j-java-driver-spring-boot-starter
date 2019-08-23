@@ -24,7 +24,7 @@ import org.neo4j.driver.AccessMode;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.exceptions.SessionExpiredException;
-import org.neo4j.driver.internal.SessionConfig;
+import org.neo4j.driver.SessionConfig;
 import org.neo4j.driver.summary.DatabaseInfo;
 import org.neo4j.driver.summary.ResultSummary;
 import org.neo4j.driver.summary.ServerInfo;

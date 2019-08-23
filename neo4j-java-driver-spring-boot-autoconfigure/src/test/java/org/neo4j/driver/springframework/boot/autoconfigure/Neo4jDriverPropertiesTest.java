@@ -238,8 +238,6 @@ class Neo4jDriverPropertiesTest {
 			assertThat(driverSettings.isEncrypted()).isEqualTo(defaultConfig.encrypted());
 			assertThat(driverSettings.getTrustSettings().getStrategy().name())
 				.isEqualTo(defaultConfig.trustStrategy().strategy().name());
-			assertThat(driverSettings.getLoadBalancingStrategy().name())
-				.isEqualTo(defaultConfig.loadBalancingStrategy().name());
 			assertDuration(driverSettings.getConnectionTimeout(), defaultConfig.connectionTimeoutMillis());
 			assertDuration(driverSettings.getMaxTransactionRetryTime(), RetrySettings.DEFAULT.maxRetryTimeMs());
 			assertThat(driverSettings.getServerAddressResolverClass()).isNull();
@@ -268,15 +266,6 @@ class Neo4jDriverPropertiesTest {
 			driverProperties.getConfig().setTrustSettings(trustSettings);
 			assertThat(driverProperties.asDriverConfig().trustStrategy().strategy()).isEqualTo(
 				Config.TrustStrategy.Strategy.TRUST_SYSTEM_CA_SIGNED_CERTIFICATES);
-		}
-
-		@Test
-		void loadBalancingStrategySettingsShouldWork() {
-
-			Neo4jDriverProperties configProperties = new Neo4jDriverProperties();
-			configProperties.getConfig().setLoadBalancingStrategy(DriverSettings.LoadBalancingStrategy.ROUND_ROBIN);
-			assertThat(configProperties.asDriverConfig().loadBalancingStrategy()).isEqualTo(
-				Config.LoadBalancingStrategy.ROUND_ROBIN);
 		}
 
 		@Test

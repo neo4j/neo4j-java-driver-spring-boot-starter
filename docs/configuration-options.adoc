@@ -37,10 +37,6 @@
 |
 |+++Pooled connections that have been idle in the pool for longer than this timeout will be tested before they are used again.+++
 
-|`{config_prefix}.config.load-balancing-strategy`
-|
-|+++Provide an alternative load balancing strategy for the routing driver to use.+++
-
 |`{config_prefix}.pool.log-leaked-sessions`
 |`false`
 |+++Flag, if leaked sessions logging is enabled.+++

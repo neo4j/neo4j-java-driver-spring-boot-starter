@@ -32,7 +32,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.driver.exceptions.ServiceUnavailableException;
 import org.neo4j.driver.exceptions.SessionExpiredException;
-import org.neo4j.driver.internal.SessionConfig;
+import org.neo4j.driver.SessionConfig;
 import org.neo4j.driver.reactive.RxSession;
 import org.neo4j.driver.reactive.RxStatementResult;
 import org.springframework.boot.actuate.health.Status;

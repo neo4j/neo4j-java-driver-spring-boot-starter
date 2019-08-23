@@ -286,29 +286,15 @@ public class Neo4jDriverProperties {
 
 	public static class DriverSettings {
 
-		public enum LoadBalancingStrategy {
-			ROUND_ROBIN,
-			LEAST_CONNECTED;
-
-			Config.LoadBalancingStrategy toInternalRepresentation() {
-				return Config.LoadBalancingStrategy.valueOf(this.name());
-			}
-		}
-
 		/**
 		 * Flag, if the driver should use encrypted traffic.
 		 */
-		private boolean encrypted = true;
+		private boolean encrypted = false;
 
 		/**
 		 * Specify how to determine the authenticity of an encryption certificate provided by the Neo4j instance we are connecting to. Defaults to trust all.
 		 */
 		private TrustSettings trustSettings = new TrustSettings();
-
-		/**
-		 * Provide an alternative load balancing strategy for the routing driver to use.
-		 */
-		private LoadBalancingStrategy loadBalancingStrategy = LoadBalancingStrategy.LEAST_CONNECTED;
 
 		/**
 		 * Specify socket connection timeout.
@@ -340,14 +326,6 @@ public class Neo4jDriverProperties {
 
 		public void setTrustSettings(TrustSettings trustSettings) {
 			this.trustSettings = trustSettings;
-		}
-
-		public LoadBalancingStrategy getLoadBalancingStrategy() {
-			return this.loadBalancingStrategy;
-		}
-
-		public void setLoadBalancingStrategy(LoadBalancingStrategy loadBalancingStrategy) {
-			this.loadBalancingStrategy = loadBalancingStrategy;
 		}
 
 		public Duration getConnectionTimeout() {
@@ -383,7 +361,6 @@ public class Neo4jDriverProperties {
 				builder.withoutEncryption();
 			}
 			builder.withTrustStrategy(this.trustSettings.toInternalRepresentation());
-			builder.withLoadBalancingStrategy(this.loadBalancingStrategy.toInternalRepresentation());
 			builder.withConnectionTimeout(this.connectionTimeout.toMillis(), TimeUnit.MILLISECONDS);
 			builder.withMaxTransactionRetryTime(this.maxTransactionRetryTime.toMillis(), TimeUnit.MILLISECONDS);
 
@@ -407,7 +384,7 @@ public class Neo4jDriverProperties {
 		/**
 		 * Configures the strategy to use use.
 		 */
-		private TrustSettings.Strategy strategy = Strategy.TRUST_ALL_CERTIFICATES;
+		private TrustSettings.Strategy strategy = Strategy.TRUST_SYSTEM_CA_SIGNED_CERTIFICATES;
 
 		/**
 		 * The file of the certificate to use.
