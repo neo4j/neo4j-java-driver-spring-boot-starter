@@ -5,7 +5,6 @@ ifndef::manualIncludeDir[]
 endif::[]
 
 We provide several examples how to use this starter.
-The reactive demo can only be used with Neo4j version 4.
 
 Each example comes with a dedicated readme, that guides you through it.
 
