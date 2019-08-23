@@ -117,7 +117,7 @@
 				</property>
 			</activation>
 			<properties>
-				<changelist>-SNAPSHOT</changelist>
+				<changelist></changelist>
 			</properties>
 		</profile>
 	</profiles>
