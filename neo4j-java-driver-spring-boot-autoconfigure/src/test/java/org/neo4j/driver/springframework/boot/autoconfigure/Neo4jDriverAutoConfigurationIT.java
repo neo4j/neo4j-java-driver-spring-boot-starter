@@ -43,6 +43,8 @@ import org.testcontainers.containers.Neo4jContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.util.Optional;
+
 /**
  * @author Michael J. Simons
  */
@@ -51,8 +53,18 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @ContextConfiguration(initializers = Neo4jDriverAutoConfigurationIT.Neo4jContainerBasedTestPropertyProvider.class)
 class Neo4jDriverAutoConfigurationIT {
 
+	private static final String SYS_PROPERTY_NEO4J_ACCEPT_COMMERCIAL_EDITION = "SPRING_BOOT_STARTER_NEO4J_ACCEPT_COMMERCIAL_EDITION";
+	private static final String SYS_PROPERTY_NEO4J_VERSION = "SPRING_BOOT_STARTER_NEO4J_VERSION";
+
 	@Container
-	private static Neo4jContainer neo4jServer = new Neo4jContainer<>();
+	private static Neo4jContainer neo4jServer;
+	static {
+		final String imageVersion = Optional.ofNullable(System.getenv(SYS_PROPERTY_NEO4J_VERSION)).orElse("3.5.8");
+		neo4jServer = new Neo4jContainer<>("neo4j:" + imageVersion)
+			.withoutAuthentication()
+			.withEnv("NEO4J_ACCEPT_LICENSE_AGREEMENT", Optional.ofNullable(System.getenv(SYS_PROPERTY_NEO4J_ACCEPT_COMMERCIAL_EDITION)).orElse("no"));
+	}
+
 
 	private final Driver driver;
 
