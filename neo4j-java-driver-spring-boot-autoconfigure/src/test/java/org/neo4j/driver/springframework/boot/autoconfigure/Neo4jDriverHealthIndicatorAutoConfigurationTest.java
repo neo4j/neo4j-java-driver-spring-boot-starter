@@ -41,11 +41,14 @@ import org.springframework.context.annotation.Configuration;
 /**
  * @author Michael J. Simons
  */
-class Neo4jHealthIndicatorAutoConfigurationTest {
+class Neo4jDriverHealthIndicatorAutoConfigurationTest {
 
 	private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
 		.withConfiguration(
-			AutoConfigurations.of(HealthIndicatorAutoConfiguration.class, Neo4jHealthIndicatorAutoConfiguration.class));
+			AutoConfigurations.of(HealthIndicatorAutoConfiguration.class,
+				Neo4jDriverHealthIndicatorAutoConfiguration.class,
+				org.springframework.boot.actuate.autoconfigure.neo4j.Neo4jHealthIndicatorAutoConfiguration.class
+			));
 
 	@Nested
 	class NoMatches {
@@ -108,10 +111,11 @@ class Neo4jHealthIndicatorAutoConfigurationTest {
 		void ogmHealthIndicatorShouldHavePrecedence() {
 			contextRunner
 				.withUserConfiguration(WithDriver.class, WithSessionFactory.class)
-				.run(ctx -> assertThat(ctx)
-					.doesNotHaveBean(Neo4jHealthIndicator.class)
-					.hasSingleBean(org.springframework.boot.actuate.neo4j.Neo4jHealthIndicator.class)
-				);
+				.run(ctx -> {
+					assertThat(ctx)
+						.doesNotHaveBean(Neo4jHealthIndicator.class)
+						.hasSingleBean(org.springframework.boot.actuate.neo4j.Neo4jHealthIndicator.class);
+				});
 		}
 
 		@Test

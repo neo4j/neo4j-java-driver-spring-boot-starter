@@ -20,13 +20,12 @@ package org.neo4j.driver.springframework.boot.autoconfigure;
 
 import java.util.Map;
 
-import org.neo4j.driver.v1.Driver;
 import org.neo4j.driver.springframework.boot.actuate.Neo4jHealthIndicator;
-
-import org.neo4j.ogm.session.SessionFactory;
+import org.neo4j.driver.v1.Driver;
 import org.springframework.boot.actuate.autoconfigure.health.CompositeHealthIndicatorConfiguration;
 import org.springframework.boot.actuate.autoconfigure.health.ConditionalOnEnabledHealthIndicator;
 import org.springframework.boot.actuate.autoconfigure.health.HealthIndicatorAutoConfiguration;
+import org.springframework.boot.actuate.autoconfigure.neo4j.Neo4jHealthIndicatorAutoConfiguration;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -48,16 +47,15 @@ import org.springframework.core.annotation.Order;
  * @soundtrack Iron Maiden - Somewhere In Time
  */
 @Configuration
-@ConditionalOnClass({ Health.class })
+@ConditionalOnClass({ Health.class, Driver.class })
 @ConditionalOnEnabledHealthIndicator("neo4j")
-@AutoConfigureBefore({HealthIndicatorAutoConfiguration.class,
-	org.springframework.boot.actuate.autoconfigure.neo4j.Neo4jHealthIndicatorAutoConfiguration.class})
-@AutoConfigureAfter({ Neo4jDriverAutoConfiguration.class, Neo4jDataAutoConfiguration.class })
+@ConditionalOnBean(Driver.class)
+@AutoConfigureBefore({ HealthIndicatorAutoConfiguration.class })
+@AutoConfigureAfter({ Neo4jDriverAutoConfiguration.class, Neo4jDataAutoConfiguration.class,
+	Neo4jHealthIndicatorAutoConfiguration.class })
 @ConditionalOnMissingBean(name = "neo4jHealthIndicator")
-public class Neo4jHealthIndicatorAutoConfiguration {
+public class Neo4jDriverHealthIndicatorAutoConfiguration {
 
-	@ConditionalOnClass(Driver.class)
-	@ConditionalOnBean(Driver.class)
 	@Order(-20)
 	static class Neo4jNeo4jHealthIndicatorConfiguration
 		extends CompositeHealthIndicatorConfiguration<Neo4jHealthIndicator, Driver> {
@@ -65,19 +63,6 @@ public class Neo4jHealthIndicatorAutoConfiguration {
 		@Bean
 		HealthIndicator neo4jHealthIndicator(Map<String, Driver> drivers) {
 			return createHealthIndicator(drivers);
-		}
-
-	}
-
-	@ConditionalOnClass(SessionFactory.class)
-	@ConditionalOnBean(SessionFactory.class)
-	@Order(-10)
-	static class Neo4jOgmHealthIndicatorConfiguration
-		extends CompositeHealthIndicatorConfiguration<org.springframework.boot.actuate.neo4j.Neo4jHealthIndicator, SessionFactory> {
-
-		@Bean
-		HealthIndicator neo4jHealthIndicator(Map<String, SessionFactory> sessionFactories) {
-			return createHealthIndicator(sessionFactories);
 		}
 
 	}
