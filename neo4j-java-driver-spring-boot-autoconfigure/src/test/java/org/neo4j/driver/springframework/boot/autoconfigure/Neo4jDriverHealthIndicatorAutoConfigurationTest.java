@@ -42,11 +42,11 @@ import org.springframework.context.annotation.Configuration;
 /**
  * @author Michael J. Simons
  */
-class Neo4jHealthIndicatorAutoConfigurationTest {
+class Neo4jDriverHealthIndicatorAutoConfigurationTest {
 
 	private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
 		.withConfiguration(
-			AutoConfigurations.of(HealthIndicatorAutoConfiguration.class, Neo4jHealthIndicatorAutoConfiguration.class));
+			AutoConfigurations.of(HealthIndicatorAutoConfiguration.class, Neo4jDriverHealthIndicatorAutoConfiguration.class));
 
 	@Nested
 	class NoMatches {

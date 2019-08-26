@@ -58,7 +58,7 @@ import org.springframework.core.annotation.Order;
 @AutoConfigureBefore(HealthIndicatorAutoConfiguration.class)
 @AutoConfigureAfter({ Neo4jDriverAutoConfiguration.class })
 @ConditionalOnBean({ Driver.class })
-public class Neo4jHealthIndicatorAutoConfiguration {
+public class Neo4jDriverHealthIndicatorAutoConfiguration {
 
 	@Configuration
 	@Order(-20)
