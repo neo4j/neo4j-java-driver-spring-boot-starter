@@ -79,6 +79,7 @@
 		<module>examples/testing-with-neo4j-harness</module>
 		<module>examples/web</module>
 		<module>examples/dedicated-routing-driver</module>
+		<module>examples/ogm-integration</module>
 	</modules>
 
 	<properties>
