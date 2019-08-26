@@ -110,7 +110,7 @@
 				</property>
 			</activation>
 			<properties>
-				<revision>1.7.5</revision>
+				<revision>1.7.5.1</revision>
 			</properties>
 		</profile>
 		<profile>
