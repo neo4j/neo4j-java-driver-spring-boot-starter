@@ -20,8 +20,7 @@ package org.neo4j.driver.springframework.boot.test;
 
 import static org.mockito.Mockito.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 
 import org.neo4j.driver.ConnectionPoolMetrics;
@@ -38,12 +37,10 @@ public final class Neo4jDriverMocks {
 
 	public static Driver mockDriverWithMetrics() {
 		ConnectionPoolMetrics p1 = mock(ConnectionPoolMetrics.class);
-
-		Map<String, ConnectionPoolMetrics> connectionPoolMetrics = new HashMap<>();
-		connectionPoolMetrics.put("p1", p1);
+		when(p1.id()).thenReturn("p1");
 
 		Metrics metrics = mock(Metrics.class);
-		when(metrics.connectionPoolMetrics()).thenReturn(connectionPoolMetrics);
+		when(metrics.connectionPoolMetrics()).thenReturn(Collections.singletonList(p1));
 
 		Driver driver = mock(Driver.class);
 		when(driver.metrics()).thenReturn(metrics);

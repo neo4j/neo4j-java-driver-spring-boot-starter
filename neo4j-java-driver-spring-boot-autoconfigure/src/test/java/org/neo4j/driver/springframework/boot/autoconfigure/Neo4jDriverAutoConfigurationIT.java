@@ -81,7 +81,7 @@ class Neo4jDriverAutoConfigurationIT {
 		) {
 			StatementResult statementResult = tx.run("MATCH (n:Thing) RETURN n LIMIT 1");
 			assertThat(statementResult.hasNext()).isFalse();
-			tx.success();
+			tx.commit();
 		}
 	}
 

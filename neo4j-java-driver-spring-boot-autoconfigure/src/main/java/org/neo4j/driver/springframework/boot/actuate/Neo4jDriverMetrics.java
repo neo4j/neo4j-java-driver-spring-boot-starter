@@ -25,7 +25,7 @@ import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.Tags;
 import io.micrometer.core.instrument.binder.MeterBinder;
 
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import org.neo4j.driver.ConnectionPoolMetrics;
 import org.neo4j.driver.Driver;
@@ -64,9 +64,9 @@ public final class Neo4jDriverMetrics implements MeterBinder {
 		metrics.connectionPoolMetrics().forEach(this.getPoolMetricsBinder(meterRegistry));
 	}
 
-	BiConsumer<String, ConnectionPoolMetrics> getPoolMetricsBinder(MeterRegistry meterRegistry) {
-		return (poolId, poolMetrics) -> {
-			Iterable<Tag> poolTags = Tags.concat(tags, "poolId", poolId);
+	Consumer<ConnectionPoolMetrics> getPoolMetricsBinder(MeterRegistry meterRegistry) {
+		return poolMetrics -> {
+			Iterable<Tag> poolTags = Tags.concat(tags, "poolId", poolMetrics.id());
 
 			FunctionCounter.builder(PREFIX + ".acquired", poolMetrics, ConnectionPoolMetrics::acquired)
 				.tags(poolTags)
