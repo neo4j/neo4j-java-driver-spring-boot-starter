@@ -1,5 +1,5 @@
 :sectanchors:
-:spring-boot_version: 2.1.7.RELEASE
+:spring-boot_version: 2.1.8.RELEASE
 image:https://img.shields.io/maven-central/v/org.neo4j.driver/neo4j-java-driver-spring-boot-starter.svg[Maven Central,link=http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.neo4j.driver%22%20AND%20a%3A%22neo4j-java-driver-spring-boot-starter%22]
 
 = neo4j-java-driver-spring-boot-starter
