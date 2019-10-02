@@ -113,7 +113,7 @@
 				</property>
 			</activation>
 			<properties>
-				<changelist>-beta01</changelist>
+				<changelist>-beta02</changelist>
 			</properties>
 		</profile>
 	</profiles>
