@@ -113,7 +113,7 @@ class Neo4jDriverMetricsAutoConfigurationTest {
 		}
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class WithDriverWithMetrics {
 
 		@Bean
@@ -122,7 +122,7 @@ class Neo4jDriverMetricsAutoConfigurationTest {
 		}
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class WithDriverWithoutMetrics {
 
 		@Bean
@@ -131,7 +131,7 @@ class Neo4jDriverMetricsAutoConfigurationTest {
 		}
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class WithMeterRegistry {
 
 		@Bean

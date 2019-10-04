@@ -181,7 +181,7 @@ class Neo4jDriverHealthContributorAutoConfigurationTest {
 			);
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class WithDriver {
 
 		@Bean
@@ -190,7 +190,7 @@ class Neo4jDriverHealthContributorAutoConfigurationTest {
 		}
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class WithSessionFactory {
 
 		@Bean
@@ -199,7 +199,7 @@ class Neo4jDriverHealthContributorAutoConfigurationTest {
 		}
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class WithCustomIndicator {
 
 		@Bean

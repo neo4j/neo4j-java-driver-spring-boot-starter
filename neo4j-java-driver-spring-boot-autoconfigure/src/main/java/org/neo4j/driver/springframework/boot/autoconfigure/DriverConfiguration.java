@@ -30,7 +30,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * @author Michael J. Simons
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 class DriverConfiguration {
 
 	@Bean

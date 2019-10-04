@@ -100,7 +100,7 @@ class Neo4jDriverAutoConfigurationIT {
 		}
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@ImportAutoConfiguration(Neo4jDriverAutoConfiguration.class)
 	@EntityScan(basePackageClasses = EmptyPackage.class)
 	static class TestConfiguration {

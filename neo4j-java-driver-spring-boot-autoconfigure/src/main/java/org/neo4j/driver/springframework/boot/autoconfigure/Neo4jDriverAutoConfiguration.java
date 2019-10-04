@@ -34,7 +34,7 @@ import org.springframework.context.annotation.Import;
  *
  * @author Michael J. Simons
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @AutoConfigureBefore(Neo4jDataAutoConfiguration.class)
 @ConditionalOnClass(Driver.class)
 @EnableConfigurationProperties(Neo4jDriverProperties.class)

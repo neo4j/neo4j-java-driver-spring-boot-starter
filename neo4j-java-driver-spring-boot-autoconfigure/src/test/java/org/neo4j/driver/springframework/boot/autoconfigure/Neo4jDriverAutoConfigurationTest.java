@@ -88,13 +88,13 @@ class Neo4jDriverAutoConfigurationTest {
 	}
 
 	// Needed to not make OGM go mad on package root
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@EntityScan(basePackageClasses = EmptyPackage.class)
 	static class TestConfiguration {
 	}
 
 	// Mock the driver for OGM related test
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class WithDriver {
 
 		@Bean

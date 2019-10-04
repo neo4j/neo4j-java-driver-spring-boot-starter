@@ -54,7 +54,7 @@ import org.springframework.core.annotation.Order;
  * @author Michael J. Simons
  * @soundtrack Iron Maiden - Somewhere In Time
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnClass({ Driver.class, Health.class })
 @ConditionalOnEnabledHealthIndicator("neo4j")
 @AutoConfigureBefore(HealthContributorAutoConfiguration.class)
@@ -63,7 +63,7 @@ import org.springframework.core.annotation.Order;
 @ConditionalOnBean({ Driver.class })
 public class Neo4jDriverHealthContributorAutoConfiguration {
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@Order(-20)
 	static class Neo4jHealthIndicatorConfiguration
 		extends CompositeHealthContributorConfiguration<Neo4jHealthIndicator, Driver> {
@@ -76,7 +76,7 @@ public class Neo4jDriverHealthContributorAutoConfiguration {
 		}
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass({ Flux.class })
 	@Order(-30)
 	static class Neo4jReactiveHealthIndicatorConfiguration

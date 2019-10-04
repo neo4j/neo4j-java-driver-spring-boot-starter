@@ -44,7 +44,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Michael J. Simons
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnBean(Driver.class)
 @ConditionalOnMissingBean(SessionFactory.class)
 @ConditionalOnClass({ SessionFactory.class, BoltDriver.class })
