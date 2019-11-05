@@ -299,7 +299,7 @@ public class Neo4jDriverProperties {
 		/**
 		 * Specify socket connection timeout.
 		 */
-		private Duration connectionTimeout = Duration.ofSeconds(5);
+		private Duration connectionTimeout = Duration.ofSeconds(30);
 
 		/**
 		 * Specify the maximum time transactions are allowed to retry.

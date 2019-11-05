@@ -26,7 +26,7 @@
 |+++Acquisition of new connections will be attempted for at most configured timeout.+++
 
 |`{config_prefix}.config.connection-timeout`
-|`5s`
+|`30s`
 |+++Specify socket connection timeout.+++
 
 |`{config_prefix}.config.encrypted`

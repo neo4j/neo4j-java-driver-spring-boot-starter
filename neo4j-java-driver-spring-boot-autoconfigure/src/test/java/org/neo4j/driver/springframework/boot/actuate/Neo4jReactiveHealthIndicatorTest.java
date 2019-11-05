@@ -53,7 +53,7 @@ class Neo4jReactiveHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 	void neo4jIsUp() {
 
 		prepareSharedMocks();
-		when(statementResult.summary()).thenReturn(Mono.just(resultSummary));
+		when(statementResult.consume()).thenReturn(Mono.just(resultSummary));
 		when(session.run(anyString())).thenReturn(statementResult);
 
 		when(driver.rxSession(any(SessionConfig.class))).thenReturn(session);
@@ -78,7 +78,7 @@ class Neo4jReactiveHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 		AtomicInteger cnt = new AtomicInteger(0);
 
 		prepareSharedMocks();
-		when(statementResult.summary()).thenReturn(Mono.just(resultSummary));
+		when(statementResult.consume()).thenReturn(Mono.just(resultSummary));
 		when(session.run(anyString())).thenAnswer(invocation -> {
 			if (cnt.compareAndSet(0, 1)) {
 				throw new SessionExpiredException("Session expired");
