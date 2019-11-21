@@ -1,0 +1,26 @@
+name: build
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  build:
+    name: with jdk ${{ matrix.java }}
+    runs-on: ubuntu-latest
+    env:
+      SDN_RX_NEO4J_REPOSITORY: neo4j/neo4j-experimental
+      SDN_RX_NEO4J_VERSION: 4.0.0-beta03mr03
+    strategy:
+      matrix:
+        java: [ '8', '11', '13' ]
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+            java-version: ${{ matrix.java }}
+      - name: Run Maven build
+        run: ./mvnw --no-transfer-progress clean verify
