@@ -3,11 +3,11 @@
 ifndef::manualIncludeDir[]
 :manualIncludeDir: ../
 endif::[]
-:neo4j-java-driver-spring-boot-starter_version: 4.0.0-beta02
+:neo4j-java-driver-spring-boot-starter_version: 4.0.0-rc1
 :groupId: org.neo4j.driver
 :artifactId: neo4j-java-driver-spring-boot-starter
-:spring-boot_version: 2.1.8.RELEASE
-:neo4j_version: 3.5.8
+:spring-boot_version: 2.1.10.RELEASE
+:neo4j_version: 3.5.12
 :config_prefix: org.neo4j.driver
 :driver_manual_base: https://neo4j.com/docs/driver-manual/1.7/
 :gh_base: https://github.com/neo4j/neo4j-java-driver-spring-boot-starter

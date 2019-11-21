@@ -117,7 +117,7 @@
 				</property>
 			</activation>
 			<properties>
-				<changelist>-beta02</changelist>
+				<changelist>-rc1</changelist>
 			</properties>
 		</profile>
 	</profiles>
