@@ -33,8 +33,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.driver.exceptions.ServiceUnavailableException;
 import org.neo4j.driver.exceptions.SessionExpiredException;
 import org.neo4j.driver.SessionConfig;
+import org.neo4j.driver.reactive.RxResult;
 import org.neo4j.driver.reactive.RxSession;
-import org.neo4j.driver.reactive.RxStatementResult;
 import org.springframework.boot.actuate.health.Status;
 
 /**
@@ -47,7 +47,7 @@ class Neo4jReactiveHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 	private RxSession session;
 
 	@Mock
-	private RxStatementResult statementResult;
+	private RxResult statementResult;
 
 	@Test
 	void neo4jIsUp() {

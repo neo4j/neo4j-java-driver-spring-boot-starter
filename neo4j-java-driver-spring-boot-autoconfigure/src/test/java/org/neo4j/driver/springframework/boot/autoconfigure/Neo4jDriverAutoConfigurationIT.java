@@ -20,8 +20,8 @@ package org.neo4j.driver.springframework.boot.autoconfigure;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.driver.Driver;
+import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
-import org.neo4j.driver.StatementResult;
 import org.neo4j.driver.Transaction;
 import org.testcontainers.containers.Neo4jContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -58,7 +58,7 @@ class Neo4jDriverAutoConfigurationIT {
 		Predicate<String> isNotBlank = s -> !s.trim().isEmpty();
 		final String imageVersion = Optional.ofNullable(System.getenv(SYS_PROPERTY_NEO4J_VERSION))
 			.filter(isNotBlank)
-			.orElse("3.5.8");
+			.orElse("3.5.12");
 		neo4jServer = new Neo4jContainer<>("neo4j:" + imageVersion)
 			.withoutAuthentication()
 			.withEnv("NEO4J_ACCEPT_LICENSE_AGREEMENT", Optional.ofNullable(System.getenv(SYS_PROPERTY_NEO4J_ACCEPT_COMMERCIAL_EDITION)).filter(isNotBlank).orElse("no"));
@@ -79,7 +79,7 @@ class Neo4jDriverAutoConfigurationIT {
 			Session session = driver.session();
 			Transaction tx = session.beginTransaction()
 		) {
-			StatementResult statementResult = tx.run("MATCH (n:Thing) RETURN n LIMIT 1");
+			Result statementResult = tx.run("MATCH (n:Thing) RETURN n LIMIT 1");
 			assertThat(statementResult.hasNext()).isFalse();
 			tx.commit();
 		}

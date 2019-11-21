@@ -27,8 +27,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
-import org.neo4j.driver.StatementResult;
 import org.neo4j.driver.exceptions.ServiceUnavailableException;
 import org.neo4j.driver.exceptions.SessionExpiredException;
 import org.neo4j.driver.SessionConfig;
@@ -45,7 +45,7 @@ class Neo4jHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 	private Session session;
 
 	@Mock
-	private StatementResult statementResult;
+	private Result statementResult;
 
 	@Test
 	void shouldWorkWithoutDatabaseName() {
