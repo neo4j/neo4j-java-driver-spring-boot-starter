@@ -23,4 +23,4 @@ jobs:
         with:
             java-version: ${{ matrix.java }}
       - name: Run Maven build
-        run: ./mvnw --no-transfer-progress clean verify
+        run: ./mvnw --no-transfer-progress clean verify -Drevision=4.0 -Dchangelist=-SNAPSHOT
