@@ -86,18 +86,18 @@
 		<changelist>-SNAPSHOT</changelist>
 		<checkstyle.version>8.18</checkstyle.version>
 		<flatten-maven-plugin.version>1.1.0</flatten-maven-plugin.version>
-		<jacoco-maven-plugin.version>0.8.2</jacoco-maven-plugin.version>
+		<jacoco-maven-plugin.version>0.8.5</jacoco-maven-plugin.version>
 		<java.version>1.8</java.version>
 		<junit-jupiter.version>5.4.2</junit-jupiter.version>
 		<maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
 		<maven-deploy-plugin.version>3.0.0-M1</maven-deploy-plugin.version>
 		<maven-enforcer-plugin.version>3.0.0-M2</maven-enforcer-plugin.version>
-		<maven-failsafe-plugin.version>3.0.0-M3</maven-failsafe-plugin.version>
+		<maven-failsafe-plugin.version>3.0.0-M4</maven-failsafe-plugin.version>
 		<maven-install-plugin.version>3.0.0-M1</maven-install-plugin.version>
 		<maven-javadoc-plugin.version>3.0.1</maven-javadoc-plugin.version>
 		<maven-jar-plugin.version>3.1.2</maven-jar-plugin.version>
 		<maven-source-plugin.version>3.0.1</maven-source-plugin.version>
-		<maven-surefire-plugin.version>3.0.0-M3</maven-surefire-plugin.version>
+		<maven-surefire-plugin.version>3.0.0-M4</maven-surefire-plugin.version>
 		<neo4j-java-driver.version>4.0.0-rc1</neo4j-java-driver.version>
 		<neo4j.version>3.5.12</neo4j.version>
 		<revision>4.0</revision>
