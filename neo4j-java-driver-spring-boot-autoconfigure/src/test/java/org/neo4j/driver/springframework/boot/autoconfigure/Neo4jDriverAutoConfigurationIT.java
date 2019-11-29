@@ -42,6 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.logging.Logger;
 
 /**
  * @author Michael J. Simons
@@ -52,18 +53,33 @@ import java.util.function.Predicate;
 class Neo4jDriverAutoConfigurationIT {
 
 	private static final String SYS_PROPERTY_NEO4J_ACCEPT_COMMERCIAL_EDITION = "SPRING_BOOT_STARTER_NEO4J_ACCEPT_COMMERCIAL_EDITION";
+	private static final String SYS_PROPERTY_NEO4J_REPOSITORY = "SPRING_BOOT_STARTER_NEO4J_REPOSITORY";
 	private static final String SYS_PROPERTY_NEO4J_VERSION = "SPRING_BOOT_STARTER_NEO4J_VERSION";
 
 	@Container
 	private static Neo4jContainer neo4jServer;
+
+	private static final Logger LOGGER = Logger.getLogger(Neo4jDriverAutoConfigurationIT.class.getName());
+
 	static {
 		Predicate<String> isNotBlank = s -> !s.trim().isEmpty();
-		final String imageVersion = Optional.ofNullable(System.getenv(SYS_PROPERTY_NEO4J_VERSION))
-			.filter(isNotBlank)
-			.orElse("3.5.12");
-		neo4jServer = new Neo4jContainer<>("neo4j:" + imageVersion)
+
+		String repository = Optional.ofNullable(System.getenv(SYS_PROPERTY_NEO4J_REPOSITORY))
+				.filter(isNotBlank)
+				.orElseGet(() -> System.getProperty(SYS_PROPERTY_NEO4J_REPOSITORY, "neo4j"));
+
+		String imageVersion = Optional.ofNullable(System.getenv(SYS_PROPERTY_NEO4J_VERSION))
+				.filter(isNotBlank)
+				.orElseGet(() -> System.getProperty(SYS_PROPERTY_NEO4J_VERSION, "3.5.13"));
+
+		String image = repository + ":" + imageVersion;
+		LOGGER.info(() -> String.format("Using image %s", image));
+
+		neo4jServer = new Neo4jContainer<>(image)
 			.withoutAuthentication()
-			.withEnv("NEO4J_ACCEPT_LICENSE_AGREEMENT", Optional.ofNullable(System.getenv(SYS_PROPERTY_NEO4J_ACCEPT_COMMERCIAL_EDITION)).filter(isNotBlank).orElse("no"));
+			.withEnv("NEO4J_ACCEPT_LICENSE_AGREEMENT",
+				Optional.ofNullable(System.getenv(SYS_PROPERTY_NEO4J_ACCEPT_COMMERCIAL_EDITION)).filter(isNotBlank)
+					.orElse("no"));
 	}
 
 
