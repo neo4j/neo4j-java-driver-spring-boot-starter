@@ -32,13 +32,14 @@ import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.testcontainers.containers.Neo4jContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * This tests shows that the Neo4j-OGM with the Java Driver autoconfiguration works fine with test slices.
+ *
+ * @author Michael J. Simons
  */
 @Testcontainers
 @DataNeo4jTest
@@ -79,6 +80,7 @@ class TestSliceTest {
 	static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
 
+			System.out.println("Provding things");
 			TestPropertyValues.of(
 				"org.neo4j.driver.uri=" + neo4jContainer.getBoltUrl(),
 				"org.neo4j.driver.authentication.username=neo4j",
