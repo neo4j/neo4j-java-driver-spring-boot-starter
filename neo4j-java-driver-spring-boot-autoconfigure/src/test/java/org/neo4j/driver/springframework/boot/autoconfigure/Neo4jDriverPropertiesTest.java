@@ -368,7 +368,7 @@ class Neo4jDriverPropertiesTest {
 		}
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@EnableConfigurationProperties(Neo4jDriverProperties.class)
 	static class TestConfiguration {
 

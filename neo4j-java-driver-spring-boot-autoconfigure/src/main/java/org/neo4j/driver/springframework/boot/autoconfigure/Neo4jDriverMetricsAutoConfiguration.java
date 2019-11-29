@@ -48,7 +48,7 @@ import org.springframework.context.annotation.Configuration;
  *
  * @author Michael J. Simons
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @AutoConfigureAfter({ MetricsAutoConfiguration.class, Neo4jDriverAutoConfiguration.class,
 	SimpleMetricsExportAutoConfiguration.class })
 @ConditionalOnClass({ Driver.class, MeterRegistry.class })

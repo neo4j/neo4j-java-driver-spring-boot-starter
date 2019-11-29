@@ -18,26 +18,29 @@
  */
 package org.neo4j.driver.springframework.boot.autoconfigure;
 
+import org.neo4j.driver.AuthToken;
+import org.neo4j.driver.Config;
 import org.neo4j.driver.Driver;
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.data.neo4j.Neo4jDataAutoConfiguration;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.neo4j.driver.GraphDatabase;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 
 /**
- * Automatic configuration of Neo4js Java Driver.
- * <p>
- * Provides an instance of {@link org.neo4j.driver.Driver} if the required library is available and no other instance
- * has been manually configured.
- *
  * @author Michael J. Simons
  */
 @Configuration(proxyBeanMethods = false)
-@AutoConfigureBefore(Neo4jDataAutoConfiguration.class)
-@ConditionalOnClass(Driver.class)
-@EnableConfigurationProperties(Neo4jDriverProperties.class)
-@Import({ DriverConfiguration.class, AdditionalDataConfiguration.class })
-public class Neo4jDriverAutoConfiguration {
+class DriverConfiguration {
+
+	@Bean
+	@ConditionalOnMissingBean(Driver.class)
+	@ConditionalOnProperty(prefix = "org.neo4j.driver", name = "uri")
+	Driver neo4jDriver(final Neo4jDriverProperties driverProperties) {
+
+		final AuthToken authToken = driverProperties.getAuthentication().asAuthToken();
+		final Config config = driverProperties.asDriverConfig();
+
+		return GraphDatabase.driver(driverProperties.getUri(), authToken, config);
+	}
 }

@@ -23,6 +23,8 @@ import org.neo4j.driver.Driver;
 import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.Transaction;
+import org.neo4j.driver.springframework.boot.autoconfigure.domain.EmptyPackage;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.testcontainers.containers.Neo4jContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -98,8 +100,9 @@ class Neo4jDriverAutoConfigurationIT {
 		}
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@ImportAutoConfiguration(Neo4jDriverAutoConfiguration.class)
+	@EntityScan(basePackageClasses = EmptyPackage.class)
 	static class TestConfiguration {
 	}
 }

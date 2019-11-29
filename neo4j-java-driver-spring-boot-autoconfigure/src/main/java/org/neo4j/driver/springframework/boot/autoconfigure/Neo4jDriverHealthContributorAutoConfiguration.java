@@ -25,19 +25,21 @@ import java.util.Map;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.springframework.boot.actuate.Neo4jHealthIndicator;
 import org.neo4j.driver.springframework.boot.actuate.Neo4jReactiveHealthIndicator;
-import org.springframework.boot.actuate.autoconfigure.health.CompositeHealthIndicatorConfiguration;
-import org.springframework.boot.actuate.autoconfigure.health.CompositeReactiveHealthIndicatorConfiguration;
+import org.springframework.boot.actuate.autoconfigure.health.CompositeHealthContributorConfiguration;
+import org.springframework.boot.actuate.autoconfigure.health.CompositeReactiveHealthContributorConfiguration;
 import org.springframework.boot.actuate.autoconfigure.health.ConditionalOnEnabledHealthIndicator;
-import org.springframework.boot.actuate.autoconfigure.health.HealthIndicatorAutoConfiguration;
+import org.springframework.boot.actuate.autoconfigure.health.HealthContributorAutoConfiguration;
+import org.springframework.boot.actuate.autoconfigure.neo4j.Neo4jHealthContributorAutoConfiguration;
 import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.health.HealthIndicator;
-import org.springframework.boot.actuate.health.ReactiveHealthIndicator;
+import org.springframework.boot.actuate.health.HealthContributor;
+import org.springframework.boot.actuate.health.ReactiveHealthContributor;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.data.neo4j.Neo4jDataAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -52,37 +54,38 @@ import org.springframework.core.annotation.Order;
  * @author Michael J. Simons
  * @soundtrack Iron Maiden - Somewhere In Time
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnClass({ Driver.class, Health.class })
 @ConditionalOnEnabledHealthIndicator("neo4j")
-@AutoConfigureBefore(HealthIndicatorAutoConfiguration.class)
-@AutoConfigureAfter({ Neo4jDriverAutoConfiguration.class })
+@AutoConfigureBefore(HealthContributorAutoConfiguration.class)
+@AutoConfigureAfter({ Neo4jDriverAutoConfiguration.class, Neo4jDataAutoConfiguration.class,
+	Neo4jHealthContributorAutoConfiguration.class })
 @ConditionalOnBean({ Driver.class })
-public class Neo4jDriverHealthIndicatorAutoConfiguration {
+public class Neo4jDriverHealthContributorAutoConfiguration {
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@Order(-20)
 	static class Neo4jHealthIndicatorConfiguration
-		extends CompositeHealthIndicatorConfiguration<Neo4jHealthIndicator, Driver> {
+		extends CompositeHealthContributorConfiguration<Neo4jHealthIndicator, Driver> {
 
 		@Bean
 		// If Neo4jReactiveHealthIndicatorConfiguration kicked in, don't add the imperative version as well
-		@ConditionalOnMissingBean(name = "neo4jHealthIndicator")
-		public HealthIndicator neo4jHealthIndicator(Map<String, Driver> drivers) {
-			return createHealthIndicator(drivers);
+		@ConditionalOnMissingBean(name = "neo4jHealthContributor")
+		public HealthContributor neo4jHealthContributor(Map<String, Driver> drivers) {
+			return createContributor(drivers);
 		}
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass({ Flux.class })
 	@Order(-30)
 	static class Neo4jReactiveHealthIndicatorConfiguration
-		extends CompositeReactiveHealthIndicatorConfiguration<Neo4jReactiveHealthIndicator, Driver> {
+		extends CompositeReactiveHealthContributorConfiguration<Neo4jReactiveHealthIndicator, Driver> {
 
 		@Bean
-		@ConditionalOnMissingBean(name = "neo4jHealthIndicator")
-		public ReactiveHealthIndicator neo4jHealthIndicator(Map<String, Driver> drivers) {
-			return createHealthIndicator(drivers);
+		@ConditionalOnMissingBean(name = "neo4jHealthContributor")
+		public ReactiveHealthContributor neo4jHealthContributor(Map<String, Driver> drivers) {
+			return createComposite(drivers);
 		}
 	}
 }

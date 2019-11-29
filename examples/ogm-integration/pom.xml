@@ -9,18 +9,24 @@
 	</parent>
 
 	<groupId>org.neo4j.doc.driver</groupId>
-	<artifactId>imperative-web-spring-boot-starter-example</artifactId>
+	<artifactId>ogm-integration-spring-boot-starter-example</artifactId>
 	<version>999-SNAPSHOT</version>
 
-	<name>Imperative web example</name>
+	<name>Example project that shows how the starter works with Neo4j-OGM.</name>
 	<description>Demo project for Spring Boot</description>
 
 	<properties>
 		<java.version>1.8</java.version>
 		<neo4j-java-driver-spring-boot-starter.version>${revision}${sha1}${changelist}</neo4j-java-driver-spring-boot-starter.version>
+		<neo4j-ogm.version>3.2.3</neo4j-ogm.version>
+		<testcontainers.version>1.10.7</testcontainers.version>
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>com.github.ben-manes.caffeine</groupId>
+			<artifactId>caffeine</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.neo4j.driver</groupId>
 			<artifactId>neo4j-java-driver-spring-boot-starter</artifactId>
@@ -32,12 +38,32 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-cache</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-neo4j</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>${testcontainers.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>neo4j</artifactId>
+			<version>${testcontainers.version}</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
@@ -95,7 +121,7 @@
 				</property>
 			</activation>
 			<properties>
-				<revision>4.0.0</revision>
+				<revision>4.0</revision>
 			</properties>
 		</profile>
 		<profile>
@@ -117,7 +143,7 @@
 				</property>
 			</activation>
 			<properties>
-				<changelist>-rc1</changelist>
+				<changelist>-SNAPSHOT</changelist>
 			</properties>
 		</profile>
 	</profiles>
