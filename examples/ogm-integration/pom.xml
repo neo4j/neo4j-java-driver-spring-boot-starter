@@ -121,7 +121,7 @@
 				</property>
 			</activation>
 			<properties>
-				<revision>4.0</revision>
+				<revision>4.0.0</revision>
 			</properties>
 		</profile>
 		<profile>
@@ -143,7 +143,7 @@
 				</property>
 			</activation>
 			<properties>
-				<changelist>-SNAPSHOT</changelist>
+				<changelist>-rc2</changelist>
 			</properties>
 		</profile>
 	</profiles>
