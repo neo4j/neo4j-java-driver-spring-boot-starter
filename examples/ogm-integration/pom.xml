@@ -143,7 +143,7 @@
 				</property>
 			</activation>
 			<properties>
-				<changelist>-rc2</changelist>
+				<changelist></changelist>
 			</properties>
 		</profile>
 	</profiles>
