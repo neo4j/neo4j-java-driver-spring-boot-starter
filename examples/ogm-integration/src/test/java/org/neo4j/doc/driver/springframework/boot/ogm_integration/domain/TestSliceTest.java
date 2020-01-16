@@ -80,7 +80,6 @@ class TestSliceTest {
 	static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
 
-			System.out.println("Provding things");
 			TestPropertyValues.of(
 				"org.neo4j.driver.uri=" + neo4jContainer.getBoltUrl(),
 				"org.neo4j.driver.authentication.username=neo4j",

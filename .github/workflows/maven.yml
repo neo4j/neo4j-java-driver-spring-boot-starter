@@ -10,9 +10,6 @@ jobs:
   build:
     name: with jdk ${{ matrix.java }}
     runs-on: ubuntu-latest
-    env:
-      SDN_RX_NEO4J_REPOSITORY: neo4j/neo4j-experimental
-      SDN_RX_NEO4J_VERSION: 4.0.0-beta03mr03
     strategy:
       matrix:
         java: [ '8', '11', '13' ]
@@ -22,5 +19,9 @@ jobs:
         uses: actions/setup-java@v1
         with:
             java-version: ${{ matrix.java }}
-      - name: Run Maven build
+      - name: Run Maven build (JDK 8)
+        run: ./mvnw -pl !org.neo4j.doc.driver:testing-with-neo4j-harness --no-transfer-progress clean verify -Drevision=4.0 -Dchangelist=-SNAPSHOT
+        if: matrix.java == 8
+      - name: Run Maven build (JDK 11+)
         run: ./mvnw --no-transfer-progress clean verify -Drevision=4.0 -Dchangelist=-SNAPSHOT
+        if: matrix.java != 8

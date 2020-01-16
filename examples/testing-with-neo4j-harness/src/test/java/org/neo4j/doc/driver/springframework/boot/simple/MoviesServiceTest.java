@@ -23,8 +23,8 @@ import static org.assertj.core.api.Assertions.*;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.neo4j.harness.ServerControls;
-import org.neo4j.harness.TestServerBuilders;
+import org.neo4j.harness.Neo4j;
+import org.neo4j.harness.Neo4jBuilders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.util.TestPropertyValues;
@@ -43,18 +43,18 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration(initializers = { MoviesServiceTest.Initializer.class })
 class MoviesServiceTest {
 
-	private static ServerControls embeddedDatabaseServer;
+	private static Neo4j embeddedDatabaseServer;
 
 	@BeforeAll
 	static void initializeNeo4j() {
 
-		embeddedDatabaseServer = TestServerBuilders.newInProcessBuilder()
+		embeddedDatabaseServer = Neo4jBuilders.newInProcessBuilder()
 			.withFixture(""
 				+ "CREATE (TheMatrix:Movie {title:'The Matrix', released:1999, tagline:'Welcome to the Real World'})\n"
 				+ "CREATE (TheMatrixReloaded:Movie {title:'The Matrix Reloaded', released:2003, tagline:'Free your mind'})\n"
 				+ "CREATE (TheMatrixRevolutions:Movie {title:'The Matrix Revolutions', released:2003, tagline:'Everything that has a beginning has an end'})\n"
 			)
-			.newServer();
+			.build();
 	}
 
 	@AfterAll
