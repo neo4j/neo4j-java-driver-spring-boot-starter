@@ -1,7 +1,6 @@
 {
   "name": "Neo4j Java Driver Spring Boot starter (Web example)",
   "dockerComposeFile": "docker-compose.yml",
-  //"dockerFile": "Dockerfile",
   "workspaceFolder": "/workspace",
   "shutdownAction": "stopCompose",
   "service": "example",

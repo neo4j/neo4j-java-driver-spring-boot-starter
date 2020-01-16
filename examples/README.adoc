@@ -37,10 +37,19 @@ public class SimpleApplication {
 }
 ----
 
-NOTE: If you are a https://code.visualstudio.com[Visual Studio Code] user, you'll be happy to see that most of the examples include support for https://code.visualstudio.com/docs/remote/remote-overview[VS Code Remote Development].
-      Please follow the instructions at the link above for setting up your Visual Studio Code environment.
-      Once setup, you can open the example of your choice inside a VS Code container.
-      The running example can be accessed from the outside as shown above without any further actions.
+== Support for Visual Studio Remote Containers
+
+To make playing with the examples a bit easier, we have support for https://code.visualstudio.com/docs/remote/remote-overview[VS Code Remote Development].
+Please follow the instructions at the link above for setting up your Visual Studio Code environment.
+
+You can open `web`, `reactive-web` and `simple` in Visual Studio Code and let it build the container. 
+The development container will contain a Neo4j 4.0 database as well as the example project.
+The database can be reached under http://localhost:7474[http://localhost:7474] with the username / password combination `neo4j/secret`.
+
+The example than can be build and run via Visual Studios support for Spring Boot, which is automatically added to the development container.
+
+The web examples are reachable on http://localhost:8080[http://localhost:8080] from both outside and inside Visual Studio Code.
+Any changes to the code will be automatically reloaded and available.
 
 include::{manualIncludeDir}examples/web/README.adoc[]
 

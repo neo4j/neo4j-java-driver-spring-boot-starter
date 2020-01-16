@@ -1,4 +1,4 @@
-FROM maven:3.6-jdk-12
+FROM maven:3.6-jdk-13
 
 # Install some more tools
 RUN yum install git -y

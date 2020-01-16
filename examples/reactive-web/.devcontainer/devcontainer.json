@@ -1,5 +1,5 @@
 {
-  "name": "Neo4j Java Driver Spring Boot starter (Simple CLI example)",
+  "name": "Neo4j Java Driver Spring Boot starter (Reactive Web example)",
   "dockerComposeFile": "docker-compose.yml",
   "workspaceFolder": "/workspace",
   "shutdownAction": "stopCompose",
