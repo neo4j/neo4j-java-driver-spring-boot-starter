@@ -26,7 +26,7 @@ import java.net.URI;
 import org.junit.jupiter.api.Test;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.exceptions.ServiceUnavailableException;
-import org.neo4j.harness.Neo4j;
+import org.neo4j.harness.ServerControls;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
@@ -46,7 +46,7 @@ class Neo4jTestHarnessAutoConfigurationTest {
 			.withUserConfiguration(ConfigurationWithDriver.class)
 			.run(ctx -> {
 				assertThat(ctx)
-					.doesNotHaveBean(Neo4j.class)
+					.doesNotHaveBean(ServerControls.class)
 					.hasSingleBean(Driver.class);
 
 				Driver driver = ctx.getBean(Driver.class);
@@ -61,10 +61,10 @@ class Neo4jTestHarnessAutoConfigurationTest {
 			.withUserConfiguration(ConfigurationWithServerControls.class)
 			.run(ctx -> {
 				assertThat(ctx)
-					.hasSingleBean(Neo4j.class)
+					.hasSingleBean(ServerControls.class)
 					.hasSingleBean(Driver.class);
 
-				verify(ctx.getBean(Neo4j.class)).boltURI();
+				verify(ctx.getBean(ServerControls.class)).boltURI();
 				Driver driverBean = ctx.getBean(Driver.class);
 				assertThatExceptionOfType(ServiceUnavailableException.class)
 					.isThrownBy(() -> driverBean.verifyConnectivity())
@@ -86,8 +86,8 @@ class Neo4jTestHarnessAutoConfigurationTest {
 	static class ConfigurationWithServerControls {
 
 		@Bean
-		Neo4j neo4j() {
-			final Neo4j mockedServerControls = mock(Neo4j.class);
+		ServerControls serverControls() {
+			final ServerControls mockedServerControls = mock(ServerControls.class);
 			when(mockedServerControls.boltURI()).thenReturn(URI.create("bolt://localhost:4711"));
 			return mockedServerControls;
 		}

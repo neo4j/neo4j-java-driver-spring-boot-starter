@@ -27,3 +27,4 @@ The starter supports Neo4j server mode only, that is: A connection against a Neo
 
 For a gentle introduction and some getting started guides, please use our
 link:docs/manual.adoc[Manual].
+The manual contains descriptions of all examples, which you'll find in the project source directory under https://github.com/neo4j/neo4j-java-driver-spring-boot-starter/tree/master/examples[examples].
