@@ -18,19 +18,22 @@
  */
 package org.neo4j.driver.springframework.boot.test.autoconfigure;
 
+import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.GraphDatabase;
 import org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverAutoConfiguration;
+import org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverProperties;
 import org.neo4j.harness.ServerControls;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Automatic configuration that provides a driver that is connected to an existing instance of {@link Neo4j Neo4j test harness}
+ * Automatic configuration that provides a driver that is connected to an existing instance of {@link ServerControls Neo4j test harness}
  * when there's no driver configured elsewhere.
  *
  * @author Michael J. Simons
@@ -38,14 +41,15 @@ import org.springframework.context.annotation.Configuration;
  * @since 4.0.0.1
  */
 @Configuration(proxyBeanMethods = false)
+@AutoConfigureBefore(Neo4jDriverAutoConfiguration.class)
 @ConditionalOnClass(ServerControls.class)
 @ConditionalOnBean(ServerControls.class)
 @ConditionalOnMissingBean(Driver.class)
-@AutoConfigureBefore(Neo4jDriverAutoConfiguration.class)
+@EnableConfigurationProperties(Neo4jDriverProperties.class)
 public class Neo4jTestHarnessAutoConfiguration {
 
 	@Bean
-	Driver neo4jDriver(ServerControls neo4j) {
-		return GraphDatabase.driver(neo4j.boltURI());
+	Driver neo4jDriver(final Neo4jDriverProperties driverProperties, final ServerControls serverControls) {
+		return GraphDatabase.driver(serverControls.boltURI(), AuthTokens.none(), driverProperties.asDriverConfig());
 	}
 }
