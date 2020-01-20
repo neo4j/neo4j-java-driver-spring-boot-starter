@@ -48,7 +48,7 @@ class MoviesServiceAlt1Test {
 	@BeforeAll
 	static void initializeNeo4j() {
 
-		embeddedDatabaseServer = com.neo4j.harness.EnterpriseNeo4jBuilders.newInProcessBuilder()
+		embeddedDatabaseServer = Neo4jBuilders.newInProcessBuilder()
 			.withDisabledServer() // No need for http
 			.withFixture(""
 				+ "CREATE (TheMatrix:Movie {title:'The Matrix', released:1999, tagline:'Welcome to the Real World'})\n"
