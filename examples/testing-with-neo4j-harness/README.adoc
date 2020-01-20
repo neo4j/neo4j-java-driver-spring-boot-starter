@@ -3,21 +3,16 @@
 We provide a special module that brings in the community edition of the Neo4j harness
 and some additional utilities that hopefully make your life easier.
 
-Our dedicated module comes in two flavors.
-One for Neo4j 3.5.x (and below) and one for Neo4j 4.0 and upwards.
-
 [source,xml]
 .pom.xml
 ----
 <dependency>
     <groupId>org.neo4j.driver</groupId>
-    <artifactId>neo4j-java-driver-spring-boot-test-harness-4x-support</artifactId>
+    <artifactId>neo4j-java-driver-spring-boot-test-harness-support</artifactId>
     <version>${neo4j-java-driver-spring-boot-starter.version}</version>
     <scope>test</scope>
 </dependency>
 ----
-
-The `artifactId` of the 3x line is `neo4j-java-driver-spring-boot-test-harness-4x-support`, the version number is the same.
 
 If you need the enterprise edition, bring in the module like this:
 
@@ -55,6 +50,31 @@ The advantage of it: It starts very fast.
 If you don't want to have the dependencies and can live with a slower start, we recommend https://www.testcontainers.org/modules/databases/neo4j/[Testcontainers].
 
 They are easy to use and can be configured as shown in <<option1,option 1 below>> as well.
+
+=== Neo4j 3.5 or Neo4j 4.0?
+
+Neo4j 3.5 and 4.0 have different requirements.
+Neo4j 4.0 requires at least JDK 11.
+We understand that not all of you are ready to go beyond JDK 8 (but you should).
+Therefore we decided to build the Test harness support by default against Neo4j 3.5 and JDK 8.
+
+To use Neo4j 4.0 as in the following examples, please add this to your build file
+
+[source,xml]
+.pom.xml
+----
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>org.neo4j.test</groupId>
+            <artifactId>neo4j-harness</artifactId>
+            <version>${neo4j.version}</version>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+----
+
+Be aware that the type of the 4.0 test harness is `org.neo4j.harness.Neo4j`.
 
 === Starting up the Neo4j harness and making Spring aware
 
