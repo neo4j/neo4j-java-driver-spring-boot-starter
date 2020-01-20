@@ -28,6 +28,12 @@
 			<version>${neo4j-java-driver-spring-boot-starter.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>org.neo4j.driver</groupId>
+			<artifactId>neo4j-java-driver-spring-boot-test-harness-4x-support</artifactId>
+			<version>${neo4j-java-driver-spring-boot-starter.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
 		</dependency>
@@ -35,12 +41,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.neo4j.driver</groupId>
-			<artifactId>neo4j-java-driver-spring-boot-test-harness-4x-support</artifactId>
-			<version>${neo4j-java-driver-spring-boot-starter.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
