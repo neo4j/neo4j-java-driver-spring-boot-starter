@@ -20,38 +20,33 @@ package org.neo4j.doc.driver.springframework.boot.simple;
 
 import static org.assertj.core.api.Assertions.*;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.driver.springframework.boot.test.autoconfigure.EnableNeo4jTestHarness;
 import org.neo4j.harness.Neo4j;
-import org.neo4j.harness.Neo4jBuilders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 
 /**
- * This variant creates a custom instance of the test harness and exposing it as a bean. There are a couple of ways to do this,
- * this is just one of them. With `neo4j-java-driver-spring-boot-test-harness-4x-support` on the class path, the automatic configuration will pick this up.
+ * Example on how one could use {@link EnableNeo4jTestHarness @EnableNeo4jTestHarness}.
+ *
+ * @author Michael J. Simons
  */
 @SpringBootTest
-class MoviesServiceAltTest {
-
-	@TestConfiguration
-	static class Initializer {
-
-		@Bean
-		public Neo4j neo4j() {
-			return Neo4jBuilders.newInProcessBuilder()
-				.withFixture(""
-					+ "CREATE (TheMatrix:Movie {title:'The Matrix', released:1999, tagline:'Welcome to the Real World'})\n"
-					+ "CREATE (TheMatrixReloaded:Movie {title:'The Matrix Reloaded', released:2003, tagline:'Free your mind'})\n"
-					+ "CREATE (TheMatrixRevolutions:Movie {title:'The Matrix Revolutions', released:2003, tagline:'Everything that has a beginning has an end'})\n"
-				)
-				.build();
-		}
-	}
+@EnableNeo4jTestHarness
+public class MoviesServiceAlt3Test {
 
 	@Autowired
 	private MoviesService moviesService;
+
+	@BeforeEach
+	void prepareDatabase(@Autowired Neo4j neo4j) {
+		neo4j.defaultDatabaseService().executeTransactionally(""
+			+ "CREATE (TheMatrix:Movie {title:'The Matrix', released:1999, tagline:'Welcome to the Real World'})\n"
+			+ "CREATE (TheMatrixReloaded:Movie {title:'The Matrix Reloaded', released:2003, tagline:'Free your mind'})\n"
+			+ "CREATE (TheMatrixRevolutions:Movie {title:'The Matrix Revolutions', released:2003, tagline:'Everything that has a beginning has an end'})\n"
+		);
+	}
 
 	@Test
 	void shouldRetrieveMovieTitles() {

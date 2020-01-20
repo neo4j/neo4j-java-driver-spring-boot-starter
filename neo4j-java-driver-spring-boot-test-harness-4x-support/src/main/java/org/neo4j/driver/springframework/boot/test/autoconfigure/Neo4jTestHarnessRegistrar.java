@@ -55,7 +55,9 @@ final class Neo4jTestHarnessRegistrar implements ImportBeanDefinitionRegistrar {
 
 		@Override
 		public Neo4j getObject() {
-			return Neo4jBuilders.newInProcessBuilder().build();
+			return Neo4jBuilders.newInProcessBuilder()
+				.withDisabledServer()
+				.build();
 		}
 
 		@Override

@@ -1,18 +1,52 @@
 == Testing against the Neo4j harness
 
-First of all, you have to include the test harness in your dependencies.
-Pick either community edition or enterprise edition.
+We provide a special module that brings in the community edition of the Neo4j harness
+and some additional utilities that hopefully make your life easier.
 
-Here's the community edition:
+Our dedicated module comes in two flavors.
+One for Neo4j 3.5.x (and below) and one for Neo4j 4.0 and upwards.
 
 [source,xml]
 .pom.xml
 ----
 <dependency>
-	<groupId>org.neo4j.test</groupId>
-	<artifactId>neo4j-harness</artifactId>
-	<version>${neo4j.version}</version>
-	<scope>test</scope>
+    <groupId>org.neo4j.driver</groupId>
+    <artifactId>neo4j-java-driver-spring-boot-test-harness-4x-support</artifactId>
+    <version>${neo4j-java-driver-spring-boot-starter.version}</version>
+    <scope>test</scope>
+</dependency>
+----
+
+The `artifactId` of the 3x line is `neo4j-java-driver-spring-boot-test-harness-4x-support`, the version number is the same.
+
+If you need the enterprise edition, bring in the module like this:
+
+[source,xml]
+.pom.xml
+----
+<dependency>
+    <groupId>org.neo4j.driver</groupId>
+    <artifactId>neo4j-java-driver-spring-boot-test-harness-4x-support</artifactId>
+    <version>${neo4j-java-driver-spring-boot-starter.version}</version>
+    <scope>test</scope>
+    <exclusions>
+        <exclusion>
+            <groupId>org.neo4j.test</groupId>
+            <artifactId>neo4j-harness</artifactId>
+        </exclusion>
+    </exclusions>
+</dependency>
+<dependency>
+    <groupId>com.neo4j.test</groupId>
+    <artifactId>neo4j-harness-enterprise</artifactId>
+    <version>${neo4j.version}</version>
+    <scope>test</scope>
+    <exclusions>
+        <exclusion>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-nop</artifactId>
+        </exclusion>
+    </exclusions>
 </dependency>
 ----
 
@@ -20,69 +54,142 @@ That brings a ton of dependencies.
 The advantage of it: It starts very fast.
 If you don't want to have the dependencies and can live with a slower start, we recommend https://www.testcontainers.org/modules/databases/neo4j/[Testcontainers].
 
-=== Starting up the Neo4j harness
+They are easy to use and can be configured as shown in <<option1,option 1 below>> as well.
+
+=== Starting up the Neo4j harness and making Spring aware
 
 There many different options.
-Here's a simple JUnit 5 variant:
+The main question is always: *How to make Spring Boot aware that it should use different configuration properties?*
 
-[source,java]
-.MoviesServiceTest.java
-----
-class MoviesServiceTest {
+[[option1]]
+==== Option 1: Start Neo4j outside Spring and apply its URL to configuration
 
-    private static ServerControls embeddedDatabaseServer;
-
-    @BeforeAll
-    static void initializeNeo4j() {
-        embeddedDatabaseServer = TestServerBuilders
-            .newInProcessBuilder()
-            .newServer();
-    }
-
-    @AfterAll
-    static void closeNeo4j() {
-        embeddedDatabaseServer.close();
-    }
-}
-----
-
-== Option a: Make Spring Boot aware of the URL of the embedded server
-
-In either case, the real issue you have to solve during testing is:
-*How to make Spring Boot aware that it should use different configuration properties?*
-
-We recommend using a custom `org.springframework.context.ApplicationContextInitializer` on a `@SpringBootTest` like this:
+Here we start the embedded instance from the JUnit 5 context and
+than use an `org.springframework.context.ApplicationContextInitializer` to apply `TestPropertyValues` to the Spring environment
 
 [source,java]
 [[simple-example]]
-.MoviesServiceTest.java
+.MoviesServiceAlt1Test.java
 ----
-@SpringBootTest
+import org.assertj.core.util.VisibleForTesting;import org.neo4j.driver.Driver;import org.springframework.beans.factory.annotation.Autowired;@SpringBootTest
 @ContextConfiguration(initializers = { MoviesServiceTest.Initializer.class })
 class MoviesServiceTest {
 
-    private static ServerControls embeddedDatabaseServer;
+    private static Neo4j embeddedDatabaseServer;
+
+	@BeforeAll
+	static void initializeNeo4j() { // <.>
+        embeddedDatabaseServer = TestServerBuilders
+            .newInProcessBuilder()
+            .withDisabledServer() // <.>
+            .withFixture("CREATE (TheMatrix:Movie {title:'The Matrix', released:1999, tagline:'Welcome to the Real World'})")
+            .newServer();
+
+        // For enterprise use
+        // embeddedDatabaseServer = com.neo4j.harness.EnterpriseNeo4jBuilders.newInProcessBuilder()
+        //    .newInProcessBuilder()
+        //    .newServer();
+    }
+
+    @AfterAll
+	static void closeNeo4j() { // <.>
+		embeddedDatabaseServer.close();
+	}
 
     static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
         public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
 
-            TestPropertyValues.of(
+            TestPropertyValues.of( // <.>
                 "org.neo4j.driver.uri=" + embeddedDatabaseServer.boltURI().toString(),
                 "org.neo4j.driver.authentication.password="
             ).applyTo(configurableApplicationContext.getEnvironment());
         }
     }
+
+    @Test
+    void testSomethingWithTheDriver(@Autowired Driver driver) {
+    }
 }
 ----
+<.> Use a JUnit `BeforeAll` to boot Neo4j
+<.> The driver uses only the Bolt port, not the http port, so we don't need the embedded webserver (that option is only available in Neo4j Harness 4.0+)
+<.> Close it in an `AfterAll`
+<.> This the essential part: Apply the new configuration values
 
-== Option b: Add your own driver bean to the context
+This is a good solution It works well with both Community and enterprise edition,
+decouples the creation of the server from configuring the client.
+The downside of it: You have to configure the client (driver).
 
-We have this as `MoviesServiceAltTest`.
-While the configuration seems less complex, it changes more than just the url:
-Having a driver bean of your own in the context, disables the starter.
+[[option2]]
+==== Option 2: Add the embedded server as a Spring bean (recommended approach)
+
+This is shown have this as `MoviesServiceAlt2Test`.
+
+[source,java]
+[[simple-example]]
+.MoviesServiceAlt2Test.java
+----
+@SpringBootTest
+class MoviesServiceAlt2Test {
+
+    @TestConfiguration // <1>
+    static class Initializer {
+
+        @Bean // <2>
+        public Neo4j neo4j() {
+            return Neo4jBuilders.newInProcessBuilder()
+                .withDisabledServer() // No need for http
+				.withFixture("CREATE (TheMatrixReloaded:Movie {title:'The Matrix Reloaded', released:2003, tagline:'Free your mind'})")
+                .build();
+        }
+    }
+
+    @Test
+    void testSomethingWithTheDriver(@Autowired Driver driver) {
+    }
+}
+----
+<.> This is a test configuration only applicable for this test
+<.> This turns the embedded instance into a Spring Bean, bound to Springs lifecycle
+
+While <<option1, option 1>> would work without `neo4j-java-driver-spring-boot-test-harness-4x-support` as long as
+the Neo4j harness is on the classpath, this requires our support module.
+The support module makes the starter aware of a thing like the harness and reconfigures the driver to use it.
+If you have already our support module on the test classpath, this would be the recommended way of doing things.
+
+[[option2]]
+==== Option 3: Using an annotation to enable the test harness
+
+`MoviesServiceAlt3Test.java` shows a dedicated annotation to enable the embedded server:
+
+[source,java]
+[[simple-example]]
+.MoviesServiceAlt2Test.java
+----
+@SpringBootTest
+@EnableNeo4jTestHarness // <1>
+public class MoviesServiceAlt3Test {
+
+    @BeforeEach
+    void prepareDatabase(@Autowired Neo4j neo4j) { // <2>
+        neo4j.defaultDatabaseService().executeTransactionally(
+            "CREATE (TheMatrix:Movie {title:'The Matrix', released:1999, tagline:'Welcome to the Real World'})"
+        );
+    }
+
+    @Test
+    void testSomethingWithTheDriver(@Autowired Driver driver) {
+    }
+}
+----
+<.> Enable automatic registration of a test harness
+<.> As you don't have access to the builder, you have to provide your fixtures through the embedded database service
+
+This annotation may come in handy in some scenarios, but generally, using the builder API is preferable.
+On the plus side: The annotation disables the embedded web server of Neo4j automatically.
+
+==== Running your own driver bean
+
+You can always fall back to create your own driver bean, but that actually disables the starter.
 That is of course ok, but you might end up with a very different configuration in test than in production.
-For example, you'll notice that in `MoviesServiceAltTest`, the driver does not use Slf4j logging, but it's own default.
-
-Option a only adds properties with higher values onto the default ones.
-So, if you have configured more options of the driver in your `application.properties` or else, they still get applied.
-That is not the case for you own Driver bean.
+For example the driver will not use Spring logging, but it's own default.

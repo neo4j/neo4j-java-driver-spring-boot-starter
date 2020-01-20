@@ -36,22 +36,20 @@ import org.springframework.test.context.ContextConfiguration;
  * This variant uses a custom {@link ApplicationContextInitializer} that modifies Springs configuration properties
  * with the help of {@link TestPropertyValues}. Thus, the autoconfiguration of the driver is kept and all other things
  * are as you'd expect in production.
- * <p><strong>This would be our recommended setup!</strong> There are some more options to pass properties into the testconfig,
- * use one of them, if this here isn't your thing. We like that approach as the creation of the embedded database is
- * the responsibility of JUnit, the connection to it yours and the rest is Spring Magic.
- * <p>If you don't like that setup, look at {@link MoviesServiceAltTest}. Here, we expose the embedded server as a Spring Bean
+ * <p>If you don't like that setup, look at {@link MoviesServiceAlt2Test}. Here, we expose the embedded server as a Spring Bean
  * and don't do the manual connection setting.
  */
 @SpringBootTest
-@ContextConfiguration(initializers = { MoviesServiceTest.Initializer.class })
-class MoviesServiceTest {
+@ContextConfiguration(initializers = { MoviesServiceAlt1Test.Initializer.class })
+class MoviesServiceAlt1Test {
 
 	private static Neo4j embeddedDatabaseServer;
 
 	@BeforeAll
 	static void initializeNeo4j() {
 
-		embeddedDatabaseServer = Neo4jBuilders.newInProcessBuilder()
+		embeddedDatabaseServer = com.neo4j.harness.EnterpriseNeo4jBuilders.newInProcessBuilder()
+			.withDisabledServer() // No need for http
 			.withFixture(""
 				+ "CREATE (TheMatrix:Movie {title:'The Matrix', released:1999, tagline:'Welcome to the Real World'})\n"
 				+ "CREATE (TheMatrixReloaded:Movie {title:'The Matrix Reloaded', released:2003, tagline:'Free your mind'})\n"
