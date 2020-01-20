@@ -12,16 +12,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [ '8', '11', '13' ]
+        java: [ '11', '13' ]
     steps:
       - uses: actions/checkout@v1
       - name: Set up JDK
         uses: actions/setup-java@v1
         with:
             java-version: ${{ matrix.java }}
-      - name: Run Maven build (JDK 8)
-        run: ./mvnw -pl !org.neo4j.doc.driver:testing-with-neo4j-harness --no-transfer-progress clean verify -Drevision=4.0 -Dchangelist=-SNAPSHOT
-        if: matrix.java == 8
       - name: Run Maven build (JDK 11+)
         run: ./mvnw --no-transfer-progress clean verify -Drevision=4.0 -Dchangelist=-SNAPSHOT
-        if: matrix.java != 8
