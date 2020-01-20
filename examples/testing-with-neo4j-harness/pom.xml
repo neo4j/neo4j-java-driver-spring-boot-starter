@@ -28,10 +28,9 @@
 			<version>${neo4j-java-driver-spring-boot-starter.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.neo4j.test</groupId>
-			<artifactId>neo4j-harness</artifactId>
-			<version>${neo4j.version}</version>
-			<scope>test</scope>
+			<groupId>org.neo4j.driver</groupId>
+			<artifactId>neo4j-java-driver-spring-boot-test-harness-4x-support</artifactId>
+			<version>4.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
