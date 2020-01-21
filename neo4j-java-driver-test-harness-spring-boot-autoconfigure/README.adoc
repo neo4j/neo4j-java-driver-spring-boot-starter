@@ -1,0 +1,10 @@
+= neo4j-java-driver-spring-boot-test-harness-4x-support
+
+== Introduction
+
+This brings additional support for the Neo4j 4.0 Test Harness to the Driver starter:
+
+* It brings in the correct dependencies
+* It provides auto configuration for the Test Harness:
+** If there's a `Neo4j` bean instance, it configures a corresponding `Driver` bean that uses it
+** If the test harness is available and there's no `Neo4j` bean, it creates one and opens a `Driver` instance to it.

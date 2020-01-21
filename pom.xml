@@ -75,6 +75,7 @@
 	<modules>
 		<module>neo4j-java-driver-spring-boot-autoconfigure</module>
 		<module>neo4j-java-driver-spring-boot-starter</module>
+		<module>neo4j-java-driver-test-harness-spring-boot-autoconfigure</module>
 		<module>examples/dedicated-routing-driver</module>
 		<module>examples/ogm-integration</module>
 		<module>examples/reactive-web</module>
@@ -89,6 +90,7 @@
 		<flatten-maven-plugin.version>1.1.0</flatten-maven-plugin.version>
 		<jacoco-maven-plugin.version>0.8.5</jacoco-maven-plugin.version>
 		<java.version>1.8</java.version>
+		<maven.version>3.6.1</maven.version>
 		<maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
 		<maven-deploy-plugin.version>3.0.0-M1</maven-deploy-plugin.version>
 		<maven-enforcer-plugin.version>3.0.0-M2</maven-enforcer-plugin.version>
@@ -115,16 +117,19 @@
 				<version>${neo4j-java-driver.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.neo4j.test</groupId>
+				<artifactId>neo4j-harness</artifactId>
+				<version>${neo4j.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.testcontainers</groupId>
 				<artifactId>junit-jupiter</artifactId>
 				<version>${testcontainers.version}</version>
-				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.testcontainers</groupId>
 				<artifactId>neo4j</artifactId>
 				<version>${testcontainers.version}</version>
-				<scope>test</scope>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -227,7 +232,7 @@
 							<rules>
 								<DependencyConvergence></DependencyConvergence>
 								<requireMavenVersion>
-									<version>3.6.1</version>
+									<version>${maven.version}</version>
 								</requireMavenVersion>
 							</rules>
 						</configuration>

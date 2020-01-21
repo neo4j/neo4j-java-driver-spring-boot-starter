@@ -23,9 +23,11 @@ import static org.assertj.core.api.Assertions.*;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.neo4j.driver.springframework.boot.test.autoconfigure.Neo4jTestHarnessAutoConfiguration;
 import org.neo4j.harness.Neo4j;
 import org.neo4j.harness.Neo4jBuilders;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
@@ -36,12 +38,13 @@ import org.springframework.test.context.ContextConfiguration;
  * This variant uses a custom {@link ApplicationContextInitializer} that modifies Springs configuration properties
  * with the help of {@link TestPropertyValues}. Thus, the autoconfiguration of the driver is kept and all other things
  * are as you'd expect in production.
- * <strong>This would be our recommended setup!</strong> There are some more options to pass properties into the testconfig,
- * use one of them, if this here isn't your thing.
+ * <p>If you don't like that setup, look at {@link MoviesServiceAlt1Test}. Here, we expose the embedded server as a Spring Bean
+ * and don't do the manual connection setting.
  */
 @SpringBootTest
-@ContextConfiguration(initializers = { MoviesServiceTest.Initializer.class })
-class MoviesServiceTest {
+@EnableAutoConfiguration(exclude = { Neo4jTestHarnessAutoConfiguration.class })
+@ContextConfiguration(initializers = { MoviesServiceAlt2Test.Initializer.class })
+class MoviesServiceAlt2Test {
 
 	private static Neo4j embeddedDatabaseServer;
 
@@ -49,6 +52,7 @@ class MoviesServiceTest {
 	static void initializeNeo4j() {
 
 		embeddedDatabaseServer = Neo4jBuilders.newInProcessBuilder()
+			.withDisabledServer() // No need for http
 			.withFixture(""
 				+ "CREATE (TheMatrix:Movie {title:'The Matrix', released:1999, tagline:'Welcome to the Real World'})\n"
 				+ "CREATE (TheMatrixReloaded:Movie {title:'The Matrix Reloaded', released:2003, tagline:'Free your mind'})\n"
@@ -64,7 +68,6 @@ class MoviesServiceTest {
 
 	static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-
 			TestPropertyValues.of(
 				"org.neo4j.driver.uri=" + embeddedDatabaseServer.boltURI().toString(),
 				"org.neo4j.driver.authentication.password="

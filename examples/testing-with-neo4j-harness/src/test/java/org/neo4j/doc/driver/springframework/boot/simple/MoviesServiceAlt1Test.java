@@ -20,12 +20,7 @@ package org.neo4j.doc.driver.springframework.boot.simple;
 
 import static org.assertj.core.api.Assertions.*;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.neo4j.driver.AuthTokens;
-import org.neo4j.driver.Driver;
-import org.neo4j.driver.GraphDatabase;
 import org.neo4j.harness.Neo4j;
 import org.neo4j.harness.Neo4jBuilders;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,36 +29,26 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 
 /**
- * This variant uses a custom a completely, custom driver bean and effectively disables the starter.
+ * This variant creates a custom instance of the test harness and exposing it as a bean. There are a couple of ways to do this,
+ * this is just one of them. With `neo4j-java-driver-spring-boot-test-harness-4x-support` on the class path, the automatic configuration will pick this up.
+ * <p>If you already have the harness support on the classpath, this would actually be the recommended version of doing things.
  */
 @SpringBootTest
-class MoviesServiceAltTest {
-
-	private static Neo4j embeddedDatabaseServer;
-
-	@BeforeAll
-	static void initializeNeo4j() {
-
-		embeddedDatabaseServer = Neo4jBuilders.newInProcessBuilder()
-			.withFixture(""
-				+ "CREATE (TheMatrix:Movie {title:'The Matrix', released:1999, tagline:'Welcome to the Real World'})\n"
-				+ "CREATE (TheMatrixReloaded:Movie {title:'The Matrix Reloaded', released:2003, tagline:'Free your mind'})\n"
-				+ "CREATE (TheMatrixRevolutions:Movie {title:'The Matrix Revolutions', released:2003, tagline:'Everything that has a beginning has an end'})\n"
-			)
-			.build();
-	}
-
-	@AfterAll
-	static void closeNeo4j() {
-		embeddedDatabaseServer.close();
-	}
+class MoviesServiceAlt1Test {
 
 	@TestConfiguration
-	static class Initializer {
+	static class TestHarnessConfig {
 
 		@Bean
-		public Driver driver() {
-			return GraphDatabase.driver(embeddedDatabaseServer.boltURI(), AuthTokens.none());
+		public Neo4j neo4j() {
+			return Neo4jBuilders.newInProcessBuilder()
+				.withDisabledServer() // No need for http
+				.withFixture(""
+					+ "CREATE (TheMatrix:Movie {title:'The Matrix', released:1999, tagline:'Welcome to the Real World'})\n"
+					+ "CREATE (TheMatrixReloaded:Movie {title:'The Matrix Reloaded', released:2003, tagline:'Free your mind'})\n"
+					+ "CREATE (TheMatrixRevolutions:Movie {title:'The Matrix Revolutions', released:2003, tagline:'Everything that has a beginning has an end'})\n"
+				)
+				.build();
 		}
 	}
 
