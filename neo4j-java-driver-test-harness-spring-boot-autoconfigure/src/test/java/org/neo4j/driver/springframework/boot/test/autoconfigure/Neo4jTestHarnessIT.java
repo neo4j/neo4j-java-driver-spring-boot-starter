@@ -36,8 +36,7 @@ import org.springframework.boot.test.context.SpringBootTest;
  * @author Michael J. Simons
  */
 @SpringBootTest(classes = EmptyPackage.class)
-@EnableNeo4jTestHarness
-@ImportAutoConfiguration(Neo4jTestHarnessAutoConfiguration.class)
+@ImportAutoConfiguration({Neo4jTestHarnessAutoConfiguration.class, TestHarnessDriverConfiguration.class})
 class Neo4jTestHarnessIT {
 
 	@Test

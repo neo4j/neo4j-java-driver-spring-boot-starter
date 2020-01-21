@@ -18,7 +18,6 @@
  */
 package org.neo4j.driver.springframework.boot.test.autoconfigure;
 
-import static org.neo4j.driver.springframework.boot.test.autoconfigure.DriverConnectedToNeo4jConfiguration.*;
 import static org.neo4j.driver.springframework.boot.test.autoconfigure.Neo4jTestHarnessAutoConfiguration.*;
 
 import java.lang.reflect.Method;
@@ -31,30 +30,57 @@ import org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverProperties
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Finds a bean of type {@code org.neo4j.harness.Neo4j} and connects the driver accordingly.
+ * Automatic configuration that provides a driver that is connected to an existing instance of a Neo4j test harness.
+ * when there's no driver configured elsewhere.
  *
  * @author Michael J. Simons
+ * @soundtrack NMZS - Egotrip
+ * @since 4.0.0.1
  */
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnClass(name = RESOLVABLE_BEAN_TYPE)
-@ConditionalOnBean(type = RESOLVABLE_BEAN_TYPE)
-class DriverConnectedToNeo4jConfiguration {
+@EnableConfigurationProperties(Neo4jDriverProperties.class)
+class TestHarnessDriverConfiguration {
 
-	static final String RESOLVABLE_BEAN_TYPE = "org.neo4j.harness.Neo4j";
+	@Configuration(proxyBeanMethods = false)
+	@ConditionalOnClass(name = TEST_HARNESS_3X)
+	@ConditionalOnBean(type = TEST_HARNESS_3X)
+	static class ServerControlsConfiguration {
 
-	@Bean
-	Driver neo4jDriver(final Neo4jDriverProperties driverProperties, final ListableBeanFactory beanFactory) {
+		@Bean
+		Driver neo4jDriver(final Neo4jDriverProperties driverProperties, final ListableBeanFactory beanFactory) {
 
-		LOG.debug("Using Neo4j test harness 4.0");
+			return createDriverFor(driverProperties, beanFactory, TEST_HARNESS_3X);
+		}
+
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	@ConditionalOnClass(name = TEST_HARNESS_4X)
+	@ConditionalOnBean(type = TEST_HARNESS_4X)
+	static class Neo4jConfiguration {
+
+		@Bean
+		Driver neo4jDriver(final Neo4jDriverProperties driverProperties, final ListableBeanFactory beanFactory) {
+
+			return createDriverFor(driverProperties, beanFactory, TEST_HARNESS_4X);
+		}
+	}
+
+	private static Driver createDriverFor(
+		final Neo4jDriverProperties driverProperties,
+		final ListableBeanFactory beanFactory, String embeddedServerClassName
+	) {
+		LOG.debug("Creating a driver instance connected against Neo4j test harness.");
 
 		Class<?> embeddedServerClass = ClassUtils
-			.resolveClassName(RESOLVABLE_BEAN_TYPE, ClassUtils.getDefaultClassLoader());
+			.resolveClassName(embeddedServerClassName, ClassUtils.getDefaultClassLoader());
 		Object embeddedServerInstance = beanFactory.getBean(embeddedServerClass);
 		Method boltURI = ReflectionUtils.findMethod(embeddedServerClass, "boltURI");
 

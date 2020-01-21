@@ -22,18 +22,16 @@ import static org.assertj.core.api.Assertions.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.driver.springframework.boot.test.autoconfigure.EnableNeo4jTestHarness;
 import org.neo4j.harness.Neo4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 /**
- * Example on how one could use {@link EnableNeo4jTestHarness @EnableNeo4jTestHarness}.
+ * Example on how one could use the automatically provided test harness instance.
  *
  * @author Michael J. Simons
  */
 @SpringBootTest
-@EnableNeo4jTestHarness
 public class MoviesServiceAlt3Test {
 
 	@Autowired

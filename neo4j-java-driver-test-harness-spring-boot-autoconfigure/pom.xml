@@ -27,15 +27,15 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>neo4j-java-driver-spring-boot-test-harness-support</artifactId>
+	<artifactId>neo4j-java-driver-test-harness-spring-boot-autoconfigure</artifactId>
 
 	<name>Neo4j Java Driver Test Harness Support for Spring Boot</name>
 	<description>Support for the Neo4j test harness inside Spring Boot applications.</description>
 
 	<properties>
 		<java-module-name>neo4j.java.driver.spring.boot.test_harness</java-module-name>
-		<neo4j.version>3.5.14
-		</neo4j.version> <!-- The test harness support is build against the JD8 compatible version by default -->
+		<!-- The test harness support is build against the JDK8 compatible version by default -->
+		<neo4j.version>3.5.14</neo4j.version>
 	</properties>
 
 	<dependencies>

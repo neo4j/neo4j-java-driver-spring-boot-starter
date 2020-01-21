@@ -25,9 +25,9 @@ import java.net.URI;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.driver.Driver;
-import org.neo4j.driver.exceptions.ServiceUnavailableException;
 import org.neo4j.harness.ServerControls;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.test.context.FilteredClassLoader;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,6 +39,23 @@ class Neo4jTestHarnessAutoConfigurationTest {
 
 	private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
 		.withConfiguration(AutoConfigurations.of(Neo4jTestHarnessAutoConfiguration.class));
+
+	@Test
+	void shouldRequireTestHarness() {
+		contextRunner
+			.withClassLoader(new FilteredClassLoader(ServerControls.class))
+			.run(ctx -> assertThat(ctx)
+				.doesNotHaveBean(ServerControls.class)
+				.doesNotHaveBean(Driver.class));
+	}
+
+	@Test
+	void shouldCreateServerControlsAndDriver() {
+		contextRunner
+			.run(ctx -> assertThat(ctx)
+				.hasSingleBean(ServerControls.class)
+				.hasSingleBean(Driver.class));
+	}
 
 	@Test
 	void existingDriverShouldHavePrecedence() {
@@ -65,11 +82,6 @@ class Neo4jTestHarnessAutoConfigurationTest {
 					.hasSingleBean(Driver.class);
 
 				verify(ctx.getBean(ServerControls.class)).boltURI();
-				Driver driverBean = ctx.getBean(Driver.class);
-				assertThatExceptionOfType(ServiceUnavailableException.class)
-					.isThrownBy(() -> driverBean.verifyConnectivity())
-					.withMessageContaining("Unable to connect to localhost:4711");
-				driverBean.close();
 			});
 	}
 

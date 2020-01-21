@@ -39,7 +39,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.neo4j.driver</groupId>
-			<artifactId>neo4j-java-driver-spring-boot-test-harness-support</artifactId>
+			<artifactId>neo4j-java-driver-test-harness-spring-boot-autoconfigure</artifactId>
 			<version>${neo4j-java-driver-spring-boot-starter.version}</version>
 			<scope>test</scope>
 		</dependency>
