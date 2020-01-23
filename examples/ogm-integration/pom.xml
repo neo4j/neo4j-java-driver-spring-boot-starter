@@ -121,7 +121,7 @@
 				</property>
 			</activation>
 			<properties>
-				<revision>4.0.0</revision>
+				<revision>4.0.0.1</revision>
 			</properties>
 		</profile>
 		<profile>
