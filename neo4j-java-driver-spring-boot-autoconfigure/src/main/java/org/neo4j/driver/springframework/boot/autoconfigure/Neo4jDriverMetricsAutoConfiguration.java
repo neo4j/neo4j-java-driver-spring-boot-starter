@@ -68,7 +68,8 @@ public class Neo4jDriverMetricsAutoConfiguration {
 				.verifyConnectivityAsync()
 				.thenRunAsync(() -> new Neo4jDriverMetrics(name, driver, Collections.emptyList()).bindTo(registry))
 				.exceptionally(e -> {
-					logger.warn("Could not verify connection for " + driver + " and thus not bind to metrics.", e);
+					logger.warn("Could not verify connection for " + driver + " and thus not bind to metrics: " + e
+						.getMessage());
 					return null;
 				});
 		});
