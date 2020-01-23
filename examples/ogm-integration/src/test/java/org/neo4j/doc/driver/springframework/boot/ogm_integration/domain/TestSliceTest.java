@@ -40,7 +40,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 /**
  * This tests shows that the Neo4j-OGM with the Java Driver autoconfiguration works fine with test slices.
  */
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 @DataNeo4jTest
 @ImportAutoConfiguration(Neo4jDriverAutoConfiguration.class) // This is necessary, as the test slice cannot know about it
 @ContextConfiguration(initializers = { TestSliceTest.Initializer.class })
