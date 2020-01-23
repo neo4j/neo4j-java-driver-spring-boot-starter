@@ -48,7 +48,7 @@ import java.util.logging.Logger;
  * @author Michael J. Simons
  */
 @SpringBootTest
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 @ContextConfiguration(initializers = Neo4jDriverAutoConfigurationIT.Neo4jContainerBasedTestPropertyProvider.class)
 class Neo4jDriverAutoConfigurationIT {
 

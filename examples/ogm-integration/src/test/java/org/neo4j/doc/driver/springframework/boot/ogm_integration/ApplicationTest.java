@@ -42,7 +42,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * This tests demonstrates that the automatic configuration for the driver integrates will with Spring Boot, meaning that
  * there's still a transaction manager, open session in view interceptor and bookmark support.
  */
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 @SpringBootTest
 @ImportAutoConfiguration(Neo4jDriverAutoConfiguration.class)
 // This is necessary, as the test slice cannot know about it

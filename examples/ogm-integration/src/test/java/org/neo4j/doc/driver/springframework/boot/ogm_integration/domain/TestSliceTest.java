@@ -41,7 +41,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  *
  * @author Michael J. Simons
  */
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 @DataNeo4jTest
 @ImportAutoConfiguration(Neo4jDriverAutoConfiguration.class) // This is necessary, as the test slice cannot know about it
 @ContextConfiguration(initializers = { TestSliceTest.Initializer.class })
