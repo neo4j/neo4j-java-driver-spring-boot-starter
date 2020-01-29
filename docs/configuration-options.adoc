@@ -1,4 +1,4 @@
-== Configuration options
+false== Configuration options
 :config_prefix: org.neo4j.driver
 
 [cols="1,1,2", options="header"]
@@ -30,7 +30,7 @@
 |+++Specify socket connection timeout.+++
 
 |`{config_prefix}.config.encrypted`
-|`true`
+|`false`
 |+++Flag, if the driver should use encrypted traffic.+++
 
 |`{config_prefix}.pool.idle-time-before-connection-test`
