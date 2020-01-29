@@ -18,8 +18,10 @@
  */
 package org.neo4j.doc.driver.springframework.boot.dedicated_routing_driver;
 
+import org.neo4j.driver.AccessMode;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.Session;
+import org.neo4j.driver.SessionConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -40,7 +42,7 @@ public class DisplayMoviesComponent implements CommandLineRunner {
 	public void run(String... args) {
 
 		LOGGER.info("All the movies:");
-		try (Session session = driver.session()) {
+		try (Session session = driver.session(SessionConfig.builder().withDefaultAccessMode(AccessMode.READ).build())) {
 			session.run("MATCH (m:Movie) RETURN m ORDER BY m.name ASC").stream()
 				.map(r -> r.get("m").asNode())
 				.map(n -> n.get("title").asString())

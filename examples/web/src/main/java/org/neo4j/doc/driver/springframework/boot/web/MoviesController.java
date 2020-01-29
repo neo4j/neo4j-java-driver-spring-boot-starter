@@ -40,7 +40,7 @@ public class MoviesController {
 	@GetMapping(path = "/movies", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<String> getMovieTitles() {
 
-		try (Session session = driver.session(SessionConfig.builder().withDefaultAccessMode(AccessMode.WRITE).build())) {
+		try (Session session = driver.session(SessionConfig.builder().withDefaultAccessMode(AccessMode.READ).build())) {
 			return session.run("MATCH (m:Movie) RETURN m ORDER BY m.name ASC")
 				.list(r -> r.get("m").asNode().get("title").asString());
 		}

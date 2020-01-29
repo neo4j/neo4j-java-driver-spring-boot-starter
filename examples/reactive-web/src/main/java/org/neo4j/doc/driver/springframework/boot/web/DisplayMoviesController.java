@@ -23,7 +23,9 @@ package org.neo4j.doc.driver.springframework.boot.web;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.neo4j.driver.AccessMode;
 import org.neo4j.driver.Driver;
+import org.neo4j.driver.SessionConfig;
 import org.neo4j.driver.reactive.RxSession;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,8 +43,9 @@ public class DisplayMoviesController {
 	@GetMapping(path = "/movies", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
 	public Flux<String> getMovieTitles() {
 
+		SessionConfig sessionConfig = SessionConfig.builder().withDefaultAccessMode(AccessMode.READ).build();
 		return Flux.usingWhen(
-			Mono.fromSupplier(() -> driver.rxSession()),
+			Mono.fromSupplier(() -> driver.rxSession(sessionConfig)),
 			s -> Flux.from(s.run("MATCH (m:Movie) RETURN m ORDER BY m.name ASC").records()),
 			RxSession::close
 		).map(r -> r.get("m").asNode().get("title").asString());
