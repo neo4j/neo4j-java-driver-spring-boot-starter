@@ -27,6 +27,7 @@ import org.neo4j.driver.SessionConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -36,8 +37,12 @@ public class DisplayMoviesComponent implements CommandLineRunner {
 
 	private final Driver driver;
 
-	public DisplayMoviesComponent(Driver driver) {
+	private final ConfigurableApplicationContext applicationContext;
+
+	public DisplayMoviesComponent(Driver driver,
+		ConfigurableApplicationContext applicationContext) {
 		this.driver = driver;
+		this.applicationContext = applicationContext;
 	}
 
 	@Override
@@ -51,6 +56,9 @@ public class DisplayMoviesComponent implements CommandLineRunner {
 				.map(n -> n.get("title").asString())
 				.forEach(LOGGER::info);
 		}
+
+		// We need to indicate here that we are done.
+		applicationContext.close();
 	}
 }
 // end::simple-example[]
