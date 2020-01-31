@@ -18,9 +18,21 @@
 	<properties>
 		<java.version>1.8</java.version>
 		<neo4j-java-driver-spring-boot-starter.version>${revision}${sha1}${changelist}</neo4j-java-driver-spring-boot-starter.version>
+		<!-- Change to 4.0.0 if needed and if on JDK 11 + -->
 		<neo4j-ogm.version>3.2.7</neo4j-ogm.version>
+		<neo4j.version>3.5.14</neo4j.version>
 		<testcontainers.version>1.12.4</testcontainers.version>
 	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.neo4j.test</groupId>
+				<artifactId>neo4j-harness</artifactId>
+				<version>${neo4j.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<dependencies>
 		<dependency>
@@ -31,6 +43,12 @@
 			<groupId>org.neo4j.driver</groupId>
 			<artifactId>neo4j-java-driver-spring-boot-starter</artifactId>
 			<version>${neo4j-java-driver-spring-boot-starter.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.neo4j.driver</groupId>
+			<artifactId>neo4j-java-driver-test-harness-spring-boot-autoconfigure</artifactId>
+			<version>${neo4j-java-driver-spring-boot-starter.version}</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

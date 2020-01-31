@@ -18,7 +18,11 @@
  */
 package org.neo4j.doc.driver.springframework.boot.ogm_integration.domain;
 
+import java.util.Optional;
+
 import org.springframework.data.repository.CrudRepository;
 
 public interface MovieRepository extends CrudRepository<MovieEntity, Long> {
+
+	Optional<MovieEntity> findByTitle(String title);
 }

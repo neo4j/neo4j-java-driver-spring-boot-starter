@@ -24,6 +24,7 @@ import org.neo4j.driver.AccessMode;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.SessionConfig;
+import org.neo4j.driver.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -51,6 +52,7 @@ public class DisplayMoviesComponent implements CommandLineRunner {
 		SessionConfig sessionConfig = SessionConfig.builder().withDefaultAccessMode(AccessMode.READ).build();
 		LOGGER.info("All the movies:");
 		try (Session session = driver.session(sessionConfig)) {
+
 			session.run("MATCH (m:Movie) RETURN m ORDER BY m.name ASC").stream()
 				.map(r -> r.get("m").asNode())
 				.map(n -> n.get("title").asString())
