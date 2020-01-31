@@ -26,8 +26,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverAutoConfiguration;
 import org.neo4j.driver.springframework.boot.test.autoconfigure.Neo4jTestHarnessAutoConfiguration;
-import org.neo4j.harness.Neo4j;
-import org.neo4j.harness.Neo4jBuilders;
+import org.neo4j.harness.ServerControls;
+import org.neo4j.harness.TestServerBuilders;
 import org.neo4j.ogm.drivers.bolt.driver.BoltDriver;
 import org.neo4j.ogm.session.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,15 +51,14 @@ class TestSliceTestWithHarness {
 	static class TestHarnessConfig {
 
 		@Bean
-		public Neo4j neo4j() {
-			return Neo4jBuilders.newInProcessBuilder()
-				.withDisabledServer() // No need for http
+		public ServerControls neo4j() {
+			return TestServerBuilders.newInProcessBuilder()
 				.withFixture(""
 					+ "CREATE (TheMatrix:Movie {title:'The Matrix', released:1999, tagline:'Welcome to the Real World'})\n"
 					+ "CREATE (TheMatrixReloaded:Movie {title:'The Matrix Reloaded', released:2003, tagline:'Free your mind'})\n"
 					+ "CREATE (TheMatrixRevolutions:Movie {title:'The Matrix Revolutions', released:2003, tagline:'Everything that has a beginning has an end'})\n"
 				)
-				.build();
+				.newServer();
 		}
 	}
 
