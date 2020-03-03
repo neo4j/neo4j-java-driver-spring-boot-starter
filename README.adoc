@@ -4,7 +4,7 @@
 :groupId: org.neo4j.driver
 :artifactId: neo4j-java-driver-spring-boot-starter
 :neo4j-java-driver-spring-boot-starter_version: 1.7.5.1
-:spring-boot_version: 2.1.12.RELEASE
+:spring-boot_version: 2.1.13.RELEASE
 :neo4j_version: 3.5.15
 :config_prefix: org.neo4j.driver
 :gh_base: https://github.com/neo4j/neo4j-java-driver-spring-boot-starter
