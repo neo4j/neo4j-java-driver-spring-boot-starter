@@ -1,0 +1,43 @@
+= Neo4j Spring Boot Starter
+Gerrit Meier <gerrit.meier@neo4j.com>; Michael Simons <michael.simons@neo4j.com>
+:toc:
+:doctype: book
+:lang: en
+:listing-caption: Listing
+:source-highlighter: coderay
+:icons: font
+:sectlink: true
+:sectanchors: true
+:numbered: true
+:xrefstyle: short
+
+ifndef::manualIncludeDir[]
+:manualIncludeDir: ../
+endif::[]
+
+include::{manualIncludeDir}/README.adoc[tags=properties]
+
+:copyright: 2020 Neo4j, Inc.,
+:gh-base: https://github.com/neo4j/neo4j-java-driver-spring-boot-starter
+
+(C) {copyright}
+
+License: link:license.html[Creative Commons 4.0]
+
+[abstract]
+--
+This is the manual for the Spring Boot Starter for Neo4j's Java Driver (a.k.a. the Bolt Driver).
+--
+
+_Who should read this?_
+
+This manual is written for:
+
+* engineers setting up a Neo4j connection to a single Neo4j instance or a Neo4j cluster over the wire, without the need for object mapping
+* engineers who want to use Neo4j-OGM inside Spring Boot but needs access to the configuration options of the underlying Bolt driver.
+
+include::manual/index.adoc[]
+
+include::examples/index.adoc[]
+
+include::appendix/index.adoc[]

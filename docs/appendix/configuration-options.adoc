@@ -1,5 +1,4 @@
-false== Configuration options
-:config_prefix: org.neo4j.driver
+= Configuration options
 
 [cols="1,1,2", options="header"]
 |===

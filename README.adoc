@@ -1,9 +1,17 @@
+= Neo4j Spring Boot Starter
 :sectanchors:
+// tag::properties[]
+:groupId: org.neo4j.driver
+:artifactId: neo4j-java-driver-spring-boot-starter
+:neo4j-java-driver-spring-boot-starter_version: 4.0.0.1
 :spring-boot_version: 2.2.4.RELEASE
+:neo4j_version: 4.0.0
+:config_prefix: org.neo4j.driver
+:gh_base: https://github.com/neo4j/neo4j-java-driver-spring-boot-starter
+
+// end::properties[]
+
 image:https://img.shields.io/maven-central/v/org.neo4j.driver/neo4j-java-driver-spring-boot-starter.svg[Maven Central,link=http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.neo4j.driver%22%20AND%20a%3A%22neo4j-java-driver-spring-boot-starter%22]
-
-= neo4j-java-driver-spring-boot-starter
-
 
 [abstract]
 --
@@ -26,5 +34,5 @@ The starter supports Neo4j server mode only, that is: A connection against a Neo
 == Manual
 
 For a gentle introduction and some getting started guides, please use our
-link:docs/manual.adoc[Manual].
+link:https://neo4j.github.io/neo4j-java-driver-spring-boot-starter/[Manual].
 The manual contains descriptions of all examples, which you'll find in the project source directory under https://github.com/neo4j/neo4j-java-driver-spring-boot-starter/tree/master/examples[examples].

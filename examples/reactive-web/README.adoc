@@ -1,16 +1,13 @@
-== Reactive web example
-ifndef::manualIncludeDir[]
-:manualIncludeDir: ../../
-endif::[]
+= Reactive Web
+
 This example uses the `neo4j://` protocol, which by defaults uses routing.
 Apart from that, the configuration is the same as with the simple example.
 
 The driver is however used as a source for a reactive Neo4j session, which in turn produces results for a reactive Spring Rest Controller:
 
-
 [source,java]
 [[reactive-we-example]]
 .DisplayMoviesController.java
 ----
-include::{manualIncludeDir}examples/reactive-web/src/main/java/org/neo4j/doc/driver/springframework/boot/web/DisplayMoviesController.java[tags=reactive-web-example,indent=0]
+include::src/main/java/org/neo4j/doc/driver/springframework/boot/web/DisplayMoviesController.java[tags=reactive-web-example,indent=0]
 ----

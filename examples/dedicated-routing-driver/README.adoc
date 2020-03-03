@@ -1,7 +1,4 @@
-== Dedicated routing driver
-ifndef::manualIncludeDir[]
-:manualIncludeDir: ./
-endif::[]
+= Dedicated routing driver
 
 Usually, a Neo4j cluster should be identified by one logical `neo4j://` URL.
 This can be a load balancer, a DNS resolver, anything that turns the URL into a clusters entry point.
@@ -24,5 +21,6 @@ To use the custom URIs, add a configuration class like this:
 include::src/main/java/org/neo4j/doc/driver/springframework/boot/dedicated_routing_driver/RoutingDriverConfiguration.java[tags=custom-config]
 ----
 <1> Map your custom property with `@Value` onto a list of Strings or URIs.
-<2> Let our machinery inject `Neo4jDriverProperties`, that include all of our properties
-<3> Use the convenience methods to create `org.neo4j.driver.AuthToken` and `org.neo4j.driver.Driver` as needed.
+<2> Let our machinery inject `Neo4jDriverProperties`, that includes all of our properties
+<3> Use the convenience methods to create `org.neo4j.driver.AuthToken` and `org.neo4j.driver.Config` as needed.
+<4> Call the dedicated `routingDriver` method

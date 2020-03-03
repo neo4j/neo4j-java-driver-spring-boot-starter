@@ -1,8 +1,8 @@
+:leveloffset: +1
+[[examples]]
 = Examples
-:sectanchors:
-ifndef::manualIncludeDir[]
-:manualIncludeDir: ../
-endif::[]
+
+== Introduction
 
 We provide several examples how to use this starter.
 The reactive demo can only be used with Neo4j version 4.
@@ -42,7 +42,7 @@ public class SimpleApplication {
 To make playing with the examples a bit easier, we have support for https://code.visualstudio.com/docs/remote/remote-overview[VS Code Remote Development].
 Please follow the instructions at the link above for setting up your Visual Studio Code environment.
 
-You can open `web`, `reactive-web` and `simple` in Visual Studio Code and let it build the container. 
+You can open `web`, `reactive-web` and `simple` in Visual Studio Code and let it build the container.
 The development container will contain a Neo4j 4.0 database as well as the example project.
 The database can be reached under http://localhost:7474[http://localhost:7474] with the username / password combination `neo4j/secret`.
 
@@ -50,12 +50,6 @@ The example than can be build and run via Visual Studios support for Spring Boot
 
 The web examples are reachable on http://localhost:8080[http://localhost:8080] from both outside and inside Visual Studio Code.
 Any changes to the code will be automatically reloaded and available.
-
-include::{manualIncludeDir}examples/web/README.adoc[]
-
-include::{manualIncludeDir}examples/reactive-web/README.adoc[]
-
-include::{manualIncludeDir}examples/testing-with-neo4j-harness/README.adoc[]
 
 == Collecting metrics
 
@@ -116,4 +110,14 @@ curl localhost:8080/actuator/metrics/neo4j.driver.connections.acquired|jq
 }
 ----
 
-include::{manualIncludeDir}examples/dedicated-routing-driver/README.adoc[]
+include::{manualIncludeDir}../examples/web/README.adoc[leveloffset=+1]
+
+include::{manualIncludeDir}../examples/reactive-web/README.adoc[leveloffset=+1]
+
+include::{manualIncludeDir}../examples/testing-with-neo4j-harness/README.adoc[leveloffset=+1]
+
+include::{manualIncludeDir}../examples/dedicated-routing-driver/README.adoc[leveloffset=+1]
+
+include::{manualIncludeDir}../examples/ogm-integration/README.adoc[leveloffset=+1]
+
+:leveloffset: -1

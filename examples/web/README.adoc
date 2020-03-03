@@ -1,3 +1,5 @@
-== Web example
+= Web
 
 This example shows the usage of the Neo4j Java driver in a standard Spring Web-MVC application in an imperative (blocking) way.
+
+Find the source code under  {gh_base}/tree/master/examples/web[examples/web].

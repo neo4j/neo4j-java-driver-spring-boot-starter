@@ -1,70 +1,5 @@
-= Using Neo4j's Spring Boot integration for the Java Driver
-:toc:
-ifndef::manualIncludeDir[]
-:manualIncludeDir: ../
-endif::[]
-:neo4j-java-driver-spring-boot-starter_version: 4.0.0.1
-:groupId: org.neo4j.driver
-:artifactId: neo4j-java-driver-spring-boot-starter
-:spring-boot_version: 2.2.4.RELEASE
-:neo4j_version: 4.0.0
-:config_prefix: org.neo4j.driver
-:driver_manual_base: https://neo4j.com/docs/driver-manual/1.7/
-:gh_base: https://github.com/neo4j/neo4j-java-driver-spring-boot-starter
-
-== Intro
-
-=== What's in the box?
-
-The Neo4j Java Driver Spring Boot starter provides both a Spring Boot `autoconfigure` and a `starter` module.
-The `autoconfigure` module adds a single instance of `org.neo4j.driver.Driver` as a bean to the Spring Context if there is none
-and registers health- and metric endpoints for all Driver-beans if the necessary Spring infrastructure is in place.
-
-It does not bring any mapping facilities in addition the available functions of the driver nor Spring Data integration.
-Have a look at https://github.com/neo4j/sdn-rx[Spring Data Neo4j⚡️RX] for reactive Spring Data Neo4j repositories.
-
-IMPORTANT: The driver instance is a long living object that provides short living sessions as needed.
-           The instance does not need to be closed manually, that is done automatically when the application shuts down.
-           There is no need for external connection pooling.
-           This is done already in the driver and can be configured via properties.
-           Please have a look at the chapter {driver_manual_base}/sessions-transactions/[Sessions and transactions].
-
-=== Do I need the Neo4j Java Driver Spring Boot starter?
-
-We recommend this starter for all new Spring Boot applications that want to use our new generation of drivers ("4.0").
-The next generation of drivers is compatible with both 4.0.x and 3.5.x community and enterprise databases.
-The starter takes away all the boilerplate code of configuring an instance of the driver and does support
-https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html[externalized configuration]
-for all aspects of the driver.
-
-* [*] _You want to work directly with a 4.0 driver?_
-  The starter is for you.
-* [*] _You want Spring Data Neo4j⚡️RX repositories?_
-  The automatic configuration for SDN-RX is dependent on this starter, so it is already there and you would use exactly
-  the same as described in this manual to configure your connection
-* [*] _You have the previous generation of Spring Data Neo4j or Neo4j-OGM?_
-  While you cannot use the 4.0.x line of this starter, as Spring Data Neo4j + OGM is based on the previous generation of the Java driver,
-  you can use the 1.7.x line of this starter. This configures a bean of the previous generation of the Neo4j driver and
-  also configures Neo4j-OGM to use that bean instead of an internal one.
-
-=== Does it work with the 1.7 series of the driver?
-
-The 1.7.x line of the starter is for the 1.7.x line of the driver, the 4.0.x line for the 4.0..x of the driver.
-
-=== Does it work with the embedded database?
-
-No.
-
-=== What's with the long name?
-
-`neo4j-java-driver-spring-boot-starter` is quite a long name for a module, we get that.
-However, it follows the official Spring Boot convention described https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-developing-auto-configuration.html#boot-features-custom-starter-naming[here].
-
-> As a rule of thumb, you should name a combined module after the starter. For example, assume that you are creating a starter for "acme" and that you name the auto-configure module acme-spring-boot-autoconfigure and the starter acme-spring-boot-starter. If you only have one module that combines the two, name it acme-spring-boot-starter.
-
-Our "acme" module is the Neo4j Java Driver, project name `neo4j-java-driver` and things add up from there, that's all.
-
-== Getting started
+[[manual-getting-started]]
+= Getting started
 
 As with any other Spring Boot starter, the only thing you have to do is to include the starter module via your dependency management.
 If you don't configure anything, than the starter assumes `bolt://localhost:7687` as Neo4j URI and a server that has disabled authentication.
@@ -85,7 +20,7 @@ The reactive programming model however requires a 4.0 Neo4j server on the databa
 To make the following intro as accessible as possible, we only display the blocking database access.
 Have a look at the {gh_base}/tree/master/examples[examples directory] for a reactive web application example.
 
-=== Preparing the database
+== Preparing the database
 
 For this example, we stay within the https://neo4j.com/developer/movie-database/[movie graph],
 as it comes for free with every Neo4j instance.
@@ -104,7 +39,7 @@ At first visit, you have to change your password. We chose `secret`  in the exam
 Note the command ready to run in the prompt.
 Execute it to fill your database with some test data.
 
-=== Create a new Spring Boot project
+== Create a new Spring Boot project
 
 The easiest way to setup a Spring Boot project is https://start.spring.io[start.spring.io]
  (which is integrated in the major IDEs as well, in case you don't want to use the website).
@@ -115,7 +50,7 @@ with all the files and settings in place for the selected build tool.
 
 WARNING: Don't choose Spring Data Neo4j here, as it will get you the previous generation of Spring Data Neo4j including OGM and additional abstraction over the driver.
 
-==== Maven
+=== Maven
 
 You can issue a CURL request against the Spring Initializer to create a basic Maven project:
 
@@ -146,7 +81,7 @@ As this starter is not yet on the initializer, you'll have to add the following 
 
 You would also add the dependency manually in case of an existing project.
 
-==== Gradle
+=== Gradle
 
 The idea is the same, just generate a Gradle project:
 
@@ -174,7 +109,7 @@ dependencies {
 
 You would also add the dependency manually in case of an existing project.
 
-==== Configuration
+=== Configuration
 
 Now open any of those projects in your favorite IDE.
 Find `application.properties` and configure your Neo4j credentials:
@@ -198,7 +133,7 @@ NOTE: It is not necessary to add any programmatically configuration of the drive
       While it may work, we strongly discourage and don't support additional, pragmatical configuration of the Neo4j driver when using this starter.
 
 
-==== Example CRUD Controller
+=== Example CRUD Controller
 
 Add the following `@RESTController` to your application:
 
@@ -294,7 +229,7 @@ dependencies {
 
 We support both the https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html#production-ready-health[health-] and https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-metrics.html[metrics-actuator].
 
-=== Health information
+== Health information
 
 Both reactive and imperative health checks are available,
 with the reactive health checks having precedence when Project Reactor is detected.
@@ -332,7 +267,7 @@ In case no instance is reachable, the status will be `DOWN` and the details carr
 
 To disable the Neo4j health indicator, use the standard Spring Boot property `management.health.neo4j.enabled` with a value of `false`.
 
-=== Driver metrics
+== Driver metrics
 
 `neo4j-java-driver-spring-boot-starter` comes with support for https://micrometer.io[Micrometer metrics] out of the box.
 It detects Micrometer on the classpath and binds the metrics of all instances of `org.neo4j.driver.Driver`, that have enabled their metrics, to a micrometer registry.
@@ -351,9 +286,3 @@ The following metrics are exposes
 
 All metrics will have the tags `name` (the bean of the driver they belong to)
 and `poolId` (the id of the connection pool, that contributed to the corresponding counter or gauge).
-
-include::{manualIncludeDir}docs/configuration-options.adoc[]
-
-:leveloffset: +1
-include::{manualIncludeDir}examples/README.adoc[]
-:leveloffset: -1

@@ -85,8 +85,11 @@
 	</modules>
 
 	<properties>
+		<asciidoctorj-diagram.version>2.0.1</asciidoctorj-diagram.version>
+		<asciidoctor-maven-plugin.version>1.6.0</asciidoctor-maven-plugin.version>
 		<changelist>-SNAPSHOT</changelist>
 		<checkstyle.version>8.29</checkstyle.version>
+		<project.build.docs>${project.build.directory}/docs</project.build.docs>
 		<flatten-maven-plugin.version>1.1.0</flatten-maven-plugin.version>
 		<jacoco-maven-plugin.version>0.8.5</jacoco-maven-plugin.version>
 		<java.version>1.8</java.version>
@@ -330,6 +333,46 @@
 						<phase>clean</phase>
 						<goals>
 							<goal>clean</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.asciidoctor</groupId>
+				<artifactId>asciidoctor-maven-plugin</artifactId>
+				<version>${asciidoctor-maven-plugin.version}</version>
+				<dependencies>
+					<dependency>
+						<groupId>org.asciidoctor</groupId>
+						<artifactId>asciidoctorj-diagram</artifactId>
+						<version>${asciidoctorj-diagram.version}</version>
+					</dependency>
+				</dependencies>
+				<configuration>
+					<backend>html</backend>
+					<doctype>book</doctype>
+					<imagesDir>img</imagesDir>
+					<sourceDirectory>${basedir}/docs</sourceDirectory>
+					<sourceDocumentName>index.adoc</sourceDocumentName>
+					<sourceHighlighter>coderay</sourceHighlighter>
+					<icons>font</icons>
+					<attributes>
+						<toc>left</toc>
+						<setanchors></setanchors>
+						<idprefix></idprefix>
+						<idseparator></idseparator>
+					</attributes>
+					<requires>
+						<require>asciidoctor-diagram</require>
+					</requires>
+					<outputDirectory>${project.build.docs}</outputDirectory>
+				</configuration>
+				<executions>
+					<execution>
+						<id>generate-docs</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>process-asciidoc</goal>
 						</goals>
 					</execution>
 				</executions>

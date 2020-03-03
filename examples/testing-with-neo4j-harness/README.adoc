@@ -1,28 +1,28 @@
-== Testing against the Neo4j harness
+= Testing against the Neo4j harness
 
 We provide a special module that brings in the community edition of the Neo4j harness
 and some additional utilities that hopefully make your life easier.
 
-[source,xml]
+[source,xml,subs="verbatim,attributes"]
 .pom.xml
 ----
 <dependency>
     <groupId>org.neo4j.driver</groupId>
     <artifactId>neo4j-java-driver-test-harness-spring-boot-autoconfigure</artifactId>
-    <version>${neo4j-java-driver-spring-boot-starter.version}</version>
+    <version>{neo4j-java-driver-spring-boot-starter_version}</version>
     <scope>test</scope>
 </dependency>
 ----
 
 If you need the enterprise edition, bring in the module like this:
 
-[source,xml]
+[source,xml,subs="verbatim,attributes"]
 .pom.xml
 ----
 <dependency>
     <groupId>org.neo4j.driver</groupId>
     <artifactId>neo4j-java-driver-test-harness-spring-boot-autoconfigure</artifactId>
-    <version>${neo4j-java-driver-spring-boot-starter.version}</version>
+    <version>{neo4j-java-driver-spring-boot-starter_version}</version>
     <scope>test</scope>
     <exclusions>
         <exclusion>
@@ -34,7 +34,8 @@ If you need the enterprise edition, bring in the module like this:
 <dependency>
     <groupId>com.neo4j.test</groupId>
     <artifactId>neo4j-harness-enterprise</artifactId>
-    <version>${neo4j.version}</version>
+    <!-- See below regarding Neo4j version -->
+    <version>3.5.15</version>
     <scope>test</scope>
     <exclusions>
         <exclusion>
@@ -45,13 +46,13 @@ If you need the enterprise edition, bring in the module like this:
 </dependency>
 ----
 
-That brings a ton of dependencies.
-The advantage of it: It starts very fast.
+The disadvantage: It brings a ton of dependencies.
+The advantage: It starts very fast.
 If you don't want to have the dependencies and can live with a slower start, we recommend https://www.testcontainers.org/modules/databases/neo4j/[Testcontainers].
 
 They are easy to use and can be configured as shown in <<option1,option 1 below>> as well.
 
-=== Neo4j 3.5 or Neo4j 4.0?
+== Neo4j 3.5 or Neo4j 4.0?
 
 Neo4j 3.5 and 4.0 have different requirements.
 Neo4j 4.0 requires at least JDK 11.
@@ -60,7 +61,7 @@ Therefore we decided to build the Test harness support by default against Neo4j 
 
 To use Neo4j 4.0 as in the following examples, please add this to your build file
 
-[source,xml]
+[source,xml,subs="verbatim,attributes"]
 .pom.xml
 ----
 <dependencyManagement>
@@ -68,7 +69,7 @@ To use Neo4j 4.0 as in the following examples, please add this to your build fil
         <dependency>
             <groupId>org.neo4j.test</groupId>
             <artifactId>neo4j-harness</artifactId>
-            <version>4.0.0</version>
+            <version>{neo4j_version}</version>
         </dependency>
     </dependencies>
 </dependencyManagement>
@@ -77,27 +78,27 @@ To use Neo4j 4.0 as in the following examples, please add this to your build fil
 Be aware that the type of the 4.0 test harness is `org.neo4j.harness.Neo4j`.
 The following examples use 4.0 (`org.neo4j.harness.Neo4j`) but are applicable to `ServerControlls`, too.
 
-=== Starting up the Neo4j harness and making Spring aware of it
+== Starting up the Neo4j harness and making Spring aware of it
 
 There many different options.
 The main question is always: *How to make Spring Boot aware that it should use different configuration properties?*
 
 [[option1]]
-==== Option 1: Add the embedded server as a Spring bean (recommended approach)
+=== Option 1: Add the embedded server as a Spring bean (recommended approach)
 
 The recommended approach is shown in `MoviesServiceAlt1Test`:
 
 [source,java]
-[[simple-example]]
+[[test-harness-example-option1]]
 .MoviesServiceAlt1Test.java
 ----
 @SpringBootTest
 class MoviesServiceAlt1Test {
 
-    @TestConfiguration // <1>
+    @TestConfiguration // <.>
     static class TestHarnessConfig {
 
-        @Bean // <2>
+        @Bean // <.>
         public Neo4j neo4j() {
             return Neo4jBuilders.newInProcessBuilder()
                 .withDisabledServer() // No need for http
@@ -123,12 +124,12 @@ The autoconfiguration module for the test harness makes the starter aware of the
 This would be the recommended way of doing things.
 
 [[option2]]
-==== Option 2: Use the provided harness instance
+=== Option 2: Use the provided harness instance
 
 `MoviesServiceAlt2Test.java` demonstrates the fully automatic configuration of test harness and driver:
 
 [source,java]
-[[simple-example]]
+[[test-harness-example-option2]]
 .MoviesServiceAlt2Test.java
 ----
 @SpringBootTest
@@ -152,7 +153,7 @@ This may come in handy in some scenarios, but generally, using the builder API a
 On the plus side: The automatic configuration of the harness takes care of disabling the embedded webserver (for Neo4j 4.0+).
 
 [[option3]]
-==== Option 3: Start Neo4j outside Spring and apply its URL to configuration
+=== Option 3: Start Neo4j outside Spring and apply its URL to configuration
 
 Here we start the embedded instance from the JUnit 5 context and
 than use an `org.springframework.context.ApplicationContextInitializer` to apply `TestPropertyValues` to the Spring environment.
@@ -162,7 +163,7 @@ NOTE: You don't actually need `neo4j-java-driver-test-harness-spring-boot-autoco
       If you have the test harness autoconfiguration support on the classpath, you have to explicitly disable it.
 
 [source,java]
-[[simple-example]]
+[[test-harness-example-option3]]
 .MoviesServiceAlt3Test.java
 ----
 @SpringBootTest
@@ -210,7 +211,7 @@ class MoviesServiceAlt3Test {
 This is a good solution It works well with both Community and enterprise edition and decouples the creation of the server from configuring the client.
 The downside of it: You have to configure a lot of stuff manually and your mileage may vary.
 
-==== Running your own driver bean
+=== Running your own driver bean
 
 You can always fall back to create your own driver bean, but that actually disables the starter for the driver.
 That is of course ok, but you might end up with a very different configuration in test than in production.
