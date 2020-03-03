@@ -551,15 +551,18 @@ table.CodeRay td.code>pre{padding:0}
 <li><a href="#logging">2.3. Logging</a></li>
 <li><a href="#production-readyfeatures">2.4. Production-ready features</a></li>
 <li><a href="#healthinformation">2.5. Health information</a></li>
+<li><a href="#drivermetrics">2.6. Driver metrics</a></li>
 </ul>
 </li>
 <li><a href="#examples">3. Examples</a>
 <ul class="sectlevel2">
 <li><a href="#introduction">3.1. Introduction</a></li>
-<li><a href="#web">3.2. Web</a></li>
-<li><a href="#testingagainsttheneo4jharness">3.3. Testing against the Neo4j harness</a></li>
-<li><a href="#dedicatedroutingdriver">3.4. Dedicated routing driver</a></li>
-<li><a href="#neo4j-ogm-integration">3.5. Neo4j-OGM Integration</a></li>
+<li><a href="#collectingmetrics">3.2. Collecting metrics</a></li>
+<li><a href="#web">3.3. Web</a></li>
+<li><a href="#reactiveweb">3.4. Reactive Web</a></li>
+<li><a href="#testingagainsttheneo4jharness">3.5. Testing against the Neo4j harness</a></li>
+<li><a href="#dedicatedroutingdriver">3.6. Dedicated routing driver</a></li>
+<li><a href="#neo4j-ogm-integration">3.7. Neo4j-OGM Integration</a></li>
 </ul>
 </li>
 <li><a href="#appendix">4. Appendix</a>
@@ -711,7 +714,7 @@ Otherwise, it passes all URIs to the Java driver which in turn uses the first on
 <p>The automatic configuration will fail fast if the driver cannot connect to a single Neo4j database or to a routing server.</p>
 </div>
 <div class="paragraph">
-<p>The Neo4j driver supports two different programming models:</p>
+<p>The Neo4j driver supports three different programming models:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -721,11 +724,16 @@ Otherwise, it passes all URIs to the Java driver which in turn uses the first on
 <li>
 <p>Asynchronous programming based on JDKs completable futures and related infrastructure</p>
 </li>
+<li>
+<p>Reactive programming based on <a href="http://www.reactive-streams.org">Reactive Streams</a></p>
+</li>
 </ul>
 </div>
 <div class="paragraph">
 <p>Those are all included in the same binary.
-To make the following intro as accessible as possible, we only display the blocking database access.</p>
+The reactive programming model however requires a 4.0 Neo4j server on the database side and reactive Spring on the other hand.
+To make the following intro as accessible as possible, we only display the blocking database access.
+Have a look at the <a href="https://github.com/neo4j/neo4j-java-driver-spring-boot-starter/tree/master/examples">examples directory</a> for a reactive web application example.</p>
 </div>
 <div class="sect2">
 <h3 id="preparingthedatabase"><a class="anchor" href="#preparingthedatabase"></a>2.1. Preparing the database</h3>
@@ -739,7 +747,7 @@ as it comes for free with every Neo4j instance.</p>
 <div id="start-docker-neo4j" class="listingblock">
 <div class="title">Listing 1. Start a local Neo4j instance inside Docker.</div>
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="bash">docker run --publish=7474:7474 --publish=7687:7687 neo4j:3.5.15</code></pre>
+<pre class="CodeRay highlight"><code data-lang="bash">docker run --publish=7474:7474 --publish=7687:7687 neo4j:4.0.0</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -782,7 +790,7 @@ Don&#8217;t choose Spring Data Neo4j here, as it will get you the previous gener
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="bash">curl https://start.spring.io/starter.tgz \
   -d dependencies=web,actuator \
-  -d bootVersion=2.1.12.RELEASE \
+  -d bootVersion=2.2.5.RELEASE \
   -d baseDir=Neo4jSpringBootExample \
   -d name=Neo4j%20SpringBoot%20Example | tar -xzvf -</code></pre>
 </div>
@@ -797,7 +805,7 @@ As this starter is not yet on the initializer, you&#8217;ll have to add the foll
 <pre class="CodeRay highlight"><code data-lang="xml"><span class="tag">&lt;dependency&gt;</span>
         <span class="tag">&lt;groupId&gt;</span>org.neo4j.driver<span class="tag">&lt;/groupId&gt;</span>
         <span class="tag">&lt;artifactId&gt;</span>neo4j-java-driver-spring-boot-starter<span class="tag">&lt;/artifactId&gt;</span>
-        <span class="tag">&lt;version&gt;</span>1.7.5.1<span class="tag">&lt;/version&gt;</span>
+        <span class="tag">&lt;version&gt;</span>4.0.0.1<span class="tag">&lt;/version&gt;</span>
 <span class="tag">&lt;/dependency&gt;</span></code></pre>
 </div>
 </div>
@@ -816,7 +824,7 @@ As this starter is not yet on the initializer, you&#8217;ll have to add the foll
 <pre class="CodeRay highlight"><code data-lang="bash">curl https://start.spring.io/starter.tgz \
   -d dependencies=web,actuator \
   -d type=gradle-project \
-  -d bootVersion=2.1.12.RELEASE \
+  -d bootVersion=2.2.5.RELEASE \
   -d baseDir=Neo4jSpringBootExampleGradle \
   -d name=Neo4j%20SpringBoot%20Example | tar -xzvf -</code></pre>
 </div>
@@ -828,7 +836,7 @@ As this starter is not yet on the initializer, you&#8217;ll have to add the foll
 <div class="title">Listing 5. Inclusion of the neo4j-java-driver-spring-boot-starter in a Gradle project</div>
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="groovy">dependencies {
-    compile <span class="string"><span class="delimiter">'</span><span class="content">org.neo4j.driver:neo4j-java-driver-spring-boot-starter:1.7.5.1</span><span class="delimiter">'</span></span>
+    compile <span class="string"><span class="delimiter">'</span><span class="content">org.neo4j.driver:neo4j-java-driver-spring-boot-starter:4.0.0.1</span><span class="delimiter">'</span></span>
 }</code></pre>
 </div>
 </div>
@@ -886,8 +894,10 @@ It is not necessary to add any programmatically configuration of the driver when
 
 <span class="keyword">import</span> <span class="include">java.util.List</span>;
 
+<span class="keyword">import</span> <span class="include">org.neo4j.driver.AccessMode</span>;
 <span class="keyword">import</span> <span class="include">org.neo4j.driver.Driver</span>;
 <span class="keyword">import</span> <span class="include">org.neo4j.driver.Session</span>;
+<span class="keyword">import</span> <span class="include">org.neo4j.driver.SessionConfig</span>;
 <span class="keyword">import</span> <span class="include">org.springframework.http.MediaType</span>;
 <span class="keyword">import</span> <span class="include">org.springframework.web.bind.annotation.GetMapping</span>;
 <span class="keyword">import</span> <span class="include">org.springframework.web.bind.annotation.RestController</span>;
@@ -1006,6 +1016,10 @@ This happens automatically when you add the Spring Boot Actuator Starter like th
 <div class="sect2">
 <h3 id="healthinformation"><a class="anchor" href="#healthinformation"></a>2.5. Health information</h3>
 <div class="paragraph">
+<p>Both reactive and imperative health checks are available,
+with the reactive health checks having precedence when Project Reactor is detected.</p>
+</div>
+<div class="paragraph">
 <p>When calling the health endpoint <code>/actuator/health</code> and the driver can reach a Neo4j instance, an unauthenticated user will see</p>
 </div>
 <div class="listingblock">
@@ -1028,7 +1042,8 @@ This happens automatically when you add the Spring Boot Actuator Starter like th
     <span class="key"><span class="delimiter">&quot;</span><span class="content">neo4j</span><span class="delimiter">&quot;</span></span>: {
       <span class="key"><span class="delimiter">&quot;</span><span class="content">status</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">UP</span><span class="delimiter">&quot;</span></span>,
       <span class="key"><span class="delimiter">&quot;</span><span class="content">details</span><span class="delimiter">&quot;</span></span>: {
-        <span class="key"><span class="delimiter">&quot;</span><span class="content">server</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Neo4j/3.5.15@localhost(127.0.0.1):7687</span><span class="delimiter">&quot;</span></span>
+        <span class="key"><span class="delimiter">&quot;</span><span class="content">server</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Neo4j/4.0.0@localhost(127.0.0.1):7687</span><span class="delimiter">&quot;</span></span>,
+        <span class="key"><span class="delimiter">&quot;</span><span class="content">database</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">neo4j</span><span class="delimiter">&quot;</span></span>
       }
     }
   }
@@ -1040,6 +1055,48 @@ This happens automatically when you add the Spring Boot Actuator Starter like th
 </div>
 <div class="paragraph">
 <p>To disable the Neo4j health indicator, use the standard Spring Boot property <code>management.health.neo4j.enabled</code> with a value of <code>false</code>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="drivermetrics"><a class="anchor" href="#drivermetrics"></a>2.6. Driver metrics</h3>
+<div class="paragraph">
+<p><code>neo4j-java-driver-spring-boot-starter</code> comes with support for <a href="https://micrometer.io">Micrometer metrics</a> out of the box.
+It detects Micrometer on the classpath and binds the metrics of all instances of <code>org.neo4j.driver.Driver</code>, that have enabled their metrics, to a micrometer registry.</p>
+</div>
+<div class="paragraph">
+<p>To enable metrics for the driver instance provided by this starter, set <code>org.neo4j.driver.config.metrics-enabled</code> to true.</p>
+</div>
+<div class="paragraph">
+<p>The following metrics are exposes</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>neo4j.driver.connections.inUse</code> (Gauge)</p>
+</li>
+<li>
+<p><code>neo4j.driver.connections.timedOutToAcquire</code> (Counter)</p>
+</li>
+<li>
+<p><code>neo4j.driver.connections.closed</code> (Counter)</p>
+</li>
+<li>
+<p><code>neo4j.driver.connections.failedToCreate</code> (Counter)</p>
+</li>
+<li>
+<p><code>neo4j.driver.connections.created</code> (Counter)</p>
+</li>
+<li>
+<p><code>neo4j.driver.connections.idle</code> (Gauge)</p>
+</li>
+<li>
+<p><code>neo4j.driver.connections.acquired</code> (Counter)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>All metrics will have the tags <code>name</code> (the bean of the driver they belong to)
+and <code>poolId</code> (the id of the connection pool, that contributed to the corresponding counter or gauge).</p>
 </div>
 </div>
 </div>
@@ -1110,7 +1167,81 @@ Any changes to the code will be automatically reloaded and available.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="web"><a class="anchor" href="#web"></a>3.2. Web</h3>
+<h3 id="collectingmetrics"><a class="anchor" href="#collectingmetrics"></a>3.2. Collecting metrics</h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+This refers only to Driver metrics, not to the Neo4j server metrics.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p><code>neo4j-java-driver-spring-boot-starter</code> comes with support for <a href="https://micrometer.io">Micrometer metrics</a> out of the box.
+It detects Micrometer on the classpath and binds the metrics of all instances of ` org.neo4j.driver.Driver`, that have enabled their metrics, to a micrometer registry.</p>
+</div>
+<div class="paragraph">
+<p>Add <code>org.springframework.boot:spring-boot-starter-actuator</code> to your Spring Boot application, to include Micrometer.
+To enable metrics for the driver instance provided by this starter, set <code>org.neo4j.driver.config.metrics-enabled</code> to true then.</p>
+</div>
+<div class="paragraph">
+<p>You&#8217;ll find this in the <a href="#Reactive web example">[Reactive web example]</a>.
+Spring Boot doesn&#8217;t expose the metrics endpoint over http by default, if you need this, your complete configuration looks like this:</p>
+</div>
+<div class="listingblock">
+<div class="title">Listing 12. application.properties</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="properties"># Enable metrics for the driver instance provided by this starter
+org.neo4j.driver.config.metrics-enabled=true
+
+# Expose metrics in addition to info and health over http
+management.endpoints.web.exposure.include=info,health,metrics</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The metrics can be accessed like any other metrics by their name.
+The following shows a CURL request retrieving the amount of acquired connections:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code>curl localhost:8080/actuator/metrics/neo4j.driver.connections.acquired|jq
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   287  100   287    0     0  32773      0 --:--:-- --:--:-- --:--:-- 35875
+{
+  "name": "neo4j.driver.connections.acquired",
+  "description": "The amount of connections that have been acquired.",
+  "baseUnit": "connections",
+  "measurements": [
+    {
+      "statistic": "COUNT",
+      "value": 102
+    }
+  ],
+  "availableTags": [
+    {
+      "tag": "poolId",
+      "values": [
+        "localhost:7687"
+      ]
+    },
+    {
+      "tag": "name",
+      "values": [
+        "driver"
+      ]
+    }
+  ]
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="web"><a class="anchor" href="#web"></a>3.3. Web</h3>
 <div class="paragraph">
 <p>This example shows the usage of the Neo4j Java driver in a standard Spring Web-MVC application in an imperative (blocking) way.</p>
 </div>
@@ -1119,22 +1250,98 @@ Any changes to the code will be automatically reloaded and available.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="testingagainsttheneo4jharness"><a class="anchor" href="#testingagainsttheneo4jharness"></a>3.3. Testing against the Neo4j harness</h3>
+<h3 id="reactiveweb"><a class="anchor" href="#reactiveweb"></a>3.4. Reactive Web</h3>
 <div class="paragraph">
-<p>First of all, you have to include the test harness in your dependencies.
-Pick either community edition or enterprise edition.</p>
+<p>This example uses the <code>neo4j://</code> protocol, which by defaults uses routing.
+Apart from that, the configuration is the same as with the simple example.</p>
 </div>
 <div class="paragraph">
-<p>Here&#8217;s the community edition:</p>
+<p>The driver is however used as a source for a reactive Neo4j session, which in turn produces results for a reactive Spring Rest Controller:</p>
+</div>
+<div id="reactive-we-example" class="listingblock">
+<div class="title">Listing 13. DisplayMoviesController.java</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="keyword">import</span> <span class="include">reactor.core.publisher.Flux</span>;
+<span class="keyword">import</span> <span class="include">reactor.core.publisher.Mono</span>;
+
+<span class="keyword">import</span> <span class="include">org.neo4j.driver.AccessMode</span>;
+<span class="keyword">import</span> <span class="include">org.neo4j.driver.Driver</span>;
+<span class="keyword">import</span> <span class="include">org.neo4j.driver.SessionConfig</span>;
+<span class="keyword">import</span> <span class="include">org.neo4j.driver.reactive.RxSession</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.http.MediaType</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.web.bind.annotation.GetMapping</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.web.bind.annotation.RestController</span>;
+
+<span class="annotation">@RestController</span>
+<span class="directive">public</span> <span class="type">class</span> <span class="class">DisplayMoviesController</span> {
+
+        <span class="directive">private</span> <span class="directive">final</span> <span class="predefined-type">Driver</span> driver;
+
+        <span class="directive">public</span> DisplayMoviesController(<span class="predefined-type">Driver</span> driver) {
+                <span class="local-variable">this</span>.driver = driver;
+        }
+
+        <span class="annotation">@GetMapping</span>(path = <span class="string"><span class="delimiter">&quot;</span><span class="content">/movies</span><span class="delimiter">&quot;</span></span>, produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+        <span class="directive">public</span> Flux&lt;<span class="predefined-type">String</span>&gt; getMovieTitles() {
+
+                SessionConfig sessionConfig = SessionConfig.builder().withDefaultAccessMode(AccessMode.READ).build();
+                <span class="keyword">return</span> Flux.usingWhen(
+                        Mono.fromSupplier(() -&gt; driver.rxSession(sessionConfig)),
+                        s -&gt; Flux.from(s.run(<span class="string"><span class="delimiter">&quot;</span><span class="content">MATCH (m:Movie) RETURN m ORDER BY m.name ASC</span><span class="delimiter">&quot;</span></span>).records()),
+                        RxSession::close
+                ).map(r -&gt; r.get(<span class="string"><span class="delimiter">&quot;</span><span class="content">m</span><span class="delimiter">&quot;</span></span>).asNode().get(<span class="string"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>).asString());
+        }
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="testingagainsttheneo4jharness"><a class="anchor" href="#testingagainsttheneo4jharness"></a>3.5. Testing against the Neo4j harness</h3>
+<div class="paragraph">
+<p>We provide a special module that brings in the community edition of the Neo4j harness
+and some additional utilities that hopefully make your life easier.</p>
 </div>
 <div class="listingblock">
-<div class="title">Listing 12. pom.xml</div>
+<div class="title">Listing 14. pom.xml</div>
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="xml"><span class="tag">&lt;dependency&gt;</span>
-        <span class="tag">&lt;groupId&gt;</span>org.neo4j.test<span class="tag">&lt;/groupId&gt;</span>
-        <span class="tag">&lt;artifactId&gt;</span>neo4j-harness<span class="tag">&lt;/artifactId&gt;</span>
-        <span class="tag">&lt;version&gt;</span>3.5.15<span class="tag">&lt;/version&gt;</span>
-        <span class="tag">&lt;scope&gt;</span>test<span class="tag">&lt;/scope&gt;</span>
+    <span class="tag">&lt;groupId&gt;</span>org.neo4j.driver<span class="tag">&lt;/groupId&gt;</span>
+    <span class="tag">&lt;artifactId&gt;</span>neo4j-java-driver-test-harness-spring-boot-autoconfigure<span class="tag">&lt;/artifactId&gt;</span>
+    <span class="tag">&lt;version&gt;</span>4.0.0.1<span class="tag">&lt;/version&gt;</span>
+    <span class="tag">&lt;scope&gt;</span>test<span class="tag">&lt;/scope&gt;</span>
+<span class="tag">&lt;/dependency&gt;</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If you need the enterprise edition, bring in the module like this:</p>
+</div>
+<div class="listingblock">
+<div class="title">Listing 15. pom.xml</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="xml"><span class="tag">&lt;dependency&gt;</span>
+    <span class="tag">&lt;groupId&gt;</span>org.neo4j.driver<span class="tag">&lt;/groupId&gt;</span>
+    <span class="tag">&lt;artifactId&gt;</span>neo4j-java-driver-test-harness-spring-boot-autoconfigure<span class="tag">&lt;/artifactId&gt;</span>
+    <span class="tag">&lt;version&gt;</span>4.0.0.1<span class="tag">&lt;/version&gt;</span>
+    <span class="tag">&lt;scope&gt;</span>test<span class="tag">&lt;/scope&gt;</span>
+    <span class="tag">&lt;exclusions&gt;</span>
+        <span class="tag">&lt;exclusion&gt;</span>
+            <span class="tag">&lt;groupId&gt;</span>org.neo4j.test<span class="tag">&lt;/groupId&gt;</span>
+            <span class="tag">&lt;artifactId&gt;</span>neo4j-harness<span class="tag">&lt;/artifactId&gt;</span>
+        <span class="tag">&lt;/exclusion&gt;</span>
+    <span class="tag">&lt;/exclusions&gt;</span>
+<span class="tag">&lt;/dependency&gt;</span>
+<span class="tag">&lt;dependency&gt;</span>
+    <span class="tag">&lt;groupId&gt;</span>com.neo4j.test<span class="tag">&lt;/groupId&gt;</span>
+    <span class="tag">&lt;artifactId&gt;</span>neo4j-harness-enterprise<span class="tag">&lt;/artifactId&gt;</span>
+    <span class="comment">&lt;!-- See below regarding Neo4j version --&gt;</span>
+    <span class="tag">&lt;version&gt;</span>3.5.15<span class="tag">&lt;/version&gt;</span>
+    <span class="tag">&lt;scope&gt;</span>test<span class="tag">&lt;/scope&gt;</span>
+    <span class="tag">&lt;exclusions&gt;</span>
+        <span class="tag">&lt;exclusion&gt;</span>
+            <span class="tag">&lt;groupId&gt;</span>org.slf4j<span class="tag">&lt;/groupId&gt;</span>
+            <span class="tag">&lt;artifactId&gt;</span>slf4j-nop<span class="tag">&lt;/artifactId&gt;</span>
+        <span class="tag">&lt;/exclusion&gt;</span>
+    <span class="tag">&lt;/exclusions&gt;</span>
 <span class="tag">&lt;/dependency&gt;</span></code></pre>
 </div>
 </div>
@@ -1143,86 +1350,234 @@ Pick either community edition or enterprise edition.</p>
 The advantage: It starts very fast.
 If you don&#8217;t want to have the dependencies and can live with a slower start, we recommend <a href="https://www.testcontainers.org/modules/databases/neo4j/">Testcontainers</a>.</p>
 </div>
-<div class="sect3">
-<h4 id="startinguptheneo4jharness"><a class="anchor" href="#startinguptheneo4jharness"></a>3.3.1. Starting up the Neo4j harness</h4>
 <div class="paragraph">
-<p>There many different options.
-Here&#8217;s a simple JUnit 5 variant:</p>
+<p>They are easy to use and can be configured as shown in <a href="#option1">option 1 below</a> as well.</p>
+</div>
+<div class="sect3">
+<h4 id="neo4j3.5orneo4j4.0"><a class="anchor" href="#neo4j3.5orneo4j4.0"></a>3.5.1. Neo4j 3.5 or Neo4j 4.0?</h4>
+<div class="paragraph">
+<p>Neo4j 3.5 and 4.0 have different requirements.
+Neo4j 4.0 requires at least JDK 11.
+We understand that not all of you are ready to go beyond JDK 8 (but you should).
+Therefore we decided to build the Test harness support by default against Neo4j 3.5 and JDK 8.</p>
+</div>
+<div class="paragraph">
+<p>To use Neo4j 4.0 as in the following examples, please add this to your build file</p>
 </div>
 <div class="listingblock">
-<div class="title">Listing 13. MoviesServiceTest.java</div>
+<div class="title">Listing 16. pom.xml</div>
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="java"><span class="type">class</span> <span class="class">MoviesServiceTest</span> {
+<pre class="CodeRay highlight"><code data-lang="xml"><span class="tag">&lt;dependencyManagement&gt;</span>
+    <span class="tag">&lt;dependencies&gt;</span>
+        <span class="tag">&lt;dependency&gt;</span>
+            <span class="tag">&lt;groupId&gt;</span>org.neo4j.test<span class="tag">&lt;/groupId&gt;</span>
+            <span class="tag">&lt;artifactId&gt;</span>neo4j-harness<span class="tag">&lt;/artifactId&gt;</span>
+            <span class="tag">&lt;version&gt;</span>4.0.0<span class="tag">&lt;/version&gt;</span>
+        <span class="tag">&lt;/dependency&gt;</span>
+    <span class="tag">&lt;/dependencies&gt;</span>
+<span class="tag">&lt;/dependencyManagement&gt;</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Be aware that the type of the 4.0 test harness is <code>org.neo4j.harness.Neo4j</code>.
+The following examples use 4.0 (<code>org.neo4j.harness.Neo4j</code>) but are applicable to <code>ServerControlls</code>, too.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="startinguptheneo4jharnessandmakingspringawareofit"><a class="anchor" href="#startinguptheneo4jharnessandmakingspringawareofit"></a>3.5.2. Starting up the Neo4j harness and making Spring aware of it</h4>
+<div class="paragraph">
+<p>There many different options.
+The main question is always: <strong>How to make Spring Boot aware that it should use different configuration properties?</strong></p>
+</div>
+<div class="sect4">
+<h5 id="option1"><a class="anchor" href="#option1"></a>Option 1: Add the embedded server as a Spring bean (recommended approach)</h5>
+<div class="paragraph">
+<p>The recommended approach is shown in <code>MoviesServiceAlt1Test</code>:</p>
+</div>
+<div id="test-harness-example-option1" class="listingblock">
+<div class="title">Listing 17. MoviesServiceAlt1Test.java</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="annotation">@SpringBootTest</span>
+<span class="type">class</span> <span class="class">MoviesServiceAlt1Test</span> {
 
-    <span class="directive">private</span> <span class="directive">static</span> ServerControls embeddedDatabaseServer;
+    <span class="annotation">@TestConfiguration</span> <i class="conum" data-value="1"></i><b>(1)</b>
+    <span class="directive">static</span> <span class="type">class</span> <span class="class">TestHarnessConfig</span> {
 
-    <span class="annotation">@BeforeAll</span>
-    <span class="directive">static</span> <span class="type">void</span> initializeNeo4j() {
-        embeddedDatabaseServer = TestServerBuilders
-            .newInProcessBuilder()
-            .newServer();
+        <span class="annotation">@Bean</span> <i class="conum" data-value="2"></i><b>(2)</b>
+        <span class="directive">public</span> Neo4j neo4j() {
+            <span class="keyword">return</span> Neo4jBuilders.newInProcessBuilder()
+                .withDisabledServer() <span class="comment">// No need for http</span>
+                .withFixture(<span class="string"><span class="delimiter">&quot;</span><span class="content">CREATE (TheMatrixReloaded:Movie {title:'The Matrix Reloaded', released:2003, tagline:'Free your mind'})</span><span class="delimiter">&quot;</span></span>)
+                .build();
+
+        <span class="comment">// For enterprise use</span>
+        <span class="comment">// return com.neo4j.harness.EnterpriseNeo4jBuilders.newInProcessBuilder()</span>
+        <span class="comment">//    .newInProcessBuilder()</span>
+        <span class="comment">//    .build();</span>
+        }
     }
 
-    <span class="annotation">@AfterAll</span>
-    <span class="directive">static</span> <span class="type">void</span> closeNeo4j() {
-        embeddedDatabaseServer.close();
+    <span class="annotation">@Test</span>
+    <span class="type">void</span> testSomethingWithTheDriver(<span class="annotation">@Autowired</span> <span class="predefined-type">Driver</span> driver) {
     }
 }</code></pre>
 </div>
 </div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>This is a test configuration only applicable for this test</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>This turns the embedded instance into a Spring Bean, bound to Springs lifecycle</td>
+</tr>
+</table>
 </div>
-<div class="sect3">
-<h4 id="makespringbootawareoftheurloftheembeddedserver"><a class="anchor" href="#makespringbootawareoftheurloftheembeddedserver"></a>3.3.2. Make Spring Boot aware of the URL of the embedded server</h4>
+<div class="paragraph">
+<p>The autoconfiguration module for the test harness makes the starter aware of the harness and reconfigures the driver to use it.
+This would be the recommended way of doing things.</p>
+</div>
+</div>
 <div class="sect4">
-<h5 id="optionachangetheconfiguration"><a class="anchor" href="#optionachangetheconfiguration"></a>Option a: Change the configuration</h5>
+<h5 id="option2"><a class="anchor" href="#option2"></a>Option 2: Use the provided harness instance</h5>
 <div class="paragraph">
-<p>In either case, the real issue you have to solve during testing is:
-<strong>How to make Spring Boot aware that it should use different configuration properties?</strong></p>
+<p><code>MoviesServiceAlt2Test.java</code> demonstrates the fully automatic configuration of test harness and driver:</p>
 </div>
-<div class="paragraph">
-<p>We recommend using a custom <code>org.springframework.context.ApplicationContextInitializer</code> on a <code>@SpringBootTest</code> like this:</p>
-</div>
-<div id="simple-example" class="listingblock">
-<div class="title">Listing 14. MoviesServiceTest.java</div>
+<div id="test-harness-example-option2" class="listingblock">
+<div class="title">Listing 18. MoviesServiceAlt2Test.java</div>
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="java"><span class="annotation">@SpringBootTest</span>
-<span class="annotation">@ContextConfiguration</span>(initializers = { MoviesServiceTest.Initializer.class })
-<span class="type">class</span> <span class="class">MoviesServiceTest</span> {
+<span class="directive">public</span> <span class="type">class</span> <span class="class">MoviesServiceAlt2Test</span> {
 
-    <span class="directive">private</span> <span class="directive">static</span> ServerControls embeddedDatabaseServer;
+    <span class="annotation">@BeforeEach</span>
+    <span class="type">void</span> prepareDatabase(<span class="annotation">@Autowired</span> Neo4j neo4j) { <i class="conum" data-value="1"></i><b>(1)</b>
+        neo4j.defaultDatabaseService().executeTransactionally(
+            <span class="string"><span class="delimiter">&quot;</span><span class="content">CREATE (TheMatrix:Movie {title:'The Matrix', released:1999, tagline:'Welcome to the Real World'})</span><span class="delimiter">&quot;</span></span>
+        );
+    }
+
+    <span class="annotation">@Test</span>
+    <span class="type">void</span> testSomethingWithTheDriver(<span class="annotation">@Autowired</span> <span class="predefined-type">Driver</span> driver) {
+    }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>As you don&#8217;t have access to the builder, you have to provide your fixtures through the embedded database service.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>This may come in handy in some scenarios, but generally, using the builder API as shown above is preferable.
+On the plus side: The automatic configuration of the harness takes care of disabling the embedded webserver (for Neo4j 4.0+).</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="option3"><a class="anchor" href="#option3"></a>Option 3: Start Neo4j outside Spring and apply its URL to configuration</h5>
+<div class="paragraph">
+<p>Here we start the embedded instance from the JUnit 5 context and
+than use an <code>org.springframework.context.ApplicationContextInitializer</code> to apply <code>TestPropertyValues</code> to the Spring environment.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+You don&#8217;t actually need <code>neo4j-java-driver-test-harness-spring-boot-autoconfigure</code> for this solution. It&#8217;s enough to have the
+      Test harness - either 3.5.x or 4.0.x or Community or enterprise edition on the classpath.
+      If you have the test harness autoconfiguration support on the classpath, you have to explicitly disable it.
+</td>
+</tr>
+</table>
+</div>
+<div id="test-harness-example-option3" class="listingblock">
+<div class="title">Listing 19. MoviesServiceAlt3Test.java</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="annotation">@SpringBootTest</span>
+<span class="annotation">@EnableAutoConfiguration</span>(exclude = { Neo4jTestHarnessAutoConfiguration.class }) <i class="conum" data-value="1"></i><b>(1)</b>
+<span class="annotation">@ContextConfiguration</span>(initializers = { MoviesServiceTest.Initializer.class })
+<span class="type">class</span> <span class="class">MoviesServiceAlt3Test</span> {
+
+    <span class="directive">private</span> <span class="directive">static</span> Neo4j embeddedDatabaseServer;
+
+        <span class="annotation">@BeforeAll</span>
+        <span class="directive">static</span> <span class="type">void</span> initializeNeo4j() { <i class="conum" data-value="2"></i><b>(2)</b>
+        embeddedDatabaseServer = TestServerBuilders
+            .newInProcessBuilder()
+            .withDisabledServer() <i class="conum" data-value="3"></i><b>(3)</b>
+            .withFixture(<span class="string"><span class="delimiter">&quot;</span><span class="content">CREATE (TheMatrix:Movie {title:'The Matrix', released:1999, tagline:'Welcome to the Real World'})</span><span class="delimiter">&quot;</span></span>)
+            .newServer();
+    }
+
+    <span class="annotation">@AfterAll</span>
+    <span class="directive">static</span> <span class="type">void</span> closeNeo4j() { <i class="conum" data-value="4"></i><b>(4)</b>
+        embeddedDatabaseServer.close();
+    }
 
     <span class="directive">static</span> <span class="type">class</span> <span class="class">Initializer</span> <span class="directive">implements</span> ApplicationContextInitializer&lt;ConfigurableApplicationContext&gt; {
         <span class="directive">public</span> <span class="type">void</span> initialize(ConfigurableApplicationContext configurableApplicationContext) {
 
-            TestPropertyValues.of(
+            TestPropertyValues.of( <i class="conum" data-value="5"></i><b>(5)</b>
                 <span class="string"><span class="delimiter">&quot;</span><span class="content">org.neo4j.driver.uri=</span><span class="delimiter">&quot;</span></span> + embeddedDatabaseServer.boltURI().toString(),
                 <span class="string"><span class="delimiter">&quot;</span><span class="content">org.neo4j.driver.authentication.password=</span><span class="delimiter">&quot;</span></span>
             ).applyTo(configurableApplicationContext.getEnvironment());
         }
     }
+
+    <span class="annotation">@Test</span>
+    <span class="type">void</span> testSomethingWithTheDriver(<span class="annotation">@Autowired</span> <span class="predefined-type">Driver</span> driver) {
+    }
 }</code></pre>
 </div>
 </div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Disable the autoconfiguration (only needed if you have <code>neo4j-java-driver-test-harness-spring-boot-autoconfigure</code> on the classpath)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Use a JUnit <code>BeforeAll</code> to boot Neo4j</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The driver uses only the Bolt port, not the http port, so we don&#8217;t need the embedded webserver (that option is only available in Neo4j Harness 4.0+)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Close it in an <code>AfterAll</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>This the essential part: Apply the new configuration values</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>This is a good solution It works well with both Community and enterprise edition and decouples the creation of the server from configuring the client.
+The downside of it: You have to configure a lot of stuff manually and your mileage may vary.</p>
+</div>
 </div>
 <div class="sect4">
-<h5 id="optionbaddyourowndriverbeantothecontext"><a class="anchor" href="#optionbaddyourowndriverbeantothecontext"></a>Option b: Add your own driver bean to the context</h5>
+<h5 id="runningyourowndriverbean"><a class="anchor" href="#runningyourowndriverbean"></a>Running your own driver bean</h5>
 <div class="paragraph">
-<p>We have this as <code>MoviesServiceAltTest</code>.
-While the configuration seems less complex, it changes more than just the url:
-Having a driver bean of your own in the context, disables the starter.
+<p>You can always fall back to create your own driver bean, but that actually disables the starter for the driver.
 That is of course ok, but you might end up with a very different configuration in test than in production.
-For example, you&#8217;ll notice that in <code>MoviesServiceAltTest</code>, the driver does not use Slf4j logging, but it&#8217;s own default.</p>
-</div>
-<div class="paragraph">
-<p>Option a only adds properties with higher values onto the default ones.
-So, if you have configured more options of the driver in your <code>application.properties</code> or else, they still get applied.
-That is not the case for you own Driver bean.</p>
+For example the driver will not use Spring logging, but its own default.</p>
 </div>
 </div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="dedicatedroutingdriver"><a class="anchor" href="#dedicatedroutingdriver"></a>3.4. Dedicated routing driver</h3>
+<h3 id="dedicatedroutingdriver"><a class="anchor" href="#dedicatedroutingdriver"></a>3.6. Dedicated routing driver</h3>
 <div class="paragraph">
 <p>Usually, a Neo4j cluster should be identified by one logical <code>neo4j://</code> URL.
 This can be a load balancer, a DNS resolver, anything that turns the URL into a clusters entry point.
@@ -1259,10 +1614,10 @@ my.physical.neo4j.uris=\
 <pre class="CodeRay highlight"><code data-lang="java"><span class="keyword">import</span> <span class="include">java.net.URI</span>;
 <span class="keyword">import</span> <span class="include">java.util.List</span>;
 
-<span class="keyword">import</span> <span class="include">org.neo4j.driver.v1.AuthToken</span>;
-<span class="keyword">import</span> <span class="include">org.neo4j.driver.v1.Config</span>;
-<span class="keyword">import</span> <span class="include">org.neo4j.driver.v1.Driver</span>;
-<span class="keyword">import</span> <span class="include">org.neo4j.driver.v1.GraphDatabase</span>;
+<span class="keyword">import</span> <span class="include">org.neo4j.driver.AuthToken</span>;
+<span class="keyword">import</span> <span class="include">org.neo4j.driver.Config</span>;
+<span class="keyword">import</span> <span class="include">org.neo4j.driver.Driver</span>;
+<span class="keyword">import</span> <span class="include">org.neo4j.driver.GraphDatabase</span>;
 <span class="keyword">import</span> <span class="include">org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverProperties</span>;
 <span class="keyword">import</span> <span class="include">org.springframework.beans.factory.annotation.Value</span>;
 <span class="keyword">import</span> <span class="include">org.springframework.context.annotation.Bean</span>;
@@ -1307,10 +1662,10 @@ my.physical.neo4j.uris=\
 </div>
 </div>
 <div class="sect2">
-<h3 id="neo4j-ogm-integration"><a class="anchor" href="#neo4j-ogm-integration"></a>3.5. Neo4j-OGM Integration</h3>
+<h3 id="neo4j-ogm-integration"><a class="anchor" href="#neo4j-ogm-integration"></a>3.7. Neo4j-OGM Integration</h3>
 <div class="paragraph">
 <p>The current Spring Boot starter you get on <a href="https://start.spring.io/#!type=maven-project&amp;language=java&amp;platformVersion=2.2.5.RELEASE&amp;packaging=jar&amp;jvmVersion=1.8&amp;groupId=com.example&amp;artifactId=demo&amp;name=demo&amp;description=Demo%20project%20for%20Spring%20Boot&amp;packageName=com.example.demo&amp;dependencies=data-neo4j">start.spring.io</a> recognizes the driver bean created by this starter here.
-That means you can add this starter via <code>org.neo4j.driver:neo4j-java-driver-spring-boot-starter:1.7.5.1</code> and use the properties under <code>org.neo4j.driver</code> to configure the connection.
+That means you can add this starter via <code>org.neo4j.driver:neo4j-java-driver-spring-boot-starter:4.0.0.1</code> and use the properties under <code>org.neo4j.driver</code> to configure the connection.
 Thus you don&#8217;t have to work your way into Neo4j-OGM to manipulate the encapsulated driver but inject a correctly configured driver bean into the Neo4j-OGM session factory.</p>
 </div>
 </div>
@@ -1362,23 +1717,18 @@ Thus you don&#8217;t have to work your way into Neo4j-OGM to manipulate the enca
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.neo4j.driver.config.connection-timeout</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>5s</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>30s</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Specify socket connection timeout.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.neo4j.driver.config.encrypted</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>true</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>false</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Flag, if the driver should use encrypted traffic.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.neo4j.driver.pool.idle-time-before-connection-test</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Pooled connections that have been idle in the pool for longer than this timeout will be tested before they are used again.</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.neo4j.driver.config.load-balancing-strategy</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Provide an alternative load balancing strategy for the routing driver to use.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.neo4j.driver.pool.log-leaked-sessions</code></p></td>
@@ -1425,6 +1775,11 @@ Thus you don&#8217;t have to work your way into Neo4j-OGM to manipulate the enca
 <td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">The uri this driver should connect to. The driver supports bolt, bolt+routing or neo4j as schemes. The default URI is 'bolt://localhost:7687'.</p></td>
 </tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.neo4j.driver.pool.metrics-enabled</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>false</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Set this to true, so that the driver collects metrics, which can be exported to Micrometer.</p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -1433,7 +1788,7 @@ Thus you don&#8217;t have to work your way into Neo4j-OGM to manipulate the enca
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-03 16:25:39 UTC
+Last updated 2020-03-03 16:20:21 +0100
 </div>
 </div>
 </body>
