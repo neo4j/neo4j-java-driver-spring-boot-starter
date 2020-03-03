@@ -1,3 +1,4 @@
+[[neo4j-ogm-integration]]
 = Neo4j-OGM Integration
 
 The current Spring Boot starter you get on https://start.spring.io/#!type=maven-project&language=java&platformVersion=2.2.5.RELEASE&packaging=jar&jvmVersion=1.8&groupId=com.example&artifactId=demo&name=demo&description=Demo%20project%20for%20Spring%20Boot&packageName=com.example.demo&dependencies=data-neo4j[start.spring.io] recognizes the driver bean created by this starter here.
