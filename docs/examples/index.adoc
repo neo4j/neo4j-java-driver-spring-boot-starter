@@ -37,7 +37,7 @@ public class SimpleApplication {
 }
 ----
 
-== Support for Visual Studio Remote Containers
+=== Support for Visual Studio Remote Containers
 
 To make playing with the examples a bit easier, we have support for https://code.visualstudio.com/docs/remote/remote-overview[VS Code Remote Development].
 Please follow the instructions at the link above for setting up your Visual Studio Code environment.
