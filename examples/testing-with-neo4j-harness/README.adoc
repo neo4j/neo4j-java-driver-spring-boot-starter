@@ -1,26 +1,26 @@
-== Testing against the Neo4j harness
+= Testing against the Neo4j harness
 
 First of all, you have to include the test harness in your dependencies.
 Pick either community edition or enterprise edition.
 
 Here's the community edition:
 
-[source,xml]
+[source,xml,subs="verbatim,attributes"]
 .pom.xml
 ----
 <dependency>
 	<groupId>org.neo4j.test</groupId>
 	<artifactId>neo4j-harness</artifactId>
-	<version>${neo4j.version}</version>
+	<version>{neo4j_version}</version>
 	<scope>test</scope>
 </dependency>
 ----
 
-That brings a ton of dependencies.
-The advantage of it: It starts very fast.
+The disadvantage: It brings a ton of dependencies.
+The advantage: It starts very fast.
 If you don't want to have the dependencies and can live with a slower start, we recommend https://www.testcontainers.org/modules/databases/neo4j/[Testcontainers].
 
-=== Starting up the Neo4j harness
+== Starting up the Neo4j harness
 
 There many different options.
 Here's a simple JUnit 5 variant:
@@ -46,7 +46,9 @@ class MoviesServiceTest {
 }
 ----
 
-== Option a: Make Spring Boot aware of the URL of the embedded server
+== Make Spring Boot aware of the URL of the embedded server
+
+=== Option a: Change the configuration
 
 In either case, the real issue you have to solve during testing is:
 *How to make Spring Boot aware that it should use different configuration properties?*
@@ -75,7 +77,7 @@ class MoviesServiceTest {
 }
 ----
 
-== Option b: Add your own driver bean to the context
+=== Option b: Add your own driver bean to the context
 
 We have this as `MoviesServiceAltTest`.
 While the configuration seems less complex, it changes more than just the url:

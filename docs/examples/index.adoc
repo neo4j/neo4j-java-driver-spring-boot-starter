@@ -1,0 +1,62 @@
+:leveloffset: +1
+[[examples]]
+= Examples
+
+== Introduction
+
+We provide several examples how to use this starter.
+The reactive demo can only be used with Neo4j version 4.
+
+Each example comes with a dedicated readme, that guides you through it.
+
+The examples use the "Movie" data set, that you can install into your instance by going to the http://localhost:7474/browser/?cmd=play&arg=movies[Neo4j Browser].
+Enter the command `:play movies` and follow the instructions.
+
+The examples expect an instance with the username `neo4j` and the password `secret`.
+
+All examples use Maven, however they work completely the same with Gradle.
+
+Also, all examples follow Spring Boot conventions, especially:
+Use the dependency management and starters, don't provide dependencies for things that are available as a starter.
+Use version properties for overwriting any managed version instead of an explicit version.
+
+The examples all have the default main application class, that looks like this:
+
+[source,java]
+.A standard Spring Boot main application class
+----
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class SimpleApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(SimpleApplication.class, args);
+	}
+}
+----
+
+== Support for Visual Studio Remote Containers
+
+To make playing with the examples a bit easier, we have support for https://code.visualstudio.com/docs/remote/remote-overview[VS Code Remote Development].
+Please follow the instructions at the link above for setting up your Visual Studio Code environment.
+
+You can open `web`, `reactive-web` and `simple` in Visual Studio Code and let it build the container.
+The development container will contain a Neo4j 4.0 database as well as the example project.
+The database can be reached under http://localhost:7474[http://localhost:7474] with the username / password combination `neo4j/secret`.
+
+The example than can be build and run via Visual Studios support for Spring Boot, which is automatically added to the development container.
+
+The web examples are reachable on http://localhost:8080[http://localhost:8080] from both outside and inside Visual Studio Code.
+Any changes to the code will be automatically reloaded and available.
+
+include::{manualIncludeDir}../examples/web/README.adoc[leveloffset=+1]
+
+include::{manualIncludeDir}../examples/testing-with-neo4j-harness/README.adoc[leveloffset=+1]
+
+include::{manualIncludeDir}../examples/dedicated-routing-driver/README.adoc[leveloffset=+1]
+
+include::{manualIncludeDir}../examples/ogm-integration/README.adoc[leveloffset=+1]
+
+:leveloffset: -1
