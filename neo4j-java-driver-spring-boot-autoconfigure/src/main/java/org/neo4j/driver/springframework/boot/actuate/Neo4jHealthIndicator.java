@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.neo4j.driver.AccessMode;
 import org.neo4j.driver.Driver;
+import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.exceptions.SessionExpiredException;
 import org.neo4j.driver.SessionConfig;
@@ -47,7 +48,7 @@ public final class Neo4jHealthIndicator extends AbstractHealthIndicator {
 	/**
 	 * The Cypher statement used to verify Neo4j is up.
 	 */
-	static final String CYPHER = "RETURN 1 AS result";
+	static final String CYPHER = "CALL dbms.components() YIELD name, edition WHERE name = 'Neo4j Kernel' RETURN edition";
 	/**
 	 * Message indicating that the health check failed.
 	 */
@@ -75,15 +76,15 @@ public final class Neo4jHealthIndicator extends AbstractHealthIndicator {
 	protected void doHealthCheck(Health.Builder builder) {
 
 		try {
-			ResultSummary resultSummary;
+			ResultSummaryWithEdition resultSummaryWithEdition;
 			// Retry one time when the session has been expired
 			try {
-				resultSummary = runHealthCheckQuery();
+				resultSummaryWithEdition = runHealthCheckQuery();
 			} catch (SessionExpiredException sessionExpiredException) {
 				logger.warn(MESSAGE_SESSION_EXPIRED);
-				resultSummary = runHealthCheckQuery();
+				resultSummaryWithEdition = runHealthCheckQuery();
 			}
-			buildStatusUp(resultSummary, builder);
+			buildStatusUp(resultSummaryWithEdition, builder);
 		} catch (Exception ex) {
 			builder.down().withException(ex);
 		}
@@ -92,15 +93,17 @@ public final class Neo4jHealthIndicator extends AbstractHealthIndicator {
 	/**
 	 * Applies the given {@link ResultSummary} to the {@link Health.Builder builder} without actually calling {@code build}.
 	 *
-	 * @param resultSummary the result summary returned by the server
+	 * @param resultSummaryWithEdition the result summary returned by the server
 	 * @param builder the health builder to be modified
 	 * @return the modified health builder
 	 */
-	static Health.Builder buildStatusUp(ResultSummary resultSummary, Health.Builder builder) {
-		ServerInfo serverInfo = resultSummary.server();
-		DatabaseInfo databaseInfo = resultSummary.database();
+	static Health.Builder buildStatusUp(ResultSummaryWithEdition resultSummaryWithEdition, Health.Builder builder) {
+		ServerInfo serverInfo = resultSummaryWithEdition.resultSummary.server();
+		DatabaseInfo databaseInfo = resultSummaryWithEdition.resultSummary.database();
 
-		builder.up().withDetail("server", serverInfo.version() + "@" + serverInfo.address());
+		builder.up()
+			.withDetail("server", serverInfo.version() + "@" + serverInfo.address())
+			.withDetail("edition", resultSummaryWithEdition.edition);
 
 		if (StringUtils.hasText(databaseInfo.name())) {
 			builder.withDetail("database", databaseInfo.name());
@@ -109,12 +112,14 @@ public final class Neo4jHealthIndicator extends AbstractHealthIndicator {
 		return builder;
 	}
 
-	ResultSummary runHealthCheckQuery() {
+	ResultSummaryWithEdition runHealthCheckQuery() {
 		// We use WRITE here to make sure UP is returned for a server that supports
 		// all possible workloads
 		try (Session session = this.driver.session(DEFAULT_SESSION_CONFIG)) {
-			ResultSummary resultSummary = session.run(CYPHER).consume();
-			return resultSummary;
+			Result result = session.run(CYPHER);
+			String edition = result.single().get("edition").asString();
+			ResultSummary resultSummary = result.consume();
+			return new ResultSummaryWithEdition(resultSummary, edition);
 		}
 	}
 }

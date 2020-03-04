@@ -53,6 +53,7 @@ class Neo4jReactiveHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 	void neo4jIsUp() {
 
 		prepareSharedMocks();
+		when(statementResult.records()).thenReturn(Mono.just(record));
 		when(statementResult.consume()).thenReturn(Mono.just(resultSummary));
 		when(session.run(anyString())).thenReturn(statementResult);
 
@@ -65,6 +66,7 @@ class Neo4jReactiveHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 			.consumeNextWith(health -> {
 				assertThat(health.getStatus()).isEqualTo(Status.UP);
 				assertThat(health.getDetails()).containsEntry("server", "4711@Zu Hause");
+				assertThat(health.getDetails()).containsEntry("edition", "ultimate collectors edition");
 			})
 			.verifyComplete();
 
@@ -78,6 +80,7 @@ class Neo4jReactiveHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 		AtomicInteger cnt = new AtomicInteger(0);
 
 		prepareSharedMocks();
+		when(statementResult.records()).thenReturn(Mono.just(record));
 		when(statementResult.consume()).thenReturn(Mono.just(resultSummary));
 		when(session.run(anyString())).thenAnswer(invocation -> {
 			if (cnt.compareAndSet(0, 1)) {
@@ -94,6 +97,7 @@ class Neo4jReactiveHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 			.consumeNextWith(health -> {
 				assertThat(health.getStatus()).isEqualTo(Status.UP);
 				assertThat(health.getDetails()).containsEntry("server", "4711@Zu Hause");
+				assertThat(health.getDetails()).containsEntry("edition", "ultimate collectors edition");
 			})
 			.verifyComplete();
 

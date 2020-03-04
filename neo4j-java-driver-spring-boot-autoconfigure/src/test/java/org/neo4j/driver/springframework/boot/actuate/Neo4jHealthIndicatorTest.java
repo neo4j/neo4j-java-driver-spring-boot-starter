@@ -29,6 +29,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
+import org.neo4j.driver.Values;
 import org.neo4j.driver.exceptions.ServiceUnavailableException;
 import org.neo4j.driver.exceptions.SessionExpiredException;
 import org.neo4j.driver.SessionConfig;
@@ -56,6 +57,8 @@ class Neo4jHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 
 		when(this.databaseInfo.name()).thenReturn(null);
 
+		when(record.get("edition")).thenReturn(Values.value("some edition"));
+		when(this.statementResult.single()).thenReturn(this.record);
 		when(this.statementResult.consume()).thenReturn(this.resultSummary);
 		when(this.session.run(anyString())).thenReturn(this.statementResult);
 
@@ -66,6 +69,7 @@ class Neo4jHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 		assertThat(health.getStatus()).isEqualTo(Status.UP);
 		assertThat(health.getDetails()).containsEntry("server", "4711@Zu Hause");
 		assertThat(health.getDetails()).doesNotContainKey("database");
+		assertThat(health.getDetails()).containsEntry("edition", "some edition");
 	}
 
 	@Test
@@ -77,6 +81,8 @@ class Neo4jHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 
 		when(this.databaseInfo.name()).thenReturn("");
 
+		when(record.get("edition")).thenReturn(Values.value("some edition"));
+		when(this.statementResult.single()).thenReturn(this.record);
 		when(this.statementResult.consume()).thenReturn(this.resultSummary);
 		when(this.session.run(anyString())).thenReturn(this.statementResult);
 
@@ -87,12 +93,15 @@ class Neo4jHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 		assertThat(health.getStatus()).isEqualTo(Status.UP);
 		assertThat(health.getDetails()).containsEntry("server", "4711@Zu Hause");
 		assertThat(health.getDetails()).doesNotContainKey("database");
+		assertThat(health.getDetails()).containsEntry("edition", "some edition");
 	}
 
 	@Test
 	void neo4jIsUp() {
 
 		prepareSharedMocks();
+
+		when(this.statementResult.single()).thenReturn(this.record);
 		when(this.statementResult.consume()).thenReturn(this.resultSummary);
 		when(this.session.run(anyString())).thenReturn(this.statementResult);
 
@@ -103,6 +112,7 @@ class Neo4jHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 		assertThat(health.getStatus()).isEqualTo(Status.UP);
 		assertThat(health.getDetails()).containsEntry("server", "4711@Zu Hause");
 		assertThat(health.getDetails()).containsEntry("database", "n/a");
+		assertThat(health.getDetails()).containsEntry("edition", "ultimate collectors edition");
 
 		verify(session).close();
 		verifyNoMoreInteractions(this.driver, this.session, this.statementResult, this.resultSummary, this.serverInfo, this.databaseInfo);
@@ -114,6 +124,7 @@ class Neo4jHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 		AtomicInteger cnt = new AtomicInteger(0);
 
 		prepareSharedMocks();
+		when(this.statementResult.single()).thenReturn(this.record);
 		when(this.statementResult.consume()).thenReturn(this.resultSummary);
 		when(this.session.run(anyString())).thenAnswer(invocation -> {
 			if (cnt.compareAndSet(0, 1)) {
