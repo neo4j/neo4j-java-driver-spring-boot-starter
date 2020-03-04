@@ -26,8 +26,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.exceptions.SessionExpiredException;
+import org.neo4j.driver.reactive.RxResult;
 import org.neo4j.driver.reactive.RxSession;
-import org.neo4j.driver.summary.ResultSummary;
 import org.springframework.boot.actuate.health.AbstractReactiveHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.ReactiveHealthIndicator;
@@ -60,12 +60,16 @@ public final class Neo4jReactiveHealthIndicator extends AbstractReactiveHealthIn
 			.map(r -> buildStatusUp(r, builder).build());
 	}
 
-	Mono<ResultSummary> runHealthCheckQuery() {
+	Mono<ResultSummaryWithEdition> runHealthCheckQuery() {
 		// We use WRITE here to make sure UP is returned for a server that supports
 		// all possible workloads
 		return Mono.using(
 			() -> this.driver.rxSession(DEFAULT_SESSION_CONFIG),
-			session -> Mono.from(session.run(Neo4jHealthIndicator.CYPHER).consume()),
+			session -> {
+				RxResult result = session.run(Neo4jHealthIndicator.CYPHER);
+				return Mono.from(result.records()).map(record -> record.get("edition").asString())
+					.zipWhen(edition -> Mono.from(result.consume()), (e, r) -> new ResultSummaryWithEdition(r, e));
+			},
 			RxSession::close
 		);
 	}

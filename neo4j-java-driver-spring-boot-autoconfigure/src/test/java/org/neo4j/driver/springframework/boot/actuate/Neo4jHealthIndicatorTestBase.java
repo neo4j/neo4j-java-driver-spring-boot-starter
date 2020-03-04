@@ -22,6 +22,8 @@ import static org.mockito.Mockito.*;
 
 import org.mockito.Mock;
 import org.neo4j.driver.Driver;
+import org.neo4j.driver.Record;
+import org.neo4j.driver.Values;
 import org.neo4j.driver.summary.DatabaseInfo;
 import org.neo4j.driver.summary.ResultSummary;
 import org.neo4j.driver.summary.ServerInfo;
@@ -45,6 +47,9 @@ abstract class Neo4jHealthIndicatorTestBase {
 	@Mock
 	protected DatabaseInfo databaseInfo;
 
+	@Mock
+	protected Record record;
+
 	protected void prepareSharedMocks() {
 
 		when(serverInfo.version()).thenReturn("4711");
@@ -52,5 +57,6 @@ abstract class Neo4jHealthIndicatorTestBase {
 		when(databaseInfo.name()).thenReturn("n/a");
 		when(resultSummary.server()).thenReturn(serverInfo);
 		when(resultSummary.database()).thenReturn(databaseInfo);
+		when(record.get("edition")).thenReturn(Values.value("ultimate collectors edition"));
 	}
 }
