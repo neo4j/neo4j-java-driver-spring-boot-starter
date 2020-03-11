@@ -18,7 +18,7 @@
 	<properties>
 		<java.version>11</java.version>
 		<neo4j-java-driver-spring-boot-starter.version>${revision}${sha1}${changelist}</neo4j-java-driver-spring-boot-starter.version>
-		<neo4j.version>4.0.0</neo4j.version>
+		<neo4j.version>4.0.1</neo4j.version>
 	</properties>
 
 	<dependencyManagement>
@@ -27,6 +27,13 @@
 				<groupId>org.neo4j.test</groupId>
 				<artifactId>neo4j-harness</artifactId>
 				<version>${neo4j.version}</version>
+				<exclusions>
+					<exclusion>
+						<artifactId>slf4j-nop</artifactId>
+						<!-- Since 4.0.1 -->
+						<groupId>org.slf4j</groupId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

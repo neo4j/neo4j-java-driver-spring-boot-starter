@@ -103,9 +103,9 @@
 		<maven-javadoc-plugin.version>3.0.1</maven-javadoc-plugin.version>
 		<maven-source-plugin.version>3.0.1</maven-source-plugin.version>
 		<maven-surefire-plugin.version>3.0.0-M4</maven-surefire-plugin.version>
-		<neo4j-java-driver.version>4.0.0</neo4j-java-driver.version>
+		<neo4j-java-driver.version>4.0.1</neo4j-java-driver.version>
 		<neo4j.repository>neo4j</neo4j.repository>
-		<neo4j.version>4.0.0</neo4j.version>
+		<neo4j.version>4.0.1</neo4j.version>
 		<revision>4.0</revision>
 		<sha1></sha1>
 		<sortpom-maven-plugin.version>2.8.0</sortpom-maven-plugin.version>
@@ -123,6 +123,12 @@
 				<groupId>org.neo4j.test</groupId>
 				<artifactId>neo4j-harness</artifactId>
 				<version>${neo4j.version}</version>
+				<exclusions>
+					<exclusion> <!-- Since 4.0.1 -->
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-nop</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.testcontainers</groupId>
