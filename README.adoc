@@ -3,7 +3,7 @@
 // tag::properties[]
 :groupId: org.neo4j.driver
 :artifactId: neo4j-java-driver-spring-boot-starter
-:neo4j-java-driver-spring-boot-starter_version: 4.0.1.0
+:neo4j-java-driver-spring-boot-starter_version: 4.0-SNAPSHOT
 :spring-boot_version: 2.2.5.RELEASE
 :neo4j_version: 4.0.1
 :config_prefix: org.neo4j.driver
