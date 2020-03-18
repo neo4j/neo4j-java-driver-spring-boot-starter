@@ -18,9 +18,13 @@
  */
 package org.neo4j.driver.springframework.boot.autoconfigure;
 
-import org.junit.jupiter.api.Test;
-import org.neo4j.driver.Driver;
+import static org.assertj.core.api.Assertions.*;
+import static org.neo4j.driver.springframework.boot.test.Neo4jDriverMocks.*;
 
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.driver.Driver;
 import org.neo4j.driver.springframework.boot.autoconfigure.domain.EmptyPackage;
 import org.neo4j.ogm.drivers.bolt.driver.BoltDriver;
 import org.neo4j.ogm.session.SessionFactory;
@@ -32,9 +36,6 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.neo4j.transaction.Neo4jTransactionManager;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.driver.springframework.boot.test.Neo4jDriverMocks.*;
 
 /**
  * @author Michael J. Simons
@@ -83,8 +84,30 @@ class Neo4jDriverAutoConfigurationTest {
 				.hasSingleBean(Driver.class)
 				.hasSingleBean(BoltDriver.class)
 				.hasSingleBean(SessionFactory.class)
-				.hasSingleBean(Neo4jTransactionManager.class) // See https://github.com/spring-projects/spring-boot/pull/17662
+				.hasSingleBean(Neo4jTransactionManager.class)
 			);
+	}
+
+	/**
+	 * These tests assert correct configuration behaviour for cases in which one of the "advanced" schemes is used to
+	 * configure the driver. If any of the schemes is used, than a contradicting explicit configuration will throw an
+	 * error.
+	 *
+	 * @param scheme The schme to test.
+	 */
+	@ParameterizedTest
+	@ValueSource(strings = { "bolt+s", "bolt+ssc", "neo4j+s", "neo4j+ssc" })
+	void schemesShouldBeApplied(String scheme) {
+
+		this.contextRunner
+			.withPropertyValues("org.neo4j.driver.uri=" + scheme + "://localhost:4711")
+			.withClassLoader(new FilteredClassLoader(SessionFactory.class))
+			.run((ctx) -> {
+				assertThat(ctx).hasSingleBean(Driver.class);
+
+				Driver driver = ctx.getBean(Driver.class);
+				assertThat(driver.isEncrypted()).isTrue();
+			});
 	}
 
 	// Needed to not make OGM go mad on package root

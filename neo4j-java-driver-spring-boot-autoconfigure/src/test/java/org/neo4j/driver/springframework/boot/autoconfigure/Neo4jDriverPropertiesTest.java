@@ -18,6 +18,8 @@
  */
 package org.neo4j.driver.springframework.boot.autoconfigure;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
@@ -27,10 +29,11 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.neo4j.driver.internal.retry.RetrySettings;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.Config;
-
+import org.neo4j.driver.internal.retry.RetrySettings;
 import org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverProperties.Authentication;
 import org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverProperties.DriverSettings;
 import org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverProperties.PoolSettings;
@@ -41,9 +44,6 @@ import org.springframework.boot.context.properties.source.InvalidConfigurationPr
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Configuration;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Michael J. Simons
@@ -374,6 +374,33 @@ class Neo4jDriverPropertiesTest {
 
 		Neo4jDriverProperties driverProperties = new Neo4jDriverProperties();
 		assertThat(driverProperties.getUri()).isNull();
+	}
+
+	@Nested
+	class SchemeDetection {
+
+		@ParameterizedTest
+		@ValueSource(strings = { "bolt", "Bolt", "neo4j", "Neo4J" })
+		void shouldDetectSimpleSchemes(String aSimpleScheme) {
+
+			assertThat(Neo4jDriverProperties.isSimpleScheme(aSimpleScheme)).isTrue();
+		}
+
+		@ParameterizedTest
+		@ValueSource(strings = { "bolt+s", "Bolt+ssc", "neo4j+s", "Neo4J+ssc" })
+		void shouldDetectAdvancedSchemes(String anAdvancedScheme) {
+
+			assertThat(Neo4jDriverProperties.isSimpleScheme(anAdvancedScheme)).isFalse();
+		}
+
+		@ParameterizedTest
+		@ValueSource(strings = { "bolt+routing", "bolt+x", "neo4j+wth" })
+		void shouldFailEarlyOnInvalidSchemes(String invalidScheme) {
+
+			assertThatIllegalArgumentException()
+				.isThrownBy(() -> Neo4jDriverProperties.isSimpleScheme(invalidScheme))
+				.withMessage("'%s' is not a supported scheme.", invalidScheme);
+		}
 	}
 
 	@Configuration(proxyBeanMethods = false)
