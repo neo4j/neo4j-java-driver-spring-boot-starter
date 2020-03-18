@@ -70,7 +70,7 @@
 
 |`{config_prefix}.uri`
 |
-|+++The uri this driver should connect to. The driver supports bolt, bolt+routing or neo4j as schemes. The default URI is 'bolt://localhost:7687'.+++
+|+++The uri this driver should connect to. The driver supports bolt or neo4j as schemes. The starter does not provide a default URI so that clashes with the SDN/OGM Spring Boot starter are avoided.+++
 
 |`{config_prefix}.pool.metrics-enabled`
 |`false`

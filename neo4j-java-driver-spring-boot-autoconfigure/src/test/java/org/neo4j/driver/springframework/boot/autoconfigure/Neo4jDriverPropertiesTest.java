@@ -356,7 +356,7 @@ class Neo4jDriverPropertiesTest {
 
 		@Test
 		@DisplayName("…should fail on custom certificates without cert file")
-		void trustCustomCertificatesShouldWork2() throws IOException {
+		void trustCustomCertificatesShouldWork2() {
 
 			TrustSettings settings = new TrustSettings();
 			settings.setStrategy(Strategy.TRUST_CUSTOM_CA_SIGNED_CERTIFICATES);
@@ -366,6 +366,14 @@ class Neo4jDriverPropertiesTest {
 				.withMessage(
 					"Property org.neo4j.driver.config.trust-settings with value 'TRUST_CUSTOM_CA_SIGNED_CERTIFICATES' is invalid: Configured trust strategy requires a certificate file.");
 		}
+	}
+
+	@Test
+	@DisplayName("Should not assume default value for the URL")
+	void shouldNotAssumeDefaultValuesForUrl() {
+
+		Neo4jDriverProperties driverProperties = new Neo4jDriverProperties();
+		assertThat(driverProperties.getUri()).isNull();
 	}
 
 	@Configuration(proxyBeanMethods = false)
