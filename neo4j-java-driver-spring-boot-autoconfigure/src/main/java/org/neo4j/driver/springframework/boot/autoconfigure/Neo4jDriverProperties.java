@@ -44,7 +44,7 @@ public class Neo4jDriverProperties {
 	/**
 	 * The uri this driver should connect to. The driver supports bolt or neo4j as schemes.
 	 */
-	private URI uri = URI.create("bolt://localhost:7687");
+	private URI uri;
 
 	/**
 	 * The authentication the driver is supposed to use. Maybe null.

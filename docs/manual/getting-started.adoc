@@ -121,6 +121,12 @@ org.neo4j.driver.authentication.username=neo4j
 org.neo4j.driver.authentication.password=secret
 ----
 
+IMPORTANT: The URI is required. Autoconfiguration will not be triggered without it.
+           This is to avoid clashes with the Spring Boot SDN/OGM starter.
+           The SDN/OGM starter defaults to localhost, but backs off when it detects a driver bean.
+           If this starter here would default to localhost as well, a driver bean would always be
+           provided and SDN/OGM would back off even when a user configured a different URI.
+
 This is the bare minimum of what you need to connect to a Neo4j instance.
 
 Refer to <<Configuration options,the list of configuration properties>> for all options this driver supports.
