@@ -21,13 +21,14 @@ package org.neo4j.driver.springframework.boot.autoconfigure;
 import java.io.File;
 import java.net.URI;
 import java.time.Duration;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import org.neo4j.driver.AuthToken;
 import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.Config;
+import org.neo4j.driver.internal.Scheme;
 import org.neo4j.driver.net.ServerAddressResolver;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.source.InvalidConfigurationPropertyValueException;
@@ -102,9 +103,22 @@ public class Neo4jDriverProperties {
 
 		Config.ConfigBuilder builder = Config.builder();
 		this.pool.applyTo(builder);
-		this.config.applyTo(builder);
+		String scheme = uri == null ? "bolt" : uri.getScheme();
+		this.config.applyTo(builder, isSimpleScheme(scheme));
 
 		return builder.withLogging(new Neo4jSpringJclLogging()).build();
+	}
+
+	static boolean isSimpleScheme(String scheme) {
+
+		String lowerCaseScheme = scheme.toLowerCase(Locale.ENGLISH);
+		try {
+			Scheme.validateScheme(lowerCaseScheme);
+		} catch (IllegalArgumentException ex) {
+			throw new IllegalArgumentException(String.format("'%s' is not a supported scheme.", scheme));
+		}
+
+		return lowerCaseScheme.equals("bolt") || lowerCaseScheme.equals("neo4j");
 	}
 
 	public static class Authentication {
@@ -114,7 +128,9 @@ public class Neo4jDriverProperties {
 		 */
 		private String username;
 
-		/** The password of the user connecting to the database. */
+		/**
+		 * The password of the user connecting to the database.
+		 */
 		private String password;
 
 		/**
@@ -122,7 +138,9 @@ public class Neo4jDriverProperties {
 		 */
 		private String realm;
 
-		/** A kerberos ticket for connecting to the database. Mutual exclusive with a given username. */
+		/**
+		 * A kerberos ticket for connecting to the database. Mutual exclusive with a given username.
+		 */
 		private String kerberosTicket;
 
 		public String getUsername() {
@@ -353,20 +371,27 @@ public class Neo4jDriverProperties {
 			this.serverAddressResolverClass = serverAddressResolverClass;
 		}
 
-		private void applyTo(Config.ConfigBuilder builder) {
+		private void applyTo(Config.ConfigBuilder builder, boolean withEncryptionAndTrustSettings) {
 
-			if (this.encrypted) {
-				builder.withEncryption();
-			} else {
-				builder.withoutEncryption();
+			if (withEncryptionAndTrustSettings) {
+				applyEncryptionAndTrustSettings(builder);
 			}
-			builder.withTrustStrategy(this.trustSettings.toInternalRepresentation());
+
 			builder.withConnectionTimeout(this.connectionTimeout.toMillis(), TimeUnit.MILLISECONDS);
 			builder.withMaxTransactionRetryTime(this.maxTransactionRetryTime.toMillis(), TimeUnit.MILLISECONDS);
 
 			if (this.serverAddressResolverClass != null) {
 				builder.withResolver(BeanUtils.instantiateClass(this.serverAddressResolverClass));
 			}
+		}
+
+		private void applyEncryptionAndTrustSettings(Config.ConfigBuilder builder) {
+			if (this.encrypted) {
+				builder.withEncryption();
+			} else {
+				builder.withoutEncryption();
+			}
+			builder.withTrustStrategy(this.trustSettings.toInternalRepresentation());
 		}
 	}
 
