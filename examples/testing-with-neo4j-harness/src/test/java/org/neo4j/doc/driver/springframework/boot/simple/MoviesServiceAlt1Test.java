@@ -21,6 +21,7 @@ package org.neo4j.doc.driver.springframework.boot.simple;
 import static org.assertj.core.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.driver.Driver;
 import org.neo4j.harness.Neo4j;
 import org.neo4j.harness.Neo4jBuilders;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,13 +34,14 @@ import org.springframework.context.annotation.Bean;
  * this is just one of them. With `neo4j-java-driver-spring-boot-test-harness-4x-support` on the class path, the automatic configuration will pick this up.
  * <p>If you already have the harness support on the classpath, this would actually be the recommended version of doing things.
  */
+// tag::test-harness-example-option1[]
 @SpringBootTest
 class MoviesServiceAlt1Test {
 
-	@TestConfiguration
+	@TestConfiguration // <.>
 	static class TestHarnessConfig {
 
-		@Bean
+		@Bean // <.>
 		public Neo4j neo4j() {
 			return Neo4jBuilders.newInProcessBuilder()
 				.withDisabledServer() // No need for http
@@ -49,17 +51,27 @@ class MoviesServiceAlt1Test {
 					+ "CREATE (TheMatrixRevolutions:Movie {title:'The Matrix Revolutions', released:2003, tagline:'Everything that has a beginning has an end'})\n"
 				)
 				.build();
+
+			// For enterprise use
+			// return com.neo4j.harness.EnterpriseNeo4jBuilders.newInProcessBuilder()
+			//    .newInProcessBuilder()
+			//    .build();
 		}
 	}
 
-	@Autowired
-	private MoviesService moviesService;
+	@Test
+	void testSomethingWithTheDriver(@Autowired Driver driver) {
+	}
+	// end::test-harness-example-option1[]
 
 	@Test
-	void shouldRetrieveMovieTitles() {
+	void shouldRetrieveMovieTitles(@Autowired MoviesService moviesService) {
 
 		assertThat(moviesService.getMovieTitles())
 			.hasSize(3)
 			.contains("The Matrix");
 	}
+
+	// tag::test-harness-example-option1[]
 }
+// end::test-harness-example-option1[]

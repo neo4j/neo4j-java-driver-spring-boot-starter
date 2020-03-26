@@ -34,6 +34,8 @@ import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
 /**
  * This variant uses a custom {@link ApplicationContextInitializer} that modifies Springs configuration properties
@@ -42,19 +44,18 @@ import org.springframework.test.context.ContextConfiguration;
  * <p>If you don't like that setup, look at {@link MoviesServiceAlt1Test}. Here, we expose the embedded server as a Spring Bean
  * and don't do the manual connection setting.
  */
-// tag::test-harness-example-option3[]
+// tag::test-harness-example-option4[]
 @SpringBootTest
-@EnableAutoConfiguration(exclude = { Neo4jTestHarnessAutoConfiguration.class }) // <.>
-@ContextConfiguration(initializers = { MoviesServiceAlt3Test.Initializer.class })
-class MoviesServiceAlt3Test {
+@EnableAutoConfiguration(exclude = { Neo4jTestHarnessAutoConfiguration.class })
+class MoviesServiceAlt4Test {
 
 	private static Neo4j embeddedDatabaseServer;
 
 	@BeforeAll
-	static void initializeNeo4j() { // <.>
+	static void initializeNeo4j() {
 
 		embeddedDatabaseServer = Neo4jBuilders.newInProcessBuilder()
-			.withDisabledServer() // <.>
+			.withDisabledServer() // No need for http
 			.withFixture(""
 				+ "CREATE (TheMatrix:Movie {title:'The Matrix', released:1999, tagline:'Welcome to the Real World'})\n"
 				+ "CREATE (TheMatrixReloaded:Movie {title:'The Matrix Reloaded', released:2003, tagline:'Free your mind'})\n"
@@ -63,25 +64,22 @@ class MoviesServiceAlt3Test {
 			.build();
 	}
 
-	@AfterAll
-	static void closeNeo4j() { // <.>
-		embeddedDatabaseServer.close();
+
+	@DynamicPropertySource
+	static void neo4jProperties(DynamicPropertyRegistry registry) {
+		registry.add("org.neo4j.driver.uri", embeddedDatabaseServer::boltURI);
+		registry.add("org.neo4j.driver.authentication.password", () -> "");
 	}
 
-	// <.>
-	static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-			TestPropertyValues.of(
-				"org.neo4j.driver.uri=" + embeddedDatabaseServer.boltURI().toString(),
-				"org.neo4j.driver.authentication.password="
-			).applyTo(configurableApplicationContext.getEnvironment());
-		}
+	@AfterAll
+	static void closeNeo4j() {
+		embeddedDatabaseServer.close();
 	}
 
 	@Test
 	void testSomethingWithTheDriver(@Autowired Driver driver) {
 	}
-	// end::test-harness-example-option3[]
+	// end::test-harness-example-option4[]
 
 	@Test
 	void shouldRetrieveMovieTitles(@Autowired MoviesService moviesService) {
@@ -90,6 +88,6 @@ class MoviesServiceAlt3Test {
 			.hasSize(3)
 			.contains("The Matrix");
 	}
-	// tag::test-harness-example-option3[]
+	// tag::test-harness-example-option4[]
 }
-// end::test-harness-example-option3[]
+// end::test-harness-example-option4[]

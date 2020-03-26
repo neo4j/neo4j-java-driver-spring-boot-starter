@@ -22,6 +22,8 @@ import static org.assertj.core.api.Assertions.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.driver.Driver;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.harness.Neo4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,6 +33,7 @@ import org.springframework.boot.test.context.SpringBootTest;
  *
  * @author Michael J. Simons
  */
+// tag::test-harness-example-option2[]
 @SpringBootTest
 public class MoviesServiceAlt2Test {
 
@@ -38,13 +41,22 @@ public class MoviesServiceAlt2Test {
 	private MoviesService moviesService;
 
 	@BeforeEach
-	void prepareDatabase(@Autowired Neo4j neo4j) {
-		neo4j.defaultDatabaseService().executeTransactionally(""
-			+ "CREATE (TheMatrix:Movie {title:'The Matrix', released:1999, tagline:'Welcome to the Real World'})\n"
-			+ "CREATE (TheMatrixReloaded:Movie {title:'The Matrix Reloaded', released:2003, tagline:'Free your mind'})\n"
-			+ "CREATE (TheMatrixRevolutions:Movie {title:'The Matrix Revolutions', released:2003, tagline:'Everything that has a beginning has an end'})\n"
-		);
+	void prepareDatabase(@Autowired Neo4j neo4j) { // <.>
+		try(Transaction transaction = neo4j.defaultDatabaseService().beginTx()) {
+			transaction.execute("MATCH (n) DETACH DELETE n");
+			transaction.execute(""
+				+ "CREATE (TheMatrix:Movie {title:'The Matrix', released:1999, tagline:'Welcome to the Real World'})\n"
+				+ "CREATE (TheMatrixReloaded:Movie {title:'The Matrix Reloaded', released:2003, tagline:'Free your mind'})\n"
+				+ "CREATE (TheMatrixRevolutions:Movie {title:'The Matrix Revolutions', released:2003, tagline:'Everything that has a beginning has an end'})\n"
+			);
+			transaction.commit();
+		}
 	}
+
+	@Test
+	void testSomethingWithTheDriver(@Autowired Driver driver) {
+	}
+	// end::test-harness-example-option2[]
 
 	@Test
 	void shouldRetrieveMovieTitles() {
@@ -53,4 +65,6 @@ public class MoviesServiceAlt2Test {
 			.hasSize(3)
 			.contains("The Matrix");
 	}
+	// tag::test-harness-example-option2[]
 }
+// end::test-harness-example-option2[]
