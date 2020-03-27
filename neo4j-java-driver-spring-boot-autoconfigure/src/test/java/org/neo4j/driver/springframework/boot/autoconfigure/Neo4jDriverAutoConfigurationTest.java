@@ -93,7 +93,7 @@ class Neo4jDriverAutoConfigurationTest {
 	 * configure the driver. If any of the schemes is used, than a contradicting explicit configuration will throw an
 	 * error.
 	 *
-	 * @param scheme The schme to test.
+	 * @param scheme The scheme to test.
 	 */
 	@ParameterizedTest
 	@ValueSource(strings = { "bolt+s", "bolt+ssc", "neo4j+s", "neo4j+ssc" })
