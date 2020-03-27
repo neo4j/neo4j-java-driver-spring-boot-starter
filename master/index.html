@@ -790,7 +790,7 @@ Don&#8217;t choose Spring Data Neo4j here, as it will get you the previous gener
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="bash">curl https://start.spring.io/starter.tgz \
   -d dependencies=web,actuator \
-  -d bootVersion=2.2.5.RELEASE \
+  -d bootVersion=2.2.6.RELEASE \
   -d baseDir=Neo4jSpringBootExample \
   -d name=Neo4j%20SpringBoot%20Example | tar -xzvf -</code></pre>
 </div>
@@ -824,7 +824,7 @@ As this starter is not yet on the initializer, you&#8217;ll have to add the foll
 <pre class="CodeRay highlight"><code data-lang="bash">curl https://start.spring.io/starter.tgz \
   -d dependencies=web,actuator \
   -d type=gradle-project \
-  -d bootVersion=2.2.5.RELEASE \
+  -d bootVersion=2.2.6.RELEASE \
   -d baseDir=Neo4jSpringBootExampleGradle \
   -d name=Neo4j%20SpringBoot%20Example | tar -xzvf -</code></pre>
 </div>
@@ -1423,13 +1423,17 @@ The main question is always: <strong>How to make Spring Boot aware that it shoul
         <span class="directive">public</span> Neo4j neo4j() {
             <span class="keyword">return</span> Neo4jBuilders.newInProcessBuilder()
                 .withDisabledServer() <span class="comment">// No need for http</span>
-                .withFixture(<span class="string"><span class="delimiter">&quot;</span><span class="content">CREATE (TheMatrixReloaded:Movie {title:'The Matrix Reloaded', released:2003, tagline:'Free your mind'})</span><span class="delimiter">&quot;</span></span>)
+                .withFixture(<span class="string"><span class="delimiter">&quot;</span><span class="delimiter">&quot;</span></span>
+                    + <span class="string"><span class="delimiter">&quot;</span><span class="content">CREATE (TheMatrix:Movie {title:'The Matrix', released:1999, tagline:'Welcome to the Real World'})</span><span class="char">\n</span><span class="delimiter">&quot;</span></span>
+                    + <span class="string"><span class="delimiter">&quot;</span><span class="content">CREATE (TheMatrixReloaded:Movie {title:'The Matrix Reloaded', released:2003, tagline:'Free your mind'})</span><span class="char">\n</span><span class="delimiter">&quot;</span></span>
+                    + <span class="string"><span class="delimiter">&quot;</span><span class="content">CREATE (TheMatrixRevolutions:Movie {title:'The Matrix Revolutions', released:2003, tagline:'Everything that has a beginning has an end'})</span><span class="char">\n</span><span class="delimiter">&quot;</span></span>
+                )
                 .build();
 
-        <span class="comment">// For enterprise use</span>
-        <span class="comment">// return com.neo4j.harness.EnterpriseNeo4jBuilders.newInProcessBuilder()</span>
-        <span class="comment">//    .newInProcessBuilder()</span>
-        <span class="comment">//    .build();</span>
+            <span class="comment">// For enterprise use</span>
+            <span class="comment">// return com.neo4j.harness.EnterpriseNeo4jBuilders.newInProcessBuilder()</span>
+            <span class="comment">//    .newInProcessBuilder()</span>
+            <span class="comment">//    .build();</span>
         }
     }
 
@@ -1467,11 +1471,20 @@ This would be the recommended way of doing things.</p>
 <pre class="CodeRay highlight"><code data-lang="java"><span class="annotation">@SpringBootTest</span>
 <span class="directive">public</span> <span class="type">class</span> <span class="class">MoviesServiceAlt2Test</span> {
 
+    <span class="annotation">@Autowired</span>
+    <span class="directive">private</span> MoviesService moviesService;
+
     <span class="annotation">@BeforeEach</span>
     <span class="type">void</span> prepareDatabase(<span class="annotation">@Autowired</span> Neo4j neo4j) { <i class="conum" data-value="1"></i><b>(1)</b>
-        neo4j.defaultDatabaseService().executeTransactionally(
-            <span class="string"><span class="delimiter">&quot;</span><span class="content">CREATE (TheMatrix:Movie {title:'The Matrix', released:1999, tagline:'Welcome to the Real World'})</span><span class="delimiter">&quot;</span></span>
-        );
+        <span class="keyword">try</span>(Transaction transaction = neo4j.defaultDatabaseService().beginTx()) {
+            transaction.execute(<span class="string"><span class="delimiter">&quot;</span><span class="content">MATCH (n) DETACH DELETE n</span><span class="delimiter">&quot;</span></span>);
+            transaction.execute(<span class="string"><span class="delimiter">&quot;</span><span class="delimiter">&quot;</span></span>
+                + <span class="string"><span class="delimiter">&quot;</span><span class="content">CREATE (TheMatrix:Movie {title:'The Matrix', released:1999, tagline:'Welcome to the Real World'})</span><span class="char">\n</span><span class="delimiter">&quot;</span></span>
+                + <span class="string"><span class="delimiter">&quot;</span><span class="content">CREATE (TheMatrixReloaded:Movie {title:'The Matrix Reloaded', released:2003, tagline:'Free your mind'})</span><span class="char">\n</span><span class="delimiter">&quot;</span></span>
+                + <span class="string"><span class="delimiter">&quot;</span><span class="content">CREATE (TheMatrixRevolutions:Movie {title:'The Matrix Revolutions', released:2003, tagline:'Everything that has a beginning has an end'})</span><span class="char">\n</span><span class="delimiter">&quot;</span></span>
+            );
+            transaction.commit();
+        }
     }
 
     <span class="annotation">@Test</span>
@@ -1518,18 +1531,22 @@ You don&#8217;t actually need <code>neo4j-java-driver-test-harness-spring-boot-a
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="java"><span class="annotation">@SpringBootTest</span>
 <span class="annotation">@EnableAutoConfiguration</span>(exclude = { Neo4jTestHarnessAutoConfiguration.class }) <i class="conum" data-value="1"></i><b>(1)</b>
-<span class="annotation">@ContextConfiguration</span>(initializers = { MoviesServiceTest.Initializer.class })
+<span class="annotation">@ContextConfiguration</span>(initializers = { MoviesServiceAlt3Test.Initializer.class })
 <span class="type">class</span> <span class="class">MoviesServiceAlt3Test</span> {
 
     <span class="directive">private</span> <span class="directive">static</span> Neo4j embeddedDatabaseServer;
 
-        <span class="annotation">@BeforeAll</span>
-        <span class="directive">static</span> <span class="type">void</span> initializeNeo4j() { <i class="conum" data-value="2"></i><b>(2)</b>
-        embeddedDatabaseServer = TestServerBuilders
-            .newInProcessBuilder()
+    <span class="annotation">@BeforeAll</span>
+    <span class="directive">static</span> <span class="type">void</span> initializeNeo4j() { <i class="conum" data-value="2"></i><b>(2)</b>
+
+        embeddedDatabaseServer = Neo4jBuilders.newInProcessBuilder()
             .withDisabledServer() <i class="conum" data-value="3"></i><b>(3)</b>
-            .withFixture(<span class="string"><span class="delimiter">&quot;</span><span class="content">CREATE (TheMatrix:Movie {title:'The Matrix', released:1999, tagline:'Welcome to the Real World'})</span><span class="delimiter">&quot;</span></span>)
-            .newServer();
+            .withFixture(<span class="string"><span class="delimiter">&quot;</span><span class="delimiter">&quot;</span></span>
+                + <span class="string"><span class="delimiter">&quot;</span><span class="content">CREATE (TheMatrix:Movie {title:'The Matrix', released:1999, tagline:'Welcome to the Real World'})</span><span class="char">\n</span><span class="delimiter">&quot;</span></span>
+                + <span class="string"><span class="delimiter">&quot;</span><span class="content">CREATE (TheMatrixReloaded:Movie {title:'The Matrix Reloaded', released:2003, tagline:'Free your mind'})</span><span class="char">\n</span><span class="delimiter">&quot;</span></span>
+                + <span class="string"><span class="delimiter">&quot;</span><span class="content">CREATE (TheMatrixRevolutions:Movie {title:'The Matrix Revolutions', released:2003, tagline:'Everything that has a beginning has an end'})</span><span class="char">\n</span><span class="delimiter">&quot;</span></span>
+            )
+            .build();
     }
 
     <span class="annotation">@AfterAll</span>
@@ -1537,10 +1554,10 @@ You don&#8217;t actually need <code>neo4j-java-driver-test-harness-spring-boot-a
         embeddedDatabaseServer.close();
     }
 
+    <i class="conum" data-value="5"></i><b>(5)</b>
     <span class="directive">static</span> <span class="type">class</span> <span class="class">Initializer</span> <span class="directive">implements</span> ApplicationContextInitializer&lt;ConfigurableApplicationContext&gt; {
         <span class="directive">public</span> <span class="type">void</span> initialize(ConfigurableApplicationContext configurableApplicationContext) {
-
-            TestPropertyValues.of( <i class="conum" data-value="5"></i><b>(5)</b>
+            TestPropertyValues.of(
                 <span class="string"><span class="delimiter">&quot;</span><span class="content">org.neo4j.driver.uri=</span><span class="delimiter">&quot;</span></span> + embeddedDatabaseServer.boltURI().toString(),
                 <span class="string"><span class="delimiter">&quot;</span><span class="content">org.neo4j.driver.authentication.password=</span><span class="delimiter">&quot;</span></span>
             ).applyTo(configurableApplicationContext.getEnvironment());
@@ -1573,13 +1590,63 @@ You don&#8217;t actually need <code>neo4j-java-driver-test-harness-spring-boot-a
 </tr>
 <tr>
 <td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>This the essential part: Apply the new configuration values</td>
+<td>This the essential part: Apply the new configuration values.
+This uses an <code>ApplicationContextInitializer</code> which can inject <code>TestPropertyValues</code> into the context before the context starts.</td>
 </tr>
 </table>
 </div>
 <div class="paragraph">
 <p>This is a good solution It works well with both Community and enterprise edition and decouples the creation of the server from configuring the client.
 The downside of it: You have to configure a lot of stuff manually and your mileage may vary.</p>
+</div>
+<div class="paragraph">
+<p>Since Spring Boot 2.2.6 you have an additional option:
+As of Spring Framework 5.2.5, the TestContext framework provides support for dynamic property sources via the <code>@DynamicPropertySource</code> annotation.
+This annotation can be used in integration tests that need to add properties with dynamic values.
+For more information, have a look at the <a href="https://docs.spring.io/spring-framework/docs/current/spring-framework-reference/testing.html#testcontext-ctx-management-dynamic-property-sources">Spring Framework reference</a>.</p>
+</div>
+<div class="paragraph">
+<p><a href="#test-harness-example-option4">Listing 20</a> is conceptionally the same variant as <a href="#test-harness-example-option3">Listing 19</a> but much more concise:</p>
+</div>
+<div id="test-harness-example-option4" class="listingblock">
+<div class="title">Listing 20. MoviesServiceAlt4Test.java</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="annotation">@SpringBootTest</span>
+<span class="annotation">@EnableAutoConfiguration</span>(exclude = { Neo4jTestHarnessAutoConfiguration.class })
+<span class="type">class</span> <span class="class">MoviesServiceAlt4Test</span> {
+
+    <span class="directive">private</span> <span class="directive">static</span> Neo4j embeddedDatabaseServer;
+
+    <span class="annotation">@BeforeAll</span>
+    <span class="directive">static</span> <span class="type">void</span> initializeNeo4j() {
+
+        embeddedDatabaseServer = Neo4jBuilders.newInProcessBuilder()
+            .withDisabledServer() <span class="comment">// No need for http</span>
+            .withFixture(<span class="string"><span class="delimiter">&quot;</span><span class="delimiter">&quot;</span></span>
+                + <span class="string"><span class="delimiter">&quot;</span><span class="content">CREATE (TheMatrix:Movie {title:'The Matrix', released:1999, tagline:'Welcome to the Real World'})</span><span class="char">\n</span><span class="delimiter">&quot;</span></span>
+                + <span class="string"><span class="delimiter">&quot;</span><span class="content">CREATE (TheMatrixReloaded:Movie {title:'The Matrix Reloaded', released:2003, tagline:'Free your mind'})</span><span class="char">\n</span><span class="delimiter">&quot;</span></span>
+                + <span class="string"><span class="delimiter">&quot;</span><span class="content">CREATE (TheMatrixRevolutions:Movie {title:'The Matrix Revolutions', released:2003, tagline:'Everything that has a beginning has an end'})</span><span class="char">\n</span><span class="delimiter">&quot;</span></span>
+            )
+            .build();
+    }
+
+
+    <span class="annotation">@DynamicPropertySource</span>
+    <span class="directive">static</span> <span class="type">void</span> neo4jProperties(DynamicPropertyRegistry registry) {
+        registry.add(<span class="string"><span class="delimiter">&quot;</span><span class="content">org.neo4j.driver.uri</span><span class="delimiter">&quot;</span></span>, embeddedDatabaseServer::boltURI);
+        registry.add(<span class="string"><span class="delimiter">&quot;</span><span class="content">org.neo4j.driver.authentication.password</span><span class="delimiter">&quot;</span></span>, () -&gt; <span class="string"><span class="delimiter">&quot;</span><span class="delimiter">&quot;</span></span>);
+    }
+
+    <span class="annotation">@AfterAll</span>
+    <span class="directive">static</span> <span class="type">void</span> closeNeo4j() {
+        embeddedDatabaseServer.close();
+    }
+
+    <span class="annotation">@Test</span>
+    <span class="type">void</span> testSomethingWithTheDriver(<span class="annotation">@Autowired</span> <span class="predefined-type">Driver</span> driver) {
+    }
+}</code></pre>
+</div>
 </div>
 </div>
 <div class="sect4">
@@ -1680,7 +1747,7 @@ my.physical.neo4j.uris=\
 <div class="sect2">
 <h3 id="neo4j-ogm-integration"><a class="anchor" href="#neo4j-ogm-integration"></a>3.7. Neo4j-OGM Integration</h3>
 <div class="paragraph">
-<p>The current Spring Boot starter you get on <a href="https://start.spring.io/#!type=maven-project&amp;language=java&amp;platformVersion=2.2.5.RELEASE&amp;packaging=jar&amp;jvmVersion=1.8&amp;groupId=com.example&amp;artifactId=demo&amp;name=demo&amp;description=Demo%20project%20for%20Spring%20Boot&amp;packageName=com.example.demo&amp;dependencies=data-neo4j">start.spring.io</a> recognizes the driver bean created by this starter here.
+<p>The current Spring Boot starter you get on <a href="https://start.spring.io/#!type=maven-project&amp;language=java&amp;platformVersion=2.2.6.RELEASE&amp;packaging=jar&amp;jvmVersion=1.8&amp;groupId=com.example&amp;artifactId=demo&amp;name=demo&amp;description=Demo%20project%20for%20Spring%20Boot&amp;packageName=com.example.demo&amp;dependencies=data-neo4j">start.spring.io</a> recognizes the driver bean created by this starter here.
 That means you can add this starter via <code>org.neo4j.driver:neo4j-java-driver-spring-boot-starter:4.0-SNAPSHOT</code> and use the properties under <code>org.neo4j.driver</code> to configure the connection.
 Thus you don&#8217;t have to work your way into Neo4j-OGM to manipulate the encapsulated driver but inject a correctly configured driver bean into the Neo4j-OGM session factory.</p>
 </div>
@@ -1804,7 +1871,7 @@ Thus you don&#8217;t have to work your way into Neo4j-OGM to manipulate the enca
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-18 14:34:14 UTC
+Last updated 2020-03-27 08:09:39 UTC
 </div>
 </div>
 </body>
