@@ -30,18 +30,14 @@ import org.neo4j.harness.Neo4jBuilders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
 /**
- * This variant uses a custom {@link ApplicationContextInitializer} that modifies Springs configuration properties
- * with the help of {@link TestPropertyValues}. Thus, the autoconfiguration of the driver is kept and all other things
+ * This variant uses a {@link DynamicPropertySource @ DynamicPropertySource} for providing dynamic values applicable in tests. 
+ * Thus, the autoconfiguration of the driver is kept and all other things
  * are as you'd expect in production.
- * <p>If you don't like that setup, look at {@link MoviesServiceAlt1Test}. Here, we expose the embedded server as a Spring Bean
+ * <p>If you don't like that setup, look at {@link MoviesServiceAlt1Test}. There we expose the embedded server as a Spring Bean
  * and don't do the manual connection setting.
  */
 // tag::test-harness-example-option4[]
