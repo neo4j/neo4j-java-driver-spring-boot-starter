@@ -35,7 +35,7 @@
 	<properties>
 		<java-module-name>neo4j.java.driver.spring.boot.test_harness</java-module-name>
 		<!-- The test harness support is build against the JDK8 compatible version by default -->
-		<neo4j.version>3.5.14</neo4j.version>
+		<neo4j.version>3.5.16</neo4j.version>
 	</properties>
 
 	<dependencies>
