@@ -91,7 +91,7 @@
 				</property>
 			</activation>
 			<properties>
-				<revision>4.0.1.0</revision>
+				<revision>4.0.1.1</revision>
 			</properties>
 		</profile>
 		<profile>
