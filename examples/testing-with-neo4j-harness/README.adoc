@@ -1,3 +1,4 @@
+[[testing-with-neo4j-harness]]
 = Testing against the Neo4j harness
 
 We provide a special module that brings in the community edition of the Neo4j harness
