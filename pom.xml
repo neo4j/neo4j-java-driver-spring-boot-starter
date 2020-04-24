@@ -77,6 +77,7 @@
 		<module>neo4j-java-driver-spring-boot-starter</module>
 		<module>neo4j-java-driver-test-harness-spring-boot-autoconfigure</module>
 		<module>examples/dedicated-routing-driver</module>
+		<module>examples/embedded-bolt-connection</module>
 		<module>examples/ogm-integration</module>
 		<module>examples/reactive-web</module>
 		<module>examples/simple</module>

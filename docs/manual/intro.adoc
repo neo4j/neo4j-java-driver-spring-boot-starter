@@ -41,7 +41,26 @@ The 1.7.x line of the starter is for the 1.7.x line of the driver, the 4.0.x lin
 
 == Does it work with the embedded database?
 
-No.
+If you enable the Bolt connector on the embedded instance, it does.
+
+IMPORTANT: However, it *does not and will not* startup an embedded instance for you.
+           There are two main reasons for this decisions:
+           +
+           First, we think that booting up a database from the connection layer (which the driver belongs to)
+           or - even worse - from an object mapping layer - is wrong and violates the solid responsibility principle,
+           thus, leading to all kinds of architectural problems.
+           +
+           Furthermore, Neo4j embedded is a full database engine and comes with a lot of dependencies and also in several
+           versions and editions.
+           Catering for all combinations and configuration possible will lead up to hard to maintain
+           dependency management issues and also, duplication of configuration APIs.
+
+There are two examples in which this starter works with an embedded database:
+
+* <<testing-with-neo4j-harness>> shows a couple of ways to add a `@Bean` of type `org.neo4j.harness.Neo4j` (Neo4j 4.0) or `org.neo4j.harness.ServerControls` (Neo4j 3.5 and prior)
+  to the application context. Those types represent the Neo4j test harness and provide an embedded instance, accessible via Bolt.
+  The Bolt connector is always enabled with the test harness.
+
 
 == What's with the long name?
 

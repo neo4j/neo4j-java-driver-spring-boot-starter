@@ -1,0 +1,134 @@
+[[embedded-bolt-connection]]
+= Using an embedded database with the Driver starter
+
+This example demonstrates a couple things:
+
+1. How to provide an instance of the Neo4j `DatabaseManagementService` as a managed bean into a Spring context.
+1. How to keep the configuration for the driver and the embedded instance in sync.
+1. This starter can connect against an embedded instance with the Bolt connector enabled.
+
+While the <<testing-with-neo4j-harness,test harness example>> focuses on having an embedded instance through the harness in
+your context, this example focuses on having the embedded API for whatever reasons in your context.
+
+One of those reasons might be that you want to be able to use the `GraphDatabaseService`
+to execute Cypher without Bolt involved or traverse nodes manually.
+Here is one made up example that uses the `GraphDatabaseService` to find all nodes with a label `Movie`:
+
+[[GraphDatabaseService-usecase]]
+[source,java,indent=0]
+.Accessing the `GraphDatabaseService` from a service
+----
+try(var tx = databaseManagementService.database("neo4j").beginTx()) {
+    return tx.findNodes(Label.label("Movie"))
+        .stream()
+        .map(n -> n.getProperty("title"))
+        .map(String.class::cast)
+        .collect(Collectors.toList());
+}
+----
+
+The `MovieService` in the sources of this example however is exactly the same as the one in the other examples.
+It is not aware against what kind of server it is connected and just gets a Driver `Session` with `var session = driver.session()`.
+
+== Provide a managed, embedded `DatabaseManagementService` and keep it in sync with the driver.
+
+First, provide the necessary dependencies:
+
+[source,xml,subs="verbatim,attributes"]
+----
+<dependencies>
+    <!-- Embbedded instance -->
+    <dependency>
+        <groupId>org.neo4j</groupId>
+        <artifactId>neo4j</artifactId>
+        <version>{neo4j_version}</version>
+    </dependency>
+    <!-- Necessary bolt server -->
+    <dependency>
+        <groupId>org.neo4j</groupId>
+        <artifactId>neo4j-bolt</artifactId>
+        <version>{neo4j_version}</version>
+    </dependency>
+</dependencies>
+----
+
+Depending on your setup, you might have to exclude the following artifact from both dependencies above: `org.slf4j:slf4j-nop`,
+as it clashes with Spring Boots default logger.
+
+The enterprise edition lives under different coordinates
+(`com.neo4j:neo4j-enterprise`, which are not available in Maven central but only to customers).
+
+Configuration is done with the following components:
+
+[[EmbeddedConfig-Properties]]
+[source,java,indent=0]
+.DatabaseManagementServiceProperties.java
+----
+include::src/main/java/org/neo4j/doc/driver/springframework/boot/embedded/DatabaseManagementServiceProperties.java[tags=EmbeddedConfig-Properties]
+----
+<.> Make this class a component containing configurational properties under the prefix `org.neo4j.database-management-service`.
+    This prefix is the canonical form. Camel- and Snakecases (`databaseManagementService` respectivly `DATABASE_MANAGEMENT_SERVICE`
+    work as well.
+    These properties can come from `application.properties` or `application.yml` as well as from the environment and of course,
+    config servers.
+<.> This configuration is needed for the embedded instance. The embedded instance needs to store its data somewhere.
+
+With a properties class like this, you can have all the relevant configuration properties in one place, instead of
+manually juggling with `@Value` and related.
+
+
+[[EmbeddedConfig]]
+[source,java,indent=0]
+.Configuring the embedded instance with the driver in mind
+----
+include::src/main/java/org/neo4j/doc/driver/springframework/boot/embedded/Neo4jConfig.java[tags=EmbeddedConfig]
+----
+<.> Mark this class as a configurational bean.
+    We can make the startup of the Spring context a bit fast, as we don't need to proxy the methods.
+<.> Define the class that represents the configuration properties.
+<.> This marks the returned value as Spring bean for the context
+<.> We only fire up the embedded instance in some conditions.
+    This is optional, but makes perfect sense in a setup where both the embedded instance and the driver should be available.
+<.> We check if someone had configured the home directory for the instance.
+    If so, we use that, otherwise we default to something random.
+<.> Here, we use the same port that has been given to the driver for the port the embedded bolt listens to.
+    Choose any other port you want (or a random free one), but keep in mind,
+    that you have to reconfigure the driver as well then (through `org.neo4j.driver.uri`).
+<.> This is a `Condition` to be used with `@Conditional`.
+    It makes sure in 4. that we bring up an embedded instance only when the driver actually targets something on localhost via the bolt protocol.
+    This later step is completely optional, but keeps you from funny surprise.
+
+== Using the driver against the embedded instance
+
+To the outside world, nothing indicates that the service runs against embedded:
+
+[[MovieService]]
+[source,java,indent=0]
+.Accessing the `GraphDatabaseService` from a service
+----
+include::src/main/java/org/neo4j/doc/driver/springframework/boot/embedded/MoviesService.java[tags=usage]
+----
+
+You can of course inject the `DatabaseManagementService` or - if you provide those as beans as well - dedicated
+`GraphDatabaseService`-instances for the databases you want to work with.
+
+Let's walk through a test setup.
+The tests prepares the data directly against the embedded instance and than tests the service:
+
+[source,java,indent=0]
+.MoviesServiceTest.java
+----
+include::src/test/java/org/neo4j/doc/driver/springframework/boot/embedded/MoviesServiceTest.java[tags=test]
+----
+<.> Make it a standard, full blown `@SpringBootTest`, applying the same configuration found from walking the packages
+    starting at the `@SpringBootApplication`.
+<.> This brings in dynamic test properties in the `registry`.
+    It is available since Spring Boot 2.2.6.
+<.> We use `SocketUtils` to find a random free port.
+    We give that random free port to the driver URI which is in turn used by <<EmbeddedConfig, the embedded config>> to configure the published Bolt port.
+    This is necessary to not clash with any running databases on the test machine.
+<.> Uncommenting the next line gives you the opportunity to point the embedded instance to a directory containing pre-seeded
+    data during test for example.
+<.> Springs JUnit 5 integration allows beans to be injected in all phases of a JUnit 5 test.
+    Here we use the `@BeforeAll` phase to access the embedded database to create test data.
+<.> We want to test the service shown in <<MovieService,MovieService.java>>, which works with the driver.

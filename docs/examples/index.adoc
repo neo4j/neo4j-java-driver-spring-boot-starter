@@ -114,6 +114,8 @@ include::{manualIncludeDir}../examples/web/README.adoc[leveloffset=+1]
 
 include::{manualIncludeDir}../examples/reactive-web/README.adoc[leveloffset=+1]
 
+include::{manualIncludeDir}../examples/embedded-bolt-connection/README.adoc[leveloffset=+1]
+
 include::{manualIncludeDir}../examples/testing-with-neo4j-harness/README.adoc[leveloffset=+1]
 
 include::{manualIncludeDir}../examples/dedicated-routing-driver/README.adoc[leveloffset=+1]

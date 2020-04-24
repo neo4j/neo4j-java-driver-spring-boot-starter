@@ -20,7 +20,7 @@ jobs:
         with:
             java-version: ${{ matrix.java }}
       - name: Run Maven build (JDK 8)
-        run: ./mvnw -pl !org.neo4j.doc.driver:testing-with-neo4j-harness --no-transfer-progress clean verify -Drevision=4.0 -Dchangelist=-SNAPSHOT
+        run: ./mvnw -pl !org.neo4j.doc.driver:testing-with-neo4j-harness,!org.neo4j.doc.driver:embedded-bolt-connection --no-transfer-progress clean verify -Drevision=4.0 -Dchangelist=-SNAPSHOT
         if: matrix.java == 8
       - name: Run Maven build (JDK 11+)
         run: ./mvnw --no-transfer-progress clean verify -Drevision=4.0 -Dchangelist=-SNAPSHOT
