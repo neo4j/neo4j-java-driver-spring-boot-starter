@@ -560,9 +560,10 @@ table.CodeRay td.code>pre{padding:0}
 <li><a href="#collectingmetrics">3.2. Collecting metrics</a></li>
 <li><a href="#web">3.3. Web</a></li>
 <li><a href="#reactiveweb">3.4. Reactive Web</a></li>
-<li><a href="#testingagainsttheneo4jharness">3.5. Testing against the Neo4j harness</a></li>
-<li><a href="#dedicatedroutingdriver">3.6. Dedicated routing driver</a></li>
-<li><a href="#neo4j-ogm-integration">3.7. Neo4j-OGM Integration</a></li>
+<li><a href="#embedded-bolt-connection">3.5. Using an embedded database with the Driver starter</a></li>
+<li><a href="#testing-with-neo4j-harness">3.6. Testing against the Neo4j harness</a></li>
+<li><a href="#dedicatedroutingdriver">3.7. Dedicated routing driver</a></li>
+<li><a href="#neo4j-ogm-integration">3.8. Neo4j-OGM Integration</a></li>
 </ul>
 </li>
 <li><a href="#appendix">4. Appendix</a>
@@ -677,7 +678,41 @@ For reference see the <a href="https://github.com/neo4j/neo4j-ogm/wiki/Versions"
 <div class="sect2">
 <h3 id="doesitworkwiththeembeddeddatabase"><a class="anchor" href="#doesitworkwiththeembeddeddatabase"></a>1.4. Does it work with the embedded database?</h3>
 <div class="paragraph">
-<p>No.</p>
+<p>If you enable the Bolt connector on the embedded instance, it does.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+However, it <strong>does not and will not</strong> startup an embedded instance for you.
+           There are two main reasons for this decisions:
+          <br>
+           First, we think that booting up a database from the connection layer (which the driver belongs to)
+           or - even worse - from an object mapping layer - is wrong and violates the solid responsibility principle,
+           thus, leading to all kinds of architectural problems.
+          <br>
+           Furthermore, Neo4j embedded is a full database engine and comes with a lot of dependencies and also in several
+           versions and editions.
+           Catering for all combinations and configuration possible will lead up to hard to maintain
+           dependency management issues and also, duplication of configuration APIs.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>There are two examples in which this starter works with an embedded database:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="#testing-with-neo4j-harness">Section 3.6</a> shows a couple of ways to add a <code>@Bean</code> of type <code>org.neo4j.harness.Neo4j</code> (Neo4j 4.0) or <code>org.neo4j.harness.ServerControls</code> (Neo4j 3.5 and prior)
+to the application context. Those types represent the Neo4j test harness and provide an embedded instance, accessible via Bolt.
+The Bolt connector is always enabled with the test harness.</p>
+</li>
+</ul>
 </div>
 </div>
 <div class="sect2">
@@ -1312,13 +1347,398 @@ Apart from that, the configuration is the same as with the simple example.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="testingagainsttheneo4jharness"><a class="anchor" href="#testingagainsttheneo4jharness"></a>3.5. Testing against the Neo4j harness</h3>
+<h3 id="embedded-bolt-connection"><a class="anchor" href="#embedded-bolt-connection"></a>3.5. Using an embedded database with the Driver starter</h3>
+<div class="paragraph">
+<p>This example demonstrates a couple things:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>How to provide an instance of the Neo4j <code>DatabaseManagementService</code> as a managed bean into a Spring context.</p>
+</li>
+<li>
+<p>How to keep the configuration for the driver and the embedded instance in sync.</p>
+</li>
+<li>
+<p>This starter can connect against an embedded instance with the Bolt connector enabled.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>While the <a href="#testing-with-neo4j-harness">test harness example</a> focuses on having an embedded instance through the harness in
+your context, this example focuses on having the embedded API for whatever reasons in your context.</p>
+</div>
+<div class="paragraph">
+<p>One of those reasons might be that you want to be able to use the <code>GraphDatabaseService</code>
+to execute Cypher without Bolt involved or traverse nodes manually.
+Here is one made up example that uses the <code>GraphDatabaseService</code> to find all nodes with a label <code>Movie</code>:</p>
+</div>
+<div id="GraphDatabaseService-usecase" class="listingblock">
+<div class="title">Listing 14. Accessing the <code>GraphDatabaseService</code> from a service</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="keyword">try</span>(var tx = databaseManagementService.database(<span class="string"><span class="delimiter">&quot;</span><span class="content">neo4j</span><span class="delimiter">&quot;</span></span>).beginTx()) {
+    <span class="keyword">return</span> tx.findNodes(<span class="predefined-type">Label</span>.label(<span class="string"><span class="delimiter">&quot;</span><span class="content">Movie</span><span class="delimiter">&quot;</span></span>))
+        .stream()
+        .map(n -&gt; n.getProperty(<span class="string"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>))
+        .map(<span class="predefined-type">String</span>.class::cast)
+        .collect(Collectors.toList());
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>MovieService</code> in the sources of this example however is exactly the same as the one in the other examples.
+It is not aware against what kind of server it is connected and just gets a Driver <code>Session</code> with <code>var session = driver.session()</code>.</p>
+</div>
+<div class="sect3">
+<h4 id="provideamanagedembeddeddatabasemanagementserviceandkeepitinsyncwiththedriver."><a class="anchor" href="#provideamanagedembeddeddatabasemanagementserviceandkeepitinsyncwiththedriver."></a>3.5.1. Provide a managed, embedded <code>DatabaseManagementService</code> and keep it in sync with the driver.</h4>
+<div class="paragraph">
+<p>First, provide the necessary dependencies:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="xml"><span class="tag">&lt;dependencies&gt;</span>
+    <span class="comment">&lt;!-- Embbedded instance --&gt;</span>
+    <span class="tag">&lt;dependency&gt;</span>
+        <span class="tag">&lt;groupId&gt;</span>org.neo4j<span class="tag">&lt;/groupId&gt;</span>
+        <span class="tag">&lt;artifactId&gt;</span>neo4j<span class="tag">&lt;/artifactId&gt;</span>
+        <span class="tag">&lt;version&gt;</span>4.0.3<span class="tag">&lt;/version&gt;</span>
+    <span class="tag">&lt;/dependency&gt;</span>
+    <span class="comment">&lt;!-- Necessary bolt server --&gt;</span>
+    <span class="tag">&lt;dependency&gt;</span>
+        <span class="tag">&lt;groupId&gt;</span>org.neo4j<span class="tag">&lt;/groupId&gt;</span>
+        <span class="tag">&lt;artifactId&gt;</span>neo4j-bolt<span class="tag">&lt;/artifactId&gt;</span>
+        <span class="tag">&lt;version&gt;</span>4.0.3<span class="tag">&lt;/version&gt;</span>
+    <span class="tag">&lt;/dependency&gt;</span>
+<span class="tag">&lt;/dependencies&gt;</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Depending on your setup, you might have to exclude the following artifact from both dependencies above: <code>org.slf4j:slf4j-nop</code>,
+as it clashes with Spring Boots default logger.</p>
+</div>
+<div class="paragraph">
+<p>The enterprise edition lives under different coordinates
+(<code>com.neo4j:neo4j-enterprise</code>, which are not available in Maven central but only to customers).</p>
+</div>
+<div class="paragraph">
+<p>Configuration is done with the following components:</p>
+</div>
+<div id="EmbeddedConfig-Properties" class="listingblock">
+<div class="title">Listing 15. DatabaseManagementServiceProperties.java</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="keyword">import</span> <span class="include">java.io.File</span>;
+<span class="keyword">import</span> <span class="include">java.util.Optional</span>;
+
+<span class="keyword">import</span> <span class="include">org.springframework.boot.context.properties.ConfigurationProperties</span>;
+
+<span class="annotation">@ConfigurationProperties</span>(prefix = <span class="string"><span class="delimiter">&quot;</span><span class="content">org.neo4j.database-management-service</span><span class="delimiter">&quot;</span></span>) <i class="conum" data-value="1"></i><b>(1)</b>
+<span class="directive">public</span> <span class="type">class</span> <span class="class">DatabaseManagementServiceProperties</span> {
+
+        <span class="comment">/**
+         * The default home directory. If not configured, a random, temporary directory is used.
+         * If you want to keep your data around, please set it to a writeable path in your configuration.
+         */</span>
+        <span class="directive">private</span> Optional&lt;<span class="predefined-type">File</span>&gt; homeDirectory = Optional.empty(); <i class="conum" data-value="2"></i><b>(2)</b>
+
+        <span class="directive">public</span> Optional&lt;<span class="predefined-type">File</span>&gt; getHomeDirectory() {
+                <span class="keyword">return</span> homeDirectory;
+        }
+
+        <span class="directive">public</span> <span class="type">void</span> setHomeDirectory(Optional&lt;<span class="predefined-type">File</span>&gt; homeDirectory) {
+                <span class="local-variable">this</span>.homeDirectory = homeDirectory;
+        }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Make this class a component containing configurational properties under the prefix <code>org.neo4j.database-management-service</code>.
+This prefix is the canonical form. Camel- and Snakecases (<code>databaseManagementService</code> respectivly <code>DATABASE_MANAGEMENT_SERVICE</code>
+work as well.
+These properties can come from <code>application.properties</code> or <code>application.yml</code> as well as from the environment and of course,
+config servers.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>This configuration is needed for the embedded instance. The embedded instance needs to store its data somewhere.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>With a properties class like this, you can have all the relevant configuration properties in one place, instead of
+manually juggling with <code>@Value</code> and related.</p>
+</div>
+<div id="EmbeddedConfig" class="listingblock">
+<div class="title">Listing 16. Configuring the embedded instance with the driver in mind</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="keyword">import</span> <span class="include">static</span> <span class="include">java.lang.System.Logger.Level</span>.*;
+
+<span class="keyword">import</span> <span class="include">java.io.IOException</span>;
+<span class="keyword">import</span> <span class="include">java.io.UncheckedIOException</span>;
+<span class="keyword">import</span> <span class="include">java.lang.System.Logger</span>;
+<span class="keyword">import</span> <span class="include">java.net.URI</span>;
+<span class="keyword">import</span> <span class="include">java.nio.file.Files</span>;
+
+<span class="keyword">import</span> <span class="include">org.neo4j.configuration.connectors.BoltConnector</span>;
+<span class="keyword">import</span> <span class="include">org.neo4j.configuration.helpers.SocketAddress</span>;
+<span class="keyword">import</span> <span class="include">org.neo4j.dbms.api.DatabaseManagementService</span>;
+<span class="keyword">import</span> <span class="include">org.neo4j.dbms.api.DatabaseManagementServiceBuilder</span>;
+<span class="keyword">import</span> <span class="include">org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverProperties</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.boot.context.properties.EnableConfigurationProperties</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.context.annotation.Bean</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.context.annotation.Condition</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.context.annotation.ConditionContext</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.context.annotation.Conditional</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.context.annotation.Configuration</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.core.type.AnnotatedTypeMetadata</span>;
+
+<span class="annotation">@Configuration</span>(proxyBeanMethods = <span class="predefined-constant">false</span>) <i class="conum" data-value="1"></i><b>(1)</b>
+<span class="annotation">@EnableConfigurationProperties</span>(DatabaseManagementServiceProperties.class)  <i class="conum" data-value="2"></i><b>(2)</b>
+<span class="directive">public</span> <span class="type">class</span> <span class="class">Neo4jConfig</span> {
+
+        <span class="directive">private</span> <span class="directive">static</span> <span class="directive">final</span> <span class="predefined-type">Logger</span> LOGGER = <span class="predefined-type">System</span>.getLogger(Neo4jConfig.class.getName());
+
+        <span class="annotation">@Bean</span> <i class="conum" data-value="3"></i><b>(3)</b>
+        <span class="annotation">@Conditional</span>(OnDriverCouldConnectToEmbedded.class) <i class="conum" data-value="4"></i><b>(4)</b>
+        DatabaseManagementService databaseManagementService(
+                Neo4jDriverProperties driverProperties,
+                DatabaseManagementServiceProperties serviceProperties
+        ) {
+                <i class="conum" data-value="5"></i><b>(5)</b>
+                var homeDirectory = serviceProperties.getHomeDirectory().orElseGet(() -&gt; {
+                        <span class="keyword">try</span> {
+                                <span class="keyword">return</span> Files.createTempDirectory(<span class="string"><span class="delimiter">&quot;</span><span class="content">neo4j</span><span class="delimiter">&quot;</span></span>).toFile();
+                        } <span class="keyword">catch</span> (<span class="exception">IOException</span> e) {
+                                <span class="keyword">throw</span> <span class="keyword">new</span> UncheckedIOException(e);
+                        }
+                });
+                LOGGER.log(
+                        INFO,
+                        <span class="string"><span class="delimiter">&quot;</span><span class="content">Configuring {0} as home directory for the embedded instance.</span><span class="delimiter">&quot;</span></span>,
+                        homeDirectory
+                );
+
+                var driverPort = driverProperties.getUri().getPort();
+                var address = <span class="keyword">new</span> <span class="predefined-type">SocketAddress</span>(<span class="string"><span class="delimiter">&quot;</span><span class="content">localhost</span><span class="delimiter">&quot;</span></span>, driverPort); <i class="conum" data-value="6"></i><b>(6)</b>
+                <span class="keyword">return</span> <span class="keyword">new</span> DatabaseManagementServiceBuilder(homeDirectory)
+                        .setConfig(BoltConnector.enabled, <span class="predefined-constant">true</span>)
+                        .setConfig(BoltConnector.listen_address, address)
+                        .build();
+        }
+
+        <span class="directive">static</span> <span class="type">class</span> <span class="class">OnDriverCouldConnectToEmbedded</span> <span class="directive">implements</span> <span class="predefined-type">Condition</span> { <i class="conum" data-value="7"></i><b>(7)</b>
+
+                <span class="annotation">@Override</span>
+                <span class="directive">public</span> <span class="type">boolean</span> matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+
+                        <span class="comment">// @formatter:off</span>
+                        <span class="type">boolean</span> outcome = <span class="predefined-constant">false</span>;
+                        <span class="predefined-type">URI</span> configuredBoltUri = context.getEnvironment().getProperty(<span class="string"><span class="delimiter">&quot;</span><span class="content">org.neo4j.driver.uri</span><span class="delimiter">&quot;</span></span>, <span class="predefined-type">URI</span>.class);
+                        <span class="keyword">if</span> (configuredBoltUri == <span class="predefined-constant">null</span>) {
+                                LOGGER.log(WARNING, <span class="string"><span class="delimiter">&quot;</span><span class="content">Driver is not configured, skipping embedded instance as well.</span><span class="delimiter">&quot;</span></span>);
+                        } <span class="keyword">else</span> <span class="keyword">if</span> (!<span class="string"><span class="delimiter">&quot;</span><span class="content">bolt</span><span class="delimiter">&quot;</span></span>.equalsIgnoreCase(configuredBoltUri.getScheme())) {
+                                LOGGER.log(WARNING, <span class="string"><span class="delimiter">&quot;</span><span class="content">Driver configured to use `{0}`, but embedded only supports bolt. Not configuring embedded.</span><span class="delimiter">&quot;</span></span>,  configuredBoltUri);
+                        } <span class="keyword">else</span> <span class="keyword">if</span> (!<span class="string"><span class="delimiter">&quot;</span><span class="content">localhost</span><span class="delimiter">&quot;</span></span>.equalsIgnoreCase(configuredBoltUri.getHost())) {
+                                LOGGER.log(WARNING, <span class="string"><span class="delimiter">&quot;</span><span class="content">Driver configured to connect to `{0}`, not a local instance. Not configuring embedded.</span><span class="delimiter">&quot;</span></span>, configuredBoltUri.getHost());
+                        } <span class="keyword">else</span> {
+                                outcome = <span class="predefined-constant">true</span>;
+                        }
+                        <span class="comment">// @formatter:on</span>
+
+                        <span class="keyword">return</span> outcome;
+                }
+        }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Mark this class as a configurational bean.
+We can make the startup of the Spring context a bit fast, as we don&#8217;t need to proxy the methods.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Define the class that represents the configuration properties.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>This marks the returned value as Spring bean for the context</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>We only fire up the embedded instance in some conditions.
+This is optional, but makes perfect sense in a setup where both the embedded instance and the driver should be available.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>We check if someone had configured the home directory for the instance.
+If so, we use that, otherwise we default to something random.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Here, we use the same port that has been given to the driver for the port the embedded bolt listens to.
+Choose any other port you want (or a random free one), but keep in mind,
+that you have to reconfigure the driver as well then (through <code>org.neo4j.driver.uri</code>).</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>This is a <code>Condition</code> to be used with <code>@Conditional</code>.
+It makes sure in 4. that we bring up an embedded instance only when the driver actually targets something on localhost via the bolt protocol.
+This later step is completely optional, but keeps you from funny surprise.</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="usingthedriveragainsttheembeddedinstance"><a class="anchor" href="#usingthedriveragainsttheembeddedinstance"></a>3.5.2. Using the driver against the embedded instance</h4>
+<div class="paragraph">
+<p>To the outside world, nothing indicates that the service runs against embedded:</p>
+</div>
+<div id="MovieService" class="listingblock">
+<div class="title">Listing 17. Accessing the <code>GraphDatabaseService</code> from a service</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="keyword">import</span> <span class="include">java.util.List</span>;
+<span class="keyword">import</span> <span class="include">java.util.stream.Collectors</span>;
+
+<span class="keyword">import</span> <span class="include">org.neo4j.dbms.api.DatabaseManagementService</span>;
+<span class="keyword">import</span> <span class="include">org.neo4j.driver.Driver</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.beans.factory.annotation.Autowired</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.stereotype.Service</span>;
+
+<span class="annotation">@Service</span>
+<span class="directive">public</span> <span class="type">class</span> <span class="class">MoviesService</span> {
+
+        <span class="directive">private</span> <span class="directive">final</span> <span class="predefined-type">Driver</span> driver;
+
+        <span class="directive">public</span> MoviesService(<span class="predefined-type">Driver</span> driver) {
+                <span class="local-variable">this</span>.driver = driver;
+        }
+
+        <span class="annotation">@Autowired</span>
+        DatabaseManagementService databaseManagementService;
+
+        <span class="directive">public</span> <span class="predefined-type">List</span>&lt;<span class="predefined-type">String</span>&gt; getMovieTitles() {
+
+                <span class="keyword">try</span> (var session = driver.session()) {
+                        <span class="keyword">return</span> session.run(<span class="string"><span class="delimiter">&quot;</span><span class="content">MATCH (m:Movie) RETURN m ORDER BY m.name ASC</span><span class="delimiter">&quot;</span></span>).stream()
+                                .map(r -&gt; r.get(<span class="string"><span class="delimiter">&quot;</span><span class="content">m</span><span class="delimiter">&quot;</span></span>).asNode())
+                                .map(n -&gt; n.get(<span class="string"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>).asString())
+                                .collect(Collectors.toList());
+                }
+        }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can of course inject the <code>DatabaseManagementService</code> or - if you provide those as beans as well - dedicated
+<code>GraphDatabaseService</code>-instances for the databases you want to work with.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s walk through a test setup.
+The tests prepares the data directly against the embedded instance and than tests the service:</p>
+</div>
+<div class="listingblock">
+<div class="title">Listing 18. MoviesServiceTest.java</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="keyword">import</span> <span class="include">static</span> <span class="include">org.assertj.core.api.Assertions</span>.*;
+
+<span class="keyword">import</span> <span class="include">org.junit.jupiter.api.BeforeAll</span>;
+<span class="keyword">import</span> <span class="include">org.junit.jupiter.api.Test</span>;
+<span class="keyword">import</span> <span class="include">org.neo4j.dbms.api.DatabaseManagementService</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.beans.factory.annotation.Autowired</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.boot.test.context.SpringBootTest</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.test.context.DynamicPropertyRegistry</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.test.context.DynamicPropertySource</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.util.SocketUtils</span>;
+
+<span class="annotation">@SpringBootTest</span> <i class="conum" data-value="1"></i><b>(1)</b>
+<span class="type">class</span> <span class="class">MoviesServiceTest</span> {
+
+        <span class="annotation">@DynamicPropertySource</span> <i class="conum" data-value="2"></i><b>(2)</b>
+        <span class="directive">static</span> <span class="type">void</span> neo4jProperties(DynamicPropertyRegistry registry) {
+
+                <span class="comment">// Configure a free port</span>
+                registry.add(<span class="string"><span class="delimiter">&quot;</span><span class="content">org.neo4j.driver.uri</span><span class="delimiter">&quot;</span></span>, () -&gt; <span class="string"><span class="delimiter">&quot;</span><span class="content">bolt://localhost:</span><span class="delimiter">&quot;</span></span> + SocketUtils.findAvailableTcpPort()); <i class="conum" data-value="3"></i><b>(3)</b>
+
+                <span class="comment">// You could also point the embedded instance to some pre-seeded directory </span><i class="conum" data-value="4"></i><b>(4)</b>
+                <span class="comment">// registry.add(</span>
+                <span class="comment">//         &quot;org.neo4j.database-management-service.home-directory&quot;,</span>
+                <span class="comment">//         () -&gt; &quot;/Users/msimons/tmp/preseededNeo4j&quot;</span>
+                <span class="comment">// );</span>
+        }
+
+        <span class="annotation">@BeforeAll</span> <i class="conum" data-value="5"></i><b>(5)</b>
+        <span class="directive">static</span> <span class="type">void</span> prepareTestData(
+                <span class="annotation">@Autowired</span> DatabaseManagementService databaseManagementService
+        ) {
+
+                <span class="keyword">try</span> (var tx = databaseManagementService.database(<span class="string"><span class="delimiter">&quot;</span><span class="content">neo4j</span><span class="delimiter">&quot;</span></span>).beginTx()) {
+                        tx.execute(
+                                <span class="string"><span class="delimiter">&quot;</span><span class="content">CREATE (TheMatrix:Movie {title:'The Matrix', released:1999, tagline:'Welcome to the Real World'})</span><span class="char">\n</span><span class="delimiter">&quot;</span></span>
+                                        + <span class="string"><span class="delimiter">&quot;</span><span class="content">CREATE (TheMatrixReloaded:Movie {title:'The Matrix Reloaded', released:2003, tagline:'Free your mind'})</span><span class="char">\n</span><span class="delimiter">&quot;</span></span>
+                                        + <span class="string"><span class="delimiter">&quot;</span><span class="content">CREATE (TheMatrixRevolutions:Movie {title:'The Matrix Revolutions', released:2003, tagline:'Everything that has a beginning has an end'})</span><span class="char">\n</span><span class="delimiter">&quot;</span></span>);
+                        tx.commit();
+                }
+        }
+
+        <span class="annotation">@Test</span>
+        <span class="type">void</span> shouldRetrieveMovieTitles(<span class="annotation">@Autowired</span> MoviesService moviesService) { <i class="conum" data-value="6"></i><b>(6)</b>
+
+                assertThat(moviesService.getMovieTitles())
+                        .hasSize(<span class="integer">3</span>)
+                        .contains(<span class="string"><span class="delimiter">&quot;</span><span class="content">The Matrix</span><span class="delimiter">&quot;</span></span>);
+        }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Make it a standard, full blown <code>@SpringBootTest</code>, applying the same configuration found from walking the packages
+starting at the <code>@SpringBootApplication</code>.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>This brings in dynamic test properties in the <code>registry</code>.
+It is available since Spring Boot 2.2.6.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>We use <code>SocketUtils</code> to find a random free port.
+We give that random free port to the driver URI which is in turn used by <a href="#EmbeddedConfig">the embedded config</a> to configure the published Bolt port.
+This is necessary to not clash with any running databases on the test machine.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Uncommenting the next line gives you the opportunity to point the embedded instance to a directory containing pre-seeded
+data during test for example.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Springs JUnit 5 integration allows beans to be injected in all phases of a JUnit 5 test.
+Here we use the <code>@BeforeAll</code> phase to access the embedded database to create test data.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>We want to test the service shown in <a href="#MovieService">MovieService.java</a>, which works with the driver.</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="testing-with-neo4j-harness"><a class="anchor" href="#testing-with-neo4j-harness"></a>3.6. Testing against the Neo4j harness</h3>
 <div class="paragraph">
 <p>We provide a special module that brings in the community edition of the Neo4j harness
 and some additional utilities that hopefully make your life easier.</p>
 </div>
 <div class="listingblock">
-<div class="title">Listing 14. pom.xml</div>
+<div class="title">Listing 19. pom.xml</div>
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="xml"><span class="tag">&lt;dependency&gt;</span>
     <span class="tag">&lt;groupId&gt;</span>org.neo4j.driver<span class="tag">&lt;/groupId&gt;</span>
@@ -1332,7 +1752,7 @@ and some additional utilities that hopefully make your life easier.</p>
 <p>If you need the enterprise edition, bring in the module like this:</p>
 </div>
 <div class="listingblock">
-<div class="title">Listing 15. pom.xml</div>
+<div class="title">Listing 20. pom.xml</div>
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="xml"><span class="tag">&lt;dependency&gt;</span>
     <span class="tag">&lt;groupId&gt;</span>org.neo4j.driver<span class="tag">&lt;/groupId&gt;</span>
@@ -1370,7 +1790,7 @@ If you don&#8217;t want to have the dependencies and can live with a slower star
 <p>They are easy to use and can be configured as shown in <a href="#option1">option 1 below</a> as well.</p>
 </div>
 <div class="sect3">
-<h4 id="neo4j3.5orneo4j4.0"><a class="anchor" href="#neo4j3.5orneo4j4.0"></a>3.5.1. Neo4j 3.5 or Neo4j 4.0?</h4>
+<h4 id="neo4j3.5orneo4j4.0"><a class="anchor" href="#neo4j3.5orneo4j4.0"></a>3.6.1. Neo4j 3.5 or Neo4j 4.0?</h4>
 <div class="paragraph">
 <p>Neo4j 3.5 and 4.0 have different requirements.
 Neo4j 4.0 requires at least JDK 11.
@@ -1381,7 +1801,7 @@ Therefore we decided to build the Test harness support by default against Neo4j 
 <p>To use Neo4j 4.0 as in the following examples, please add this to your build file</p>
 </div>
 <div class="listingblock">
-<div class="title">Listing 16. pom.xml</div>
+<div class="title">Listing 21. pom.xml</div>
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="xml"><span class="tag">&lt;dependencyManagement&gt;</span>
     <span class="tag">&lt;dependencies&gt;</span>
@@ -1400,7 +1820,7 @@ The following examples use 4.0 (<code>org.neo4j.harness.Neo4j</code>) but are ap
 </div>
 </div>
 <div class="sect3">
-<h4 id="startinguptheneo4jharnessandmakingspringawareofit"><a class="anchor" href="#startinguptheneo4jharnessandmakingspringawareofit"></a>3.5.2. Starting up the Neo4j harness and making Spring aware of it</h4>
+<h4 id="startinguptheneo4jharnessandmakingspringawareofit"><a class="anchor" href="#startinguptheneo4jharnessandmakingspringawareofit"></a>3.6.2. Starting up the Neo4j harness and making Spring aware of it</h4>
 <div class="paragraph">
 <p>There many different options.
 The main question is always: <strong>How to make Spring Boot aware that it should use different configuration properties?</strong></p>
@@ -1411,7 +1831,7 @@ The main question is always: <strong>How to make Spring Boot aware that it shoul
 <p>The recommended approach is shown in <code>MoviesServiceAlt1Test</code>:</p>
 </div>
 <div id="test-harness-example-option1" class="listingblock">
-<div class="title">Listing 17. MoviesServiceAlt1Test.java</div>
+<div class="title">Listing 22. MoviesServiceAlt1Test.java</div>
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="java"><span class="annotation">@SpringBootTest</span>
 <span class="type">class</span> <span class="class">MoviesServiceAlt1Test</span> {
@@ -1466,7 +1886,7 @@ This would be the recommended way of doing things.</p>
 <p><code>MoviesServiceAlt2Test.java</code> demonstrates the fully automatic configuration of test harness and driver:</p>
 </div>
 <div id="test-harness-example-option2" class="listingblock">
-<div class="title">Listing 18. MoviesServiceAlt2Test.java</div>
+<div class="title">Listing 23. MoviesServiceAlt2Test.java</div>
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="java"><span class="annotation">@SpringBootTest</span>
 <span class="directive">public</span> <span class="type">class</span> <span class="class">MoviesServiceAlt2Test</span> {
@@ -1527,7 +1947,7 @@ You don&#8217;t actually need <code>neo4j-java-driver-test-harness-spring-boot-a
 </table>
 </div>
 <div id="test-harness-example-option3" class="listingblock">
-<div class="title">Listing 19. MoviesServiceAlt3Test.java</div>
+<div class="title">Listing 24. MoviesServiceAlt3Test.java</div>
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="java"><span class="annotation">@SpringBootTest</span>
 <span class="annotation">@EnableAutoConfiguration</span>(exclude = { Neo4jTestHarnessAutoConfiguration.class }) <i class="conum" data-value="1"></i><b>(1)</b>
@@ -1606,10 +2026,10 @@ This annotation can be used in integration tests that need to add properties wit
 For more information, have a look at the <a href="https://docs.spring.io/spring-framework/docs/current/spring-framework-reference/testing.html#testcontext-ctx-management-dynamic-property-sources">Spring Framework reference</a>.</p>
 </div>
 <div class="paragraph">
-<p><a href="#test-harness-example-option4">Listing 20</a> is conceptionally the same variant as <a href="#test-harness-example-option3">Listing 19</a> but much more concise:</p>
+<p><a href="#test-harness-example-option4">Listing 25</a> is conceptionally the same variant as <a href="#test-harness-example-option3">Listing 24</a> but much more concise:</p>
 </div>
 <div id="test-harness-example-option4" class="listingblock">
-<div class="title">Listing 20. MoviesServiceAlt4Test.java</div>
+<div class="title">Listing 25. MoviesServiceAlt4Test.java</div>
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="java"><span class="annotation">@SpringBootTest</span>
 <span class="annotation">@EnableAutoConfiguration</span>(exclude = { Neo4jTestHarnessAutoConfiguration.class })
@@ -1660,7 +2080,7 @@ For example the driver will not use Spring logging, but its own default.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="dedicatedroutingdriver"><a class="anchor" href="#dedicatedroutingdriver"></a>3.6. Dedicated routing driver</h3>
+<h3 id="dedicatedroutingdriver"><a class="anchor" href="#dedicatedroutingdriver"></a>3.7. Dedicated routing driver</h3>
 <div class="paragraph">
 <p>Usually, a Neo4j cluster should be identified by one logical <code>neo4j://</code> URL.
 This can be a load balancer, a DNS resolver, anything that turns the URL into a clusters entry point.
@@ -1745,7 +2165,7 @@ my.physical.neo4j.uris=\
 </div>
 </div>
 <div class="sect2">
-<h3 id="neo4j-ogm-integration"><a class="anchor" href="#neo4j-ogm-integration"></a>3.7. Neo4j-OGM Integration</h3>
+<h3 id="neo4j-ogm-integration"><a class="anchor" href="#neo4j-ogm-integration"></a>3.8. Neo4j-OGM Integration</h3>
 <div class="paragraph">
 <p>The current Spring Boot starter you get on <a href="https://start.spring.io/#!type=maven-project&amp;language=java&amp;platformVersion=2.2.6.RELEASE&amp;packaging=jar&amp;jvmVersion=1.8&amp;groupId=com.example&amp;artifactId=demo&amp;name=demo&amp;description=Demo%20project%20for%20Spring%20Boot&amp;packageName=com.example.demo&amp;dependencies=data-neo4j">start.spring.io</a> recognizes the driver bean created by this starter here.
 That means you can add this starter via <code>org.neo4j.driver:neo4j-java-driver-spring-boot-starter:4.0-SNAPSHOT</code> and use the properties under <code>org.neo4j.driver</code> to configure the connection.
@@ -1871,7 +2291,7 @@ Thus you don&#8217;t have to work your way into Neo4j-OGM to manipulate the enca
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-04-03 12:23:50 UTC
+Last updated 2020-04-24 07:03:53 UTC
 </div>
 </div>
 </body>
