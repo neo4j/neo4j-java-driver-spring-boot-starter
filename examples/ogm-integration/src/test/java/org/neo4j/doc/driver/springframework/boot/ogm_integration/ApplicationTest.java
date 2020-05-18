@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverAutoConfiguration;
 import org.neo4j.driver.Driver;
 import org.neo4j.ogm.session.SessionFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -64,16 +65,13 @@ public class ApplicationTest {
 	@Autowired
 	private BookmarkManager bookmarkManager;
 
-	@Autowired
-	private OpenSessionInViewInterceptor openSessionInViewInterceptor;
-
 	@Test
-	void contextLoads() {
+	void contextLoads(@Autowired ObjectProvider<OpenSessionInViewInterceptor> openSessionInViewInterceptorProvider) {
 		assertThat(driver).isNotNull();
 		assertThat(sessionFactory).isNotNull();
 		assertThat(transactionManager).isNotNull();
 		assertThat(bookmarkManager).isNotNull();
-		assertThat(openSessionInViewInterceptor).isNotNull();
+		openSessionInViewInterceptorProvider.ifAvailable(i -> fail("There should not be an OpenSessionInViewInterceptor by default."));
 	}
 
 	static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
