@@ -782,7 +782,7 @@ as it comes for free with every Neo4j instance.</p>
 <div id="start-docker-neo4j" class="listingblock">
 <div class="title">Listing 1. Start a local Neo4j instance inside Docker.</div>
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="bash">docker run --publish=7474:7474 --publish=7687:7687 neo4j:4.0.3</code></pre>
+<pre class="CodeRay highlight"><code data-lang="bash">docker run --publish=7474:7474 --publish=7687:7687 neo4j:4.0.5</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -825,7 +825,7 @@ Don&#8217;t choose Spring Data Neo4j here, as it will get you the previous gener
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="bash">curl https://start.spring.io/starter.tgz \
   -d dependencies=web,actuator \
-  -d bootVersion=2.2.6.RELEASE \
+  -d bootVersion=2.3.1.RELEASE \
   -d baseDir=Neo4jSpringBootExample \
   -d name=Neo4j%20SpringBoot%20Example | tar -xzvf -</code></pre>
 </div>
@@ -859,7 +859,7 @@ As this starter is not yet on the initializer, you&#8217;ll have to add the foll
 <pre class="CodeRay highlight"><code data-lang="bash">curl https://start.spring.io/starter.tgz \
   -d dependencies=web,actuator \
   -d type=gradle-project \
-  -d bootVersion=2.2.6.RELEASE \
+  -d bootVersion=2.3.1.RELEASE \
   -d baseDir=Neo4jSpringBootExampleGradle \
   -d name=Neo4j%20SpringBoot%20Example | tar -xzvf -</code></pre>
 </div>
@@ -1401,13 +1401,13 @@ It is not aware against what kind of server it is connected and just gets a Driv
     <span class="tag">&lt;dependency&gt;</span>
         <span class="tag">&lt;groupId&gt;</span>org.neo4j<span class="tag">&lt;/groupId&gt;</span>
         <span class="tag">&lt;artifactId&gt;</span>neo4j<span class="tag">&lt;/artifactId&gt;</span>
-        <span class="tag">&lt;version&gt;</span>4.0.3<span class="tag">&lt;/version&gt;</span>
+        <span class="tag">&lt;version&gt;</span>4.0.5<span class="tag">&lt;/version&gt;</span>
     <span class="tag">&lt;/dependency&gt;</span>
     <span class="comment">&lt;!-- Necessary bolt server --&gt;</span>
     <span class="tag">&lt;dependency&gt;</span>
         <span class="tag">&lt;groupId&gt;</span>org.neo4j<span class="tag">&lt;/groupId&gt;</span>
         <span class="tag">&lt;artifactId&gt;</span>neo4j-bolt<span class="tag">&lt;/artifactId&gt;</span>
-        <span class="tag">&lt;version&gt;</span>4.0.3<span class="tag">&lt;/version&gt;</span>
+        <span class="tag">&lt;version&gt;</span>4.0.5<span class="tag">&lt;/version&gt;</span>
     <span class="tag">&lt;/dependency&gt;</span>
 <span class="tag">&lt;/dependencies&gt;</span></code></pre>
 </div>
@@ -1808,7 +1808,7 @@ Therefore we decided to build the Test harness support by default against Neo4j 
         <span class="tag">&lt;dependency&gt;</span>
             <span class="tag">&lt;groupId&gt;</span>org.neo4j.test<span class="tag">&lt;/groupId&gt;</span>
             <span class="tag">&lt;artifactId&gt;</span>neo4j-harness<span class="tag">&lt;/artifactId&gt;</span>
-            <span class="tag">&lt;version&gt;</span>4.0.3<span class="tag">&lt;/version&gt;</span>
+            <span class="tag">&lt;version&gt;</span>4.0.5<span class="tag">&lt;/version&gt;</span>
         <span class="tag">&lt;/dependency&gt;</span>
     <span class="tag">&lt;/dependencies&gt;</span>
 <span class="tag">&lt;/dependencyManagement&gt;</span></code></pre>
@@ -2291,7 +2291,7 @@ Thus you don&#8217;t have to work your way into Neo4j-OGM to manipulate the enca
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-05-18 10:21:44 UTC
+Last updated 2020-06-12 08:03:04 UTC
 </div>
 </div>
 </body>
