@@ -29,10 +29,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
+import org.neo4j.driver.SessionConfig;
+import org.neo4j.driver.Transaction;
+import org.neo4j.driver.TransactionWork;
 import org.neo4j.driver.Values;
 import org.neo4j.driver.exceptions.ServiceUnavailableException;
 import org.neo4j.driver.exceptions.SessionExpiredException;
-import org.neo4j.driver.SessionConfig;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Status;
 
@@ -48,6 +50,9 @@ class Neo4jHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 	@Mock
 	private Result statementResult;
 
+	@Mock
+	private Transaction transaction;
+
 	@Test
 	void shouldWorkWithoutDatabaseName() {
 		when(this.serverInfo.version()).thenReturn("4711");
@@ -60,7 +65,11 @@ class Neo4jHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 		when(record.get("edition")).thenReturn(Values.value("some edition"));
 		when(this.statementResult.single()).thenReturn(this.record);
 		when(this.statementResult.consume()).thenReturn(this.resultSummary);
-		when(this.session.run(anyString())).thenReturn(this.statementResult);
+		when(this.transaction.run(anyString())).thenReturn(this.statementResult);
+		when(this.session.writeTransaction(any(TransactionWork.class))).then(invocationOnMock -> {
+			TransactionWork<ResultSummaryWithEdition> tw = invocationOnMock.getArgument(0);
+			return tw.execute(transaction);
+		});
 
 		when(this.driver.session(any(SessionConfig.class))).thenReturn(this.session);
 
@@ -84,7 +93,11 @@ class Neo4jHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 		when(record.get("edition")).thenReturn(Values.value("some edition"));
 		when(this.statementResult.single()).thenReturn(this.record);
 		when(this.statementResult.consume()).thenReturn(this.resultSummary);
-		when(this.session.run(anyString())).thenReturn(this.statementResult);
+		when(this.transaction.run(anyString())).thenReturn(this.statementResult);
+		when(this.session.writeTransaction(any(TransactionWork.class))).then(invocationOnMock -> {
+			TransactionWork<ResultSummaryWithEdition> tw = invocationOnMock.getArgument(0);
+			return tw.execute(transaction);
+		});
 
 		when(driver.session(any(SessionConfig.class))).thenReturn(this.session);
 
@@ -103,8 +116,11 @@ class Neo4jHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 
 		when(this.statementResult.single()).thenReturn(this.record);
 		when(this.statementResult.consume()).thenReturn(this.resultSummary);
-		when(this.session.run(anyString())).thenReturn(this.statementResult);
-
+		when(this.transaction.run(anyString())).thenReturn(this.statementResult);
+		when(this.session.writeTransaction(any(TransactionWork.class))).then(invocationOnMock -> {
+			TransactionWork<ResultSummaryWithEdition> tw = invocationOnMock.getArgument(0);
+			return tw.execute(transaction);
+		});
 		when(this.driver.session(any(SessionConfig.class))).thenReturn(this.session);
 
 		Neo4jHealthIndicator healthIndicator = new Neo4jHealthIndicator(this.driver);
@@ -115,7 +131,8 @@ class Neo4jHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 		assertThat(health.getDetails()).containsEntry("edition", "ultimate collectors edition");
 
 		verify(session).close();
-		verifyNoMoreInteractions(this.driver, this.session, this.statementResult, this.resultSummary, this.serverInfo, this.databaseInfo);
+		verifyNoMoreInteractions(this.driver, this.session, this.statementResult, this.resultSummary, this.serverInfo,
+			this.databaseInfo, this.transaction);
 	}
 
 	@Test
@@ -126,11 +143,15 @@ class Neo4jHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 		prepareSharedMocks();
 		when(this.statementResult.single()).thenReturn(this.record);
 		when(this.statementResult.consume()).thenReturn(this.resultSummary);
-		when(this.session.run(anyString())).thenAnswer(invocation -> {
+		when(this.transaction.run(anyString())).thenAnswer(invocation -> {
 			if (cnt.compareAndSet(0, 1)) {
 				throw new SessionExpiredException("Session expired");
 			}
 			return Neo4jHealthIndicatorTest.this.statementResult;
+		});
+		when(this.session.writeTransaction(any(TransactionWork.class))).then(invocationOnMock -> {
+			TransactionWork<ResultSummaryWithEdition> tw = invocationOnMock.getArgument(0);
+			return tw.execute(transaction);
 		});
 		when(driver.session(any(SessionConfig.class))).thenReturn(this.session);
 
@@ -141,7 +162,8 @@ class Neo4jHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 		assertThat(health.getDetails()).containsEntry("server", "4711@Zu Hause");
 
 		verify(this.session, times(2)).close();
-		verifyNoMoreInteractions(this.driver, this.session, this.statementResult, this.resultSummary, this.serverInfo, this.databaseInfo);
+		verifyNoMoreInteractions(this.driver, this.session, this.statementResult, this.resultSummary, this.serverInfo,
+			this.databaseInfo, this.transaction);
 	}
 
 	@Test
@@ -155,6 +177,7 @@ class Neo4jHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 		assertThat(health.getStatus()).isEqualTo(Status.DOWN);
 		assertThat(health.getDetails()).containsKeys("error");
 
-		verifyNoMoreInteractions(this.driver, this.session, this.statementResult, this.resultSummary, this.serverInfo, this.databaseInfo);
+		verifyNoMoreInteractions(this.driver, this.session, this.statementResult, this.resultSummary, this.serverInfo,
+			this.databaseInfo, this.transaction);
 	}
 }
