@@ -35,6 +35,8 @@ import org.neo4j.driver.exceptions.SessionExpiredException;
 import org.neo4j.driver.SessionConfig;
 import org.neo4j.driver.reactive.RxResult;
 import org.neo4j.driver.reactive.RxSession;
+import org.neo4j.driver.reactive.RxTransaction;
+import org.neo4j.driver.reactive.RxTransactionWork;
 import org.springframework.boot.actuate.health.Status;
 
 /**
@@ -49,13 +51,21 @@ class Neo4jReactiveHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 	@Mock
 	private RxResult statementResult;
 
+	@Mock
+	private RxTransaction transaction;
+
 	@Test
 	void neo4jIsUp() {
 
 		prepareSharedMocks();
 		when(statementResult.records()).thenReturn(Mono.just(record));
 		when(statementResult.consume()).thenReturn(Mono.just(resultSummary));
-		when(session.run(anyString())).thenReturn(statementResult);
+		when(transaction.run(anyString())).thenReturn(this.statementResult);
+		when(session.writeTransaction(any(RxTransactionWork.class))).then(invocationOnMock -> {
+			RxTransactionWork<ResultSummaryWithEdition> tw = invocationOnMock.getArgument(0);
+			return tw.execute(transaction);
+		});
+		when(session.close()).thenReturn(Mono.empty());
 
 		when(driver.rxSession(any(SessionConfig.class))).thenReturn(session);
 
@@ -71,7 +81,7 @@ class Neo4jReactiveHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 			.verifyComplete();
 
 		verify(session).close();
-		verifyNoMoreInteractions(driver, session, statementResult, resultSummary, serverInfo, databaseInfo);
+		verifyNoMoreInteractions(driver, session, statementResult, resultSummary, serverInfo, databaseInfo, transaction);
 	}
 
 	@Test
@@ -82,12 +92,18 @@ class Neo4jReactiveHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 		prepareSharedMocks();
 		when(statementResult.records()).thenReturn(Mono.just(record));
 		when(statementResult.consume()).thenReturn(Mono.just(resultSummary));
-		when(session.run(anyString())).thenAnswer(invocation -> {
+		when(transaction.run(anyString())).thenAnswer(invocation -> {
 			if (cnt.compareAndSet(0, 1)) {
 				throw new SessionExpiredException("Session expired");
 			}
 			return statementResult;
 		});
+		when(session.writeTransaction(any(RxTransactionWork.class))).then(invocationOnMock -> {
+			RxTransactionWork<ResultSummaryWithEdition> tw = invocationOnMock.getArgument(0);
+			return tw.execute(transaction);
+		});
+		when(session.close()).thenReturn(Mono.empty());
+
 		when(driver.rxSession(any(SessionConfig.class))).thenReturn(session);
 
 		Neo4jReactiveHealthIndicator healthIndicator = new Neo4jReactiveHealthIndicator(driver);
@@ -102,7 +118,7 @@ class Neo4jReactiveHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 			.verifyComplete();
 
 		verify(session, times(2)).close();
-		verifyNoMoreInteractions(driver, session, statementResult, resultSummary, serverInfo, databaseInfo);
+		verifyNoMoreInteractions(driver, session, statementResult, resultSummary, serverInfo, databaseInfo, transaction);
 	}
 
 	@Test
@@ -120,6 +136,6 @@ class Neo4jReactiveHealthIndicatorTest extends Neo4jHealthIndicatorTestBase {
 			})
 			.verifyComplete();
 
-		verifyNoMoreInteractions(driver, session, statementResult, resultSummary, serverInfo, databaseInfo);
+		verifyNoMoreInteractions(driver, session, statementResult, resultSummary, serverInfo, databaseInfo, transaction);
 	}
 }

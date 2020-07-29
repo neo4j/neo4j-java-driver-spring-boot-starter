@@ -24,8 +24,8 @@ import org.neo4j.driver.AccessMode;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
-import org.neo4j.driver.exceptions.SessionExpiredException;
 import org.neo4j.driver.SessionConfig;
+import org.neo4j.driver.exceptions.SessionExpiredException;
 import org.neo4j.driver.summary.DatabaseInfo;
 import org.neo4j.driver.summary.ResultSummary;
 import org.neo4j.driver.summary.ServerInfo;
@@ -94,7 +94,7 @@ public final class Neo4jHealthIndicator extends AbstractHealthIndicator {
 	 * Applies the given {@link ResultSummary} to the {@link Health.Builder builder} without actually calling {@code build}.
 	 *
 	 * @param resultSummaryWithEdition the result summary returned by the server
-	 * @param builder the health builder to be modified
+	 * @param builder                  the health builder to be modified
 	 * @return the modified health builder
 	 */
 	static Health.Builder buildStatusUp(ResultSummaryWithEdition resultSummaryWithEdition, Health.Builder builder) {
@@ -113,13 +113,17 @@ public final class Neo4jHealthIndicator extends AbstractHealthIndicator {
 	}
 
 	ResultSummaryWithEdition runHealthCheckQuery() {
-		// We use WRITE here to make sure UP is returned for a server that supports
-		// all possible workloads
+
 		try (Session session = this.driver.session(DEFAULT_SESSION_CONFIG)) {
-			Result result = session.run(CYPHER);
-			String edition = result.single().get("edition").asString();
-			ResultSummary resultSummary = result.consume();
-			return new ResultSummaryWithEdition(resultSummary, edition);
+
+			// We use WRITE here to make sure UP is returned for a server that supports
+			// all possible workloads
+			return session.writeTransaction(tx -> {
+				Result result = tx.run(CYPHER);
+				String edition = result.single().get("edition").asString();
+				ResultSummary resultSummary = result.consume();
+				return new ResultSummaryWithEdition(resultSummary, edition);
+			});
 		}
 	}
 }
