@@ -27,26 +27,11 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.driver.Driver;
 
 /**
  * @author Michael J. Simons
  */
 class Neo4jDriverMetricsTest {
-
-	@Test
-	void shouldDetectEnabledMetrics() {
-
-		Driver driver = mockDriverWithMetrics();
-		assertThat(Neo4jDriverMetrics.metricsAreEnabled(driver)).isTrue();
-	}
-
-	@Test
-	void shouldDetectDisabledMetrics() {
-
-		Driver driver = mockDriverWithoutMetrics();
-		assertThat(Neo4jDriverMetrics.metricsAreEnabled(driver)).isFalse();
-	}
 
 	@Test
 	void shouldRegisterCorrectMeters() {

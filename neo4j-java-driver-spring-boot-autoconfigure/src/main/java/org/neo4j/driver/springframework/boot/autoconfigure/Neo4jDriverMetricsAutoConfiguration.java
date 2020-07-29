@@ -61,7 +61,7 @@ public class Neo4jDriverMetricsAutoConfiguration {
 	public void bindDataSourcesToRegistry(Map<String, Driver> drivers, MeterRegistry registry) {
 
 		drivers.forEach((name, driver) -> {
-			if (!Neo4jDriverMetrics.metricsAreEnabled(driver)) {
+			if (!driver.isMetricsEnabled()) {
 				return;
 			}
 			driver

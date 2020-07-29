@@ -30,7 +30,6 @@ import java.util.function.Consumer;
 import org.neo4j.driver.ConnectionPoolMetrics;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.Metrics;
-import org.neo4j.driver.exceptions.ClientException;
 import org.springframework.util.Assert;
 
 /**
@@ -112,19 +111,5 @@ public final class Neo4jDriverMetrics implements MeterBinder {
 					"The amount of failures to acquire a connection from a pool within maximum connection acquisition timeout.")
 				.register(meterRegistry);
 		};
-	}
-
-	/**
-	 * @param driver The driver instance beans to check whether it has metrics enabled.
-	 * @return True, if the given bean exposes metrics
-	 */
-	public static boolean metricsAreEnabled(Driver driver) {
-
-		try {
-			driver.metrics();
-			return true;
-		} catch (ClientException e) {
-			return false;
-		}
 	}
 }

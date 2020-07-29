@@ -44,6 +44,7 @@ public final class Neo4jDriverMocks {
 
 		Driver driver = mock(Driver.class);
 		when(driver.metrics()).thenReturn(metrics);
+		when(driver.isMetricsEnabled()).thenReturn(true);
 
 		when(driver.verifyConnectivityAsync()).thenReturn(CompletableFuture.completedFuture(null));
 
@@ -54,6 +55,7 @@ public final class Neo4jDriverMocks {
 
 		Driver driver = mock(Driver.class);
 		when(driver.metrics()).thenThrow(ClientException.class);
+		when(driver.isMetricsEnabled()).thenReturn(false);
 		return driver;
 	}
 
