@@ -18,7 +18,7 @@
 	<properties>
 		<java.version>11</java.version>
 		<neo4j-java-driver-spring-boot-starter.version>${revision}${sha1}${changelist}</neo4j-java-driver-spring-boot-starter.version>
-		<neo4j.version>4.0.5</neo4j.version>
+		<neo4j.version>4.0.7</neo4j.version>
 	</properties>
 
 	<dependencyManagement>
