@@ -19,7 +19,7 @@
 		<java.version>1.8</java.version>
 		<neo4j-java-driver-spring-boot-starter.version>${revision}${sha1}${changelist}</neo4j-java-driver-spring-boot-starter.version>
 		<!-- Change to 4.0.0 if needed and if on JDK 11 + -->
-		<neo4j-ogm.version>3.2.12</neo4j-ogm.version>
+		<neo4j-ogm.version>3.2.14</neo4j-ogm.version>
 		<neo4j.version>3.5.18</neo4j.version>
 		<testcontainers.version>1.12.4</testcontainers.version>
 	</properties>
