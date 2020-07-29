@@ -104,7 +104,7 @@
 		<maven-javadoc-plugin.version>3.0.1</maven-javadoc-plugin.version>
 		<maven-source-plugin.version>3.0.1</maven-source-plugin.version>
 		<maven-surefire-plugin.version>3.0.0-M4</maven-surefire-plugin.version>
-		<neo4j-java-driver.version>4.0.2</neo4j-java-driver.version>
+		<neo4j-java-driver.version>4.0.3</neo4j-java-driver.version>
 		<neo4j.repository>neo4j</neo4j.repository>
 		<neo4j.version>4.0.7</neo4j.version>
 		<revision>4.0</revision>
