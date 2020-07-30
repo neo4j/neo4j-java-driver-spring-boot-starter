@@ -130,3 +130,4 @@ public class Neo4jConfig {
 		}
 	}
 }
+// end::EmbeddedConfig[]

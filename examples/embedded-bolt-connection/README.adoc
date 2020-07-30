@@ -3,9 +3,9 @@
 
 This example demonstrates a couple things:
 
-1. How to provide an instance of the Neo4j `DatabaseManagementService` as a managed bean into a Spring context.
-1. How to keep the configuration for the driver and the embedded instance in sync.
-1. This starter can connect against an embedded instance with the Bolt connector enabled.
+. How to provide an instance of the Neo4j `DatabaseManagementService` as a managed bean into a Spring context.
+. How to keep the configuration for the driver and the embedded instance in sync.
+. This starter can connect against an embedded instance with the Bolt connector enabled.
 
 While the <<testing-with-neo4j-harness,test harness example>> focuses on having an embedded instance through the harness in
 your context, this example focuses on having the embedded API for whatever reasons in your context.

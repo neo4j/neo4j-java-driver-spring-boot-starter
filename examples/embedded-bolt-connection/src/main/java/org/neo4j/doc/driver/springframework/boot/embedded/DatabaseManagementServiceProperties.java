@@ -51,3 +51,4 @@ public class DatabaseManagementServiceProperties {
 		this.homeDirectory = homeDirectory;
 	}
 }
+// end::EmbeddedConfig-Properties[]
