@@ -3,7 +3,7 @@
 // tag::properties[]
 :groupId: org.neo4j.driver
 :artifactId: neo4j-java-driver-spring-boot-starter
-:neo4j-java-driver-spring-boot-starter_version: 4.0-SNAPSHOT
+:neo4j-java-driver-spring-boot-starter_version: 4.1.1.0
 :spring-boot_version: 2.3.2.RELEASE
 :neo4j_version: 4.0.7
 :config_prefix: org.neo4j.driver
@@ -17,6 +17,10 @@ image:https://img.shields.io/maven-central/v/org.neo4j.driver/neo4j-java-driver-
 --
 A Spring Boot starter with automatic configuration for the https://github.com/neo4j/neo4j-java-driver[Neo4j Java Driver].
 --
+
+IMPORTANT: This project will be superseded by the automatic configuration Spring Boot 2.4.
+           Spring Boot 2.4 will include the same means of configuring a standalone Neo4j Driver instance, including the same health checks.
+           There will be a dedicated starter for Spring Data Neo4j 6 (formerly known as SDN/RX).
 
 == Introduction
 
