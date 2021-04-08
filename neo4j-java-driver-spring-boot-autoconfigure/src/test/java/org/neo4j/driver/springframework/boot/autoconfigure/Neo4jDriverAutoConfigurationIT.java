@@ -70,7 +70,7 @@ class Neo4jDriverAutoConfigurationIT {
 
 		String imageVersion = Optional.ofNullable(System.getenv(SYS_PROPERTY_NEO4J_VERSION))
 				.filter(isNotBlank)
-				.orElseGet(() -> System.getProperty(SYS_PROPERTY_NEO4J_VERSION, "3.5.14"));
+				.orElseGet(() -> System.getProperty(SYS_PROPERTY_NEO4J_VERSION, "3.5.27"));
 
 		String image = repository + ":" + imageVersion;
 		LOGGER.info(() -> String.format("Using image %s", image));
