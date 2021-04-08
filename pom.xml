@@ -108,7 +108,7 @@
 		<neo4j.repository>neo4j</neo4j.repository>
 		<neo4j.version>4.2.4</neo4j.version>
 		<project.build.docs>${project.build.directory}/docs</project.build.docs>
-		<revision>4.0</revision>
+		<revision>4.2</revision>
 		<sha1></sha1>
 		<sortpom-maven-plugin.version>2.8.0</sortpom-maven-plugin.version>
 		<testcontainers.version>1.15.2</testcontainers.version>

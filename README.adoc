@@ -3,7 +3,7 @@
 // tag::properties[]
 :groupId: org.neo4j.driver
 :artifactId: neo4j-java-driver-spring-boot-starter
-:neo4j-java-driver-spring-boot-starter_version: 4.2.4.0
+:neo4j-java-driver-spring-boot-starter_version: 4.2-SNAPSHOT
 :spring-boot_version: 2.3.9.RELEASE
 :neo4j_version: 4.2.4
 :config_prefix: org.neo4j.driver
@@ -30,7 +30,7 @@ It provides a single, managed Spring Bean of type `org.neo4j.driver.Driver`, con
 The starter does not add any additional functionality on top of the driver, but only exposes the drivers configuration in a Spring friendly way.
 However, it configures the driver to use Springs JCL logging variation by default.
 
-The 4.0.x. line of the starter only supports the 4.0.x line of the Neo4j Java Driver.
+The 4.x.y. line of the starter only supports the 4.x.y line of the Neo4j Java Driver.
 It is tested and developed against https://spring.io/projects/spring-boot[Spring Boot {spring-boot_version}].
 
 The starter supports Neo4j server mode only, that is: A connection against a Neo4j server over the Bolt protocol.
