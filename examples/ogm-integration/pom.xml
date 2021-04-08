@@ -21,7 +21,7 @@
 		<!-- Change to 4.0.0 if needed and if on JDK 11 + -->
 		<neo4j-ogm.version>3.2.21</neo4j-ogm.version>
 		<neo4j.version>3.5.27</neo4j.version>
-		<testcontainers.version>1.12.4</testcontainers.version>
+		<testcontainers.version>1.15.2</testcontainers.version>
 	</properties>
 
 	<dependencyManagement>

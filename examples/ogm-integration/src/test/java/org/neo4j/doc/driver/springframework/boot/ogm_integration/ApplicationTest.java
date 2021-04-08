@@ -38,6 +38,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.testcontainers.containers.Neo4jContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 /**
  * This tests demonstrates that the automatic configuration for the driver integrates will with Spring Boot, meaning that
@@ -51,7 +52,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 public class ApplicationTest {
 
 	@Container
-	private static final Neo4jContainer neo4jContainer = new Neo4jContainer<>();
+	private static final Neo4jContainer neo4jContainer = new Neo4jContainer<>(DockerImageName.parse("neo4j").withTag("3.5.27"))
+		.withReuse(true);
 
 	@Autowired
 	private Driver driver;

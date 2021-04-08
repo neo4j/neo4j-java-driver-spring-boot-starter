@@ -35,6 +35,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.Neo4jContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 /**
  * This tests shows that the Neo4j-OGM with the Java Driver autoconfiguration works fine with test slices.
@@ -48,7 +49,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 class TestSliceTest {
 
 	@Container
-	private static final Neo4jContainer neo4jContainer = new Neo4jContainer<>();
+	private static final Neo4jContainer neo4jContainer = new Neo4jContainer<>(DockerImageName.parse("neo4j").withTag("3.5.27"))
+		.withReuse(true);
 
 	@Autowired
 	private Driver driver;

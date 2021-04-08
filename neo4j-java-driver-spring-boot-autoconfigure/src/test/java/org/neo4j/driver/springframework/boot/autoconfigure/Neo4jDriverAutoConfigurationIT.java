@@ -79,7 +79,8 @@ class Neo4jDriverAutoConfigurationIT {
 			.withoutAuthentication()
 			.withEnv("NEO4J_ACCEPT_LICENSE_AGREEMENT",
 				Optional.ofNullable(System.getenv(SYS_PROPERTY_NEO4J_ACCEPT_COMMERCIAL_EDITION)).filter(isNotBlank)
-					.orElse("no"));
+					.orElse("no"))
+			.withReuse(true);
 	}
 
 
