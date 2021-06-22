@@ -116,7 +116,7 @@
 				</property>
 			</activation>
 			<properties>
-				<revision>4.2.4.0</revision>
+				<revision>4.2.7.0</revision>
 			</properties>
 		</profile>
 		<profile>
