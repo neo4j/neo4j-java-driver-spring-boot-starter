@@ -129,7 +129,7 @@ IMPORTANT: The URI is required. Autoconfiguration will not be triggered without 
 
 This is the bare minimum of what you need to connect to a Neo4j instance.
 
-Refer to <<Configuration options,the list of configuration properties>> for all options this driver supports.
+Refer to https://github.com/neo4j/neo4j-java-driver-spring-boot-starter/blob/master/docs/appendix/configuration-options.adoc[the list of configuration properties] for all options this driver supports.
 
 While the above configuration is presented in the easiest format (an `application.properties` file),
 you are of course free to use any other declarative way to define properties in Spring Boot.
