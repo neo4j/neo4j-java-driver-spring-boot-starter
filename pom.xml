@@ -104,9 +104,9 @@
 		<maven-source-plugin.version>3.0.1</maven-source-plugin.version>
 		<maven-surefire-plugin.version>3.0.0-M4</maven-surefire-plugin.version>
 		<maven.version>3.6.1</maven.version>
-		<neo4j-java-driver.version>4.2.7</neo4j-java-driver.version>
+		<neo4j-java-driver.version>4.3.6</neo4j-java-driver.version>
 		<neo4j.repository>neo4j</neo4j.repository>
-		<neo4j.version>4.2.4</neo4j.version>
+		<neo4j.version>4.3.7</neo4j.version>
 		<project.build.docs>${project.build.directory}/docs</project.build.docs>
 		<revision>4.2</revision>
 		<sha1></sha1>
